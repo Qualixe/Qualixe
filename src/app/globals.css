@@ -36,10 +36,7 @@
 body {
   font-family: 'Rubik';
   color: var(--text-color);
-}
-
-div#root {
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .container {
