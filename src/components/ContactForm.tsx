@@ -8,12 +8,13 @@ import { supabase } from "../../lib/supabaseClient";
 import "./ContactForm.css";
 
 const ContactFormSchema = z.object({
-  full_name: z.string().min(1, { message: "Full name is required" }),
+  full_name: z.string().min(1, { message: "Full name is required" })
+    .regex(/[a-zA-Z]/, { message: "Full name must contain at least one letter" }),
   email: z.string().email({ message: "Invalid email address" }),
-  phone: z.string().optional(),
-  country: z.string().optional(),
-  state: z.string().optional(),
-  zip_code: z.string().optional(),
+  phone: z.string().regex(/^[0-9+-\s()]*$/, { message: "Invalid phone number" }).optional(),
+  country: z.string().min(1, { message: "Country is required" }),
+  state: z.string().min(1, { message: "State is required" }),
+  zip_code: z.string().regex(/^[0-9]*$/, { message: "Zip code must be a number" }),
   company_name: z.string().optional(),
   note: z.string().optional(),
 });
@@ -145,7 +146,7 @@ export default function ContactForm() {
           </div>
           <div className="col-md-6 mb-3">
             <input
-              type="text"
+              type="number"
               name="zip_code"
               placeholder="Zip Code"
               className="form-control"
@@ -181,7 +182,7 @@ export default function ContactForm() {
         </div>
 
         <div className="text-center">
-          <button type="submit" className="btn btn-primary header-btn" disabled={loading}>
+          <button type="submit" className="button" disabled={loading}>
             {loading ? "Submitting..." : "Submit"}
           </button>
         </div>
