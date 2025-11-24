@@ -1,0 +1,23 @@
+.services-section {
+    background-position: center;
+    background-blend-mode: color-burn;
+    background: linear-gradient(177deg, #f5f7ff, white);
+    padding-bottom: 80px;
+    padding-top: 40px;
+}
+
+.services-heading {
+    margin-bottom: 50px;
+}
+
+.service-item-content {
+    padding: 20px;
+    box-shadow: 0 0 20px #dfdfdf;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.service-item-heading {
+    font-size: 24px;
+    margin: 15px 0;
+}

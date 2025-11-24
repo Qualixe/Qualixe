@@ -1,0 +1,42 @@
+.hero-section {
+    padding: 100px 0;
+}
+
+.hero-subheading {
+    font-size: 18px;
+}
+
+.hero-heading {
+    font-size: 56px;
+    line-height: 60px;
+    margin-bottom: 28px;
+    font-weight: var(--font-weight-bold);
+}
+
+.hero-content {
+    margin-bottom: 30px;
+}
+
+.hero-img {
+    max-width: 400px;
+    margin-left: auto;
+}
+
+@media only screen and (max-width:767px) {
+    .hero-section {
+        padding: 50px 0;
+    }
+    .hero-contents {
+        margin-top: 50px;
+    }
+    
+    .hero-heading {
+        font-size: 30px;
+        line-height: 40px;
+        margin-bottom: 0;
+    }
+    
+    .hero-content {
+        margin-top: 15px;
+    }
+}

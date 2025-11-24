@@ -1,0 +1,43 @@
+.ribon-section {
+    background: #061e69;
+    padding: 40px 0;
+}
+
+.ribon-heading {
+    color: #fff;
+    font-size: 35px;
+    margin: 0;
+}
+
+.ribon-btn {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.ribon-icon {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+@media only screen and (max-width:767px) {
+    .ribon-heading {
+        display: none;
+    }
+    .ribon-btn {
+        width: 100%;
+        max-width: 100%;
+        margin: auto;
+        font-size: 22px;
+        display: block;
+        padding: 0;
+        text-align: center;
+    }
+    
+    .ribon-section {
+        padding: 20px 0;
+    }
+    .ribon-icon svg {
+        width: 40px;
+        height: 40px;
+    }
+}

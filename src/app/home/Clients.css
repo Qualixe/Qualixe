@@ -1,0 +1,79 @@
+/* ----------  CLIENTS SECTION – PREMIUM MINIMAL  ---------- */
+.clients-section {
+    padding: 80px 0;
+    background: var(--section-bg, #f9fafb); /* soft fallback */
+}
+
+.cliens-heading {
+    margin-bottom: 40px;
+}
+
+/* ----------  GRID LAYOUT (no slider)  ---------- */
+.clients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 50px; /* generous breathing room */
+}
+
+/* ----------  CARD  ---------- */
+.client-item {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.client-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* ----------  LOGO  ---------- */
+.client-img {
+    display: block;
+    max-height: 48px; /* smaller = premium */
+    height: 48px;
+    width: auto;
+    margin: 0 auto;
+    max-width: 100%;
+    padding: 0 10px;
+    object-fit: contain;
+    filter: grayscale(100%) opacity(0.8);
+    transition: filter 0.3s ease;
+}
+
+.client-img:hover {
+    filter: grayscale(0%) opacity(1);
+}
+
+.client-item a:focus-visible {
+    outline: none;
+}
+
+/* ----------  MOBILE  ---------- */
+@media only screen and (max-width: 767px) {
+    .clients-section {
+        padding: 50px 0;
+    }
+
+    .cliens-heading {
+        margin-bottom: 24px;
+    }
+
+    .clients-grid {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 16px;
+    }
+
+    .client-item {
+        padding: 16px 8px;
+        border-radius: 8px;
+    }
+
+    .client-img {
+        max-height: 36px;
+        height: 36px;
+    }
+}

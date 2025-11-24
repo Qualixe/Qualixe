@@ -1,0 +1,19 @@
+.pagebanner-section {
+    background: url('/assets/img/banner-image.webp');
+    height: 220px;
+    display: flex;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.pagebanner-heading {
+    color: var(--white);
+}
+
+
+@media only screen and (max-width:767px) {
+    .pagebanner-section {
+        height: 120px;
+    }
+}

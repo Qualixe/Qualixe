@@ -1,0 +1,108 @@
+:root {
+  --theme-color:#0c3cc3;
+  --body-font:15px;
+  --heading-font:25px;
+  --subheading-font:20px;
+  --body-color:#f8f8ff;
+  --text-color: #111;
+  --link-color:#0d4be1;
+  --btn-bg:#031e69;
+  --btn-color:#fff;
+  --btn-bg-hover:#0530a7;
+  --font-weight-medium:500;
+  --font-weight-bold:700;
+  --section-bg:#f5f7ff;
+  --white:#f5f7ff;
+}
+
+@font-face {
+  font-family: 'Rubik';
+  src: url('/assets/fonts/Rubik-Regular.ttf');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Rubik';
+  src: url('/assets/fonts/Rubik-Bold.ttf');
+  font-weight: 700;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Rubik';
+  color: var(--text-color);
+}
+
+div#root {
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1280px;
+  margin: auto;
+  padding: 0 15px;
+}
+
+img {
+  width: 100%;
+  display: block;
+}
+
+.button {
+  background-color:var(--btn-bg);
+  color: var(--btn-color);
+  text-decoration: none;
+  padding: 12px 25px;
+  cursor: pointer;
+  border-radius: 30px;
+  font-weight: var(--font-weight-medium);
+}
+
+.button:hover {
+  background: #000;
+  color: var(--btn-color);
+}
+
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sub-heading {
+  font-size: 18px;
+  margin-bottom: 0;
+  line-height: 22px;
+  text-transform: uppercase;
+}
+
+.heading {
+  font-size: 42px;
+  line-height: 48px;
+  margin-bottom: 25px;
+  margin-top: 5px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+
+@media only screen and (max-width:767px) {
+  .column-reverse-sm {
+    flex-direction: column-reverse;
+  }
+  .heading {
+      font-size: 28px;
+      line-height: 36px;
+      margin-bottom: 15px;
+  }
+
+}
