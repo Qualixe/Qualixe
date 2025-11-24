@@ -65,14 +65,14 @@ function ClientsGrid() {
 
         {/* ----------  GRID  ---------- */}
         <Row
-          xs={2}          // 2 columns on extra-small
-          sm={3}          // 3 columns on small
-          md={4}          // 4 columns on medium
+            xs={2}
+            sm={3}
+           md={4}         // 4 columns on medium
           lg={5}          // 5 columns on large
-          className="g-3" // bootstrap 5 gutter
+           // bootstrap 5 gutter
         >
           {clients.map((c, i) => (
-            <Col key={i} className="client-item">
+            <Col key={i} className="client-item" style={{margin:'20px'}}>
               <Link href={c.url} target="_blank" rel="noopener noreferrer">
                 <Image src={c.image} className="client-img" alt="client" />
               </Link>
