@@ -16,6 +16,18 @@ function Contact() {
     <div className='page-contact'>
        <PageBanner heading='Contact' />
 
+
+       <div className='contact-form-section py-5'>
+            <Container>
+                <Row className='justify-content-center'>
+                    <Col lg={8}>
+                        <h2 className='text-center mb-4'>Get in Touch</h2>
+                        <ContactForm />
+                    </Col>
+                </Row>
+            </Container>
+        </div>
+
        <div className='contact-section'>
           <Container>
               <Row>
@@ -44,16 +56,7 @@ function Contact() {
           </Container>
        </div>
 
-        <div className='contact-form-section py-5'>
-            <Container>
-                <Row className='justify-content-center'>
-                    <Col lg={8}>
-                        <h2 className='text-center mb-4'>Get in Touch</h2>
-                        <ContactForm />
-                    </Col>
-                </Row>
-            </Container>
-        </div>
+        
     </div>
   )
 }

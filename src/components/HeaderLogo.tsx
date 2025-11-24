@@ -1,11 +1,10 @@
-import React from 'react'
-import Image from 'next/image'
+import { Image } from 'react-bootstrap'
 import logo from '@/assets/logo.png'
 
 function HeaderLogo() {
   return (
     <div className='header-logo'>
-          <Image src={logo} alt='img' className='header__logo' width={100} height={50} />
+          <Image src={'/assets/img/logo.png'} alt='img' className='header__logo'  />
     </div>
   )
 }

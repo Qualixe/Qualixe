@@ -1,26 +1,24 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { z } from "zod";
+import { supabase } from "../../lib/supabaseClient";
 import "./ContactForm.css";
 
-// Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const ContactFormSchema = z.object({
+  full_name: z.string().min(1, { message: "Full name is required" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  phone: z.string().optional(),
+  country: z.string().optional(),
+  state: z.string().optional(),
+  zip_code: z.string().optional(),
+  company_name: z.string().optional(),
+  note: z.string().optional(),
+});
 
-interface ContactFormData {
-  full_name: string;
-  email: string;
-  phone?: string;
-  country?: string;
-  state?: string;
-  zip_code?: string;
-  company_name?: string;
-  note?: string;
-}
+type ContactFormData = z.infer<typeof ContactFormSchema>;
 
 export default function ContactForm() {
   const [form, setForm] = useState<ContactFormData>({
@@ -45,10 +43,20 @@ export default function ContactForm() {
     e.preventDefault();
     setLoading(true);
 
+    const result = ContactFormSchema.safeParse(form);
+
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        toast.error(issue.message);
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from("contacts")
-        .insert([form]);
+        .insert([result.data]);
 
       if (error) {
         toast.error(error.message || "Submission failed");
@@ -87,7 +95,6 @@ export default function ContactForm() {
               className="form-control"
               value={form.full_name}
               onChange={handleChange}
-              required
             />
           </div>
           <div className="col-md-6 mb-3">
@@ -98,7 +105,6 @@ export default function ContactForm() {
               className="form-control"
               value={form.email}
               onChange={handleChange}
-              required
             />
           </div>
         </div>
@@ -175,7 +181,7 @@ export default function ContactForm() {
         </div>
 
         <div className="text-center">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
+          <button type="submit" className="btn btn-primary header-btn" disabled={loading}>
             {loading ? "Submitting..." : "Submit"}
           </button>
         </div>
