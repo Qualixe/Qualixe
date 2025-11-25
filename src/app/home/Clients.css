@@ -8,11 +8,12 @@
     margin-bottom: 40px;
 }
 
-/* ----------  GRID LAYOUT (no slider)  ---------- */
+/* ----------  FLEXBOX LAYOUT  ---------- */
 .clients-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-   
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center items when they don't fill the row */
+    margin: -10px; /* Counteract item margins */
 }
 
 /* ----------  CARD  ---------- */
@@ -23,6 +24,9 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     border: 1px solid #f0f0f0;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 10px; /* Spacing between items */
+    flex: 1 1 calc(20% - 20px); /* 5 items per row by default, accounting for margin */
+    max-width: calc(20% - 20px);
 }
 
 .client-item:hover {
@@ -53,7 +57,21 @@
 }
 
 /* ----------  MOBILE  ---------- */
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 1200px) {
+    .client-item {
+        flex: 1 1 calc(25% - 20px); /* 4 items per row */
+        max-width: calc(25% - 20px);
+    }
+}
+
+@media only screen and (max-width: 992px) {
+    .client-item {
+        flex: 1 1 calc(33.333% - 20px); /* 3 items per row */
+        max-width: calc(33.333% - 20px);
+    }
+}
+
+@media only screen and (max-width: 768px) {
     .clients-section {
         padding: 50px 0;
     }
@@ -62,12 +80,9 @@
         margin-bottom: 24px;
     }
 
-    .clients-grid {
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        gap: 16px;
-    }
-
     .client-item {
+        flex: 1 1 calc(50% - 20px); /* 2 items per row */
+        max-width: calc(50% - 20px);
         padding: 16px 8px;
         border-radius: 8px;
     }
@@ -75,5 +90,12 @@
     .client-img {
         max-height: 36px;
         height: 36px;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    .client-item {
+        flex: 1 1 calc(100% - 20px); /* 1 item per row */
+        max-width: calc(100% - 20px);
     }
 }

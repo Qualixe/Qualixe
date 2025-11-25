@@ -1,8 +1,6 @@
 // ClientsGrid.jsx
 import React from 'react';
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Image from 'react-bootstrap/Image';
 import Link from 'next/link';
 import './Clients.css';
@@ -55,30 +53,22 @@ function ClientsGrid() {
   return (
     <div className="clients-section">
       <Container>
-        <Row>
-          <Col>
-            <h2 className="cliens-heading heading text-center">
+        <div className="text-center">
+            <h2 className="cliens-heading heading">
               Our Valuable Clients
             </h2>
-          </Col>
-        </Row>
+        </div>
 
         {/* ----------  GRID  ---------- */}
-        <Row
-            xs={2}
-            sm={3}
-           md={4}         // 4 columns on medium
-          lg={5}          // 5 columns on large
-           // bootstrap 5 gutter
-        >
+        <div className="clients-grid">
           {clients.map((c, i) => (
-            <Col key={i} className="client-item" style={{margin:'20px'}}>
+            <div key={i} className="client-item">
               <Link href={c.url} target="_blank" rel="noopener noreferrer">
                 <Image src={c.image} className="client-img" alt="client" />
               </Link>
-            </Col>
+            </div>
           ))}
-        </Row>
+        </div>
       </Container>
     </div>
   );

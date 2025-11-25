@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -25,6 +25,11 @@ export const metadata: Metadata = {
     icon: '/favicon.ico',
   },
   description: "Qualixe is a leading IT solutions and services provider, offering innovative technology solutions to businesses worldwide.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
