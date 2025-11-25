@@ -24,7 +24,7 @@ function Header() {
           <div className='desk-nav'>
             <Menu />
           </div>
-          <HeaderButton shownav={showMobileNav} toggleClass={toggleClass} />
+          <HeaderButton shownav={showMobileNav} />
         </div>
       </div>
 
