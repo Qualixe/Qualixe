@@ -6,7 +6,6 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import "./Footer.css";
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
 
   return (
          <div className='footer-section'>
@@ -15,7 +14,7 @@ export default function Footer() {
                     <Col lg={3} md={3} sm={12}> 
                         <Image src={'/assets/img/logo.png'} alt='img' className='footer__logo' width={100} height={50} />
                         <p className='footer-text'>
-                            We are best e-commerce solution company in bangladesh on shopify CMS platform. We have amazing and experience team members. so let's contact with us.
+                            We are best e-commerce solution company in bangladesh on shopify CMS platform. We have amazing and experience team members. so let&apos;s contact with us.
                         </p>
                     </Col> 
                     <Col lg={3} md={3} sm={12} className='ps-lg-5'> 

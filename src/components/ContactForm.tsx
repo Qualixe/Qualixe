@@ -5,21 +5,23 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { z } from "zod";
 import { supabase } from "../../lib/supabaseClient";
+import { countries } from "../../lib/countries";
 import "./ContactForm.css";
 
 const ContactFormSchema = z.object({
   full_name: z.string().min(1, { message: "Full name is required" })
-    .regex(/[a-zA-Z]/, { message: "Full name must contain at least one letter" }),
+    .regex(/^[a-zA-Z\s]*$/, { message: "Full name must contain only letters and spaces" }),
   email: z.string().email({ message: "Invalid email address" }),
-  phone: z.string().regex(/^[0-9+-\s()]*$/, { message: "Invalid phone number" }).optional(),
+  phone: z.string().regex(/^\d{11}$/, { message: "Invalid phone number" }).optional(),
   country: z.string().min(1, { message: "Country is required" }),
-  state: z.string().min(1, { message: "State is required" }),
-  zip_code: z.string().regex(/^[0-9]*$/, { message: "Zip code must be a number" }),
+  state: z.string().min(1, { message: "State is required" }).regex(/^[a-zA-Z\s]*$/, { message: "State must contain only letters and spaces" }),
+  zip_code: z.string().regex(/^[0-9]{4}$/, { message: "Zip code must be 4 digits" }),
   company_name: z.string().optional(),
   note: z.string().optional(),
 });
 
 type ContactFormData = z.infer<typeof ContactFormSchema>;
+type FormErrors = { [key in keyof ContactFormData]?: string };
 
 export default function ContactForm() {
   const [form, setForm] = useState<ContactFormData>({
@@ -34,10 +36,22 @@ export default function ContactForm() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
+
+    const fieldSchema = ContactFormSchema.pick({ [name as keyof ContactFormData]: true });
+    const result = fieldSchema.safeParse({ [name]: value });
+
+    if (!result.success) {
+      setErrors({ ...errors, [name]: result.error.issues[0].message });
+    } else {
+      const newErrors = { ...errors };
+      delete newErrors[name as keyof ContactFormData];
+      setErrors(newErrors);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -47,15 +61,19 @@ export default function ContactForm() {
     const result = ContactFormSchema.safeParse(form);
 
     if (!result.success) {
+      const newErrors: FormErrors = {};
       result.error.issues.forEach((issue) => {
-        toast.error(issue.message);
+        newErrors[issue.path[0] as keyof ContactFormData] = issue.message;
       });
+      setErrors(newErrors);
       setLoading(false);
       return;
     }
 
+    setErrors({});
+
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("contacts")
         .insert([result.data]);
 
@@ -97,6 +115,7 @@ export default function ContactForm() {
               value={form.full_name}
               onChange={handleChange}
             />
+            {errors.full_name && <p className="text-danger">{errors.full_name}</p>}
           </div>
           <div className="col-md-6 mb-3">
             <input
@@ -107,6 +126,7 @@ export default function ContactForm() {
               value={form.email}
               onChange={handleChange}
             />
+            {errors.email && <p className="text-danger">{errors.email}</p>}
           </div>
         </div>
 
@@ -120,16 +140,23 @@ export default function ContactForm() {
               value={form.phone}
               onChange={handleChange}
             />
+            {errors.phone && <p className="text-danger">{errors.phone}</p>}
           </div>
           <div className="col-md-6 mb-3">
-            <input
-              type="text"
+            <select
               name="country"
-              placeholder="Country"
               className="form-control"
               value={form.country}
               onChange={handleChange}
-            />
+            >
+              <option value="">Select a country</option>
+              {countries.map((country) => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
+            {errors.country && <p className="text-danger">{errors.country}</p>}
           </div>
         </div>
 
@@ -143,6 +170,7 @@ export default function ContactForm() {
               value={form.state}
               onChange={handleChange}
             />
+            {errors.state && <p className="text-danger">{errors.state}</p>}
           </div>
           <div className="col-md-6 mb-3">
             <input
@@ -153,6 +181,7 @@ export default function ContactForm() {
               value={form.zip_code}
               onChange={handleChange}
             />
+            {errors.zip_code && <p className="text-danger">{errors.zip_code}</p>}
           </div>
         </div>
 
@@ -166,6 +195,7 @@ export default function ContactForm() {
               value={form.company_name}
               onChange={handleChange}
             />
+            {errors.company_name && <p className="text-danger">{errors.company_name}</p>}
           </div>
         </div>
 
@@ -178,6 +208,7 @@ export default function ContactForm() {
               value={form.note}
               onChange={handleChange}
             />
+            {errors.note && <p className="text-danger">{errors.note}</p>}
           </div>
         </div>
 

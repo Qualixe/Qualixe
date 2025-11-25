@@ -1,5 +1,5 @@
 "use client";
-
+import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { FaEye } from 'react-icons/fa';
 import Link from 'next/link';
 import './portfolio.css';
+import SkeletonCard from './Skeleton';
 
 const limit = 6;
 
@@ -30,6 +31,16 @@ const portfolios: PortfolioItem[] = [
 ];
 
 const Portfolio: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000); 
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const randomView = (arr: PortfolioItem[]): PortfolioItem[] =>
     [...arr].sort(() => Math.random() - 0.5);
 
@@ -45,18 +56,24 @@ const Portfolio: React.FC = () => {
         </Row>
 
         <Row>
-          {displayedPortfolios.map((item) => (
-            <Col key={item.id} lg={4} md={4} sm={12} className='portfolio-item pb-4'>
-              <a href={item.url} target='_blank' rel="noopener noreferrer" className='portfolio-item-link'>
-                <Image src={item.image} alt={item.name}  className='portfolio-img' width={400} height={500}/>
-                <span className='portfolio-btn'>
-                  <FaEye />
-                  <span>View Live</span>
-                </span>
-                <span className='portfolio-item-overly'></span>
-              </a>
-            </Col>
-          ))}
+          {loading
+            ? Array.from({ length: limit }).map((_, index) => (
+                <Col key={index} lg={4} md={4} sm={12} className='portfolio-item pb-4'>
+                  <SkeletonCard />
+                </Col>
+              ))
+            : displayedPortfolios.map((item) => (
+                <Col key={item.id} lg={4} md={4} sm={12} className='portfolio-item pb-4'>
+                  <a href={item.url} target='_blank' rel="noopener noreferrer" className='portfolio-item-link'>
+                    <Image src={item.image} alt={item.name}  className='portfolio-img' width={400} height={500}/>
+                    <span className='portfolio-btn'>
+                      <FaEye />
+                      <span>View Live</span>
+                    </span>
+                    <span className='portfolio-item-overly'></span>
+                  </a>
+                </Col>
+              ))}
           <Col className='text-center portfolio-button mt-5'>
             <Link href="/portfolio" className='button portfolios-btn'>
               View All

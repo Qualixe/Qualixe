@@ -24,7 +24,7 @@ function Hero() {
                 </Col>
                 <Col lg={5} xs={12}>
                     <div className='hero-image'>
-                        <Image src={"/assets/img/hero.png"} className='hero-img' />
+                        <Image src={"/assets/img/hero.png"} className='hero-img' alt='Hero Image' />
                     </div>
                 </Col>
             </Row>

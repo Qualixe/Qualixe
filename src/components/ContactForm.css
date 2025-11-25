@@ -12,3 +12,8 @@
 .contact-form .row {
   margin-bottom: 0;
 }
+.text-danger {
+  margin: 0;
+  padding: 0;
+  margin-bottom: -10px;
+}

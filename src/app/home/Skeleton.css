@@ -1,0 +1,19 @@
+.skeleton-card {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .skeleton-card .skeleton-img {
+    height: 200px;
+    background-color: #c0c0c0;
+    border-radius: 4px 4px 0 0;
+  }
+  
+  .skeleton-card .skeleton-text {
+    height: 20px;
+    background-color: #c0c0c0;
+    margin: 10px;
+    border-radius: 4px;
+  }
+  

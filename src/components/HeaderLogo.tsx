@@ -1,5 +1,4 @@
 import { Image } from 'react-bootstrap'
-import logo from '@/assets/logo.png'
 
 function HeaderLogo() {
   return (

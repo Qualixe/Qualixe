@@ -12,7 +12,7 @@ function About() {
             <Row>
                 <Col lg={6} xs={12}>
                     <div className='about-image'>
-                        <Image src={"./assets/img/about.jpeg"} className='about-img' />
+                        <Image src={"./assets/img/about.jpeg"} className='about-img' alt='About Us' />
                     </div>
                 </Col>
                 <Col lg={6} xs={12} className='my-auto ps-lg-5'>
