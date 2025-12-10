@@ -6,6 +6,7 @@ import { FaEye } from "react-icons/fa";
 import { Col, Container, Row } from "react-bootstrap";
 import Image from "next/image";
 import SkeletonCard from "./Skeleton";
+import ClientsGrid from "../home/Clients";
 
 interface PortfolioItem {
   id: number;
@@ -38,6 +39,7 @@ function Page() {
   }, []);
 
   return (
+    <>
     <div className="page-portfolio">
       <PageBanner heading="Our Latest Creative Endeavors" />
       <div className="page-portfolio-content">
@@ -67,6 +69,8 @@ function Page() {
         </div>
       </div>
     </div>
+    <ClientsGrid />
+    </>
   );
 }
 

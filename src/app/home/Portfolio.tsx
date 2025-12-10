@@ -27,7 +27,8 @@ const portfolios: PortfolioItem[] = [
   { id: 6, name: "Nilima", image: "/assets/img/portfolio-nilima.jpg", url: "https://nilima.com.bd" },
   { id: 7, name: "Flemingoo", image: "/assets/img/portfolio-flemi.jpg", url: "https://flemingoo.com/" },
   { id: 8, name: "South Asian Strong", image: "/assets/img/portfolio-southasia.jpg", url: "https://transform.southasianstrong.com/" },
-  { id: 9, name: "Moiasun", image: "/assets/img/portfolio-ahaneon.jpg", url: "https://www.ahaneon.com" }
+  { id: 9, name: "Moiasun", image: "/assets/img/portfolio-ahaneon.jpg", url: "https://www.ahaneon.com" },
+ 
 ];
 
 const Portfolio: React.FC = () => {
