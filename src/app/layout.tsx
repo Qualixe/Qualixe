@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Ribon from "@/components/Ribon";
 import WhatsAppChat from "@/components/WhatsAppChat";
+import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,11 +35,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID || 'GTM-XXXXXXX';
+
   return (
     <html lang="en">
+      <head>
+        <GoogleTagManager gtmId={gtmId} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <GoogleTagManagerNoScript gtmId={gtmId} />
         <Header />
         {children}
         <WhatsAppChat />
