@@ -21,9 +21,6 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Qualixe - IT Solutions & Services",
-  icons:{
-    icon: '/favicon.ico',
-  },
   description: "Qualixe is a leading IT solutions and services provider, offering innovative technology solutions to businesses worldwide.",
 };
 
@@ -47,7 +44,7 @@ export default function RootLayout({
         <WhatsAppChat />
         <Ribon />
         <Footer />
-        
+
       </body>
     </html>
   );
