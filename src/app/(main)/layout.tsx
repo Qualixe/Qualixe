@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import Ribon from "@/components/Ribon";
 import WhatsAppChat from "@/components/WhatsAppChat";
 import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <GoogleTagManagerNoScript gtmId={gtmId} />
+        <AnalyticsTracker />
         <Header />
         {children}
         <WhatsAppChat />

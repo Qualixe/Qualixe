@@ -9,6 +9,11 @@ import { brandsAPI } from '../../../lib/api/brands';
 import { clientsAPI } from '../../../lib/api/clients';
 import { themesAPI } from '../../../lib/api/themes';
 import { contactsAPI } from '../../../lib/api/contacts';
+import {
+  getAnalyticsOverview,
+  getDailyTraffic,
+  getRealTimeUsers,
+} from '../../../lib/api/analytics';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -18,18 +23,33 @@ export default function Dashboard() {
     themes: 0,
     contacts: 0,
   });
+  const [analyticsStats, setAnalyticsStats] = useState<any>(null);
+  const [dailyTraffic, setDailyTraffic] = useState<any>({ labels: [], pageViews: [], visitors: [] });
+  const [realTimeUsers, setRealTimeUsers] = useState(0);
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [portfolioData, brandsData, clientsData, themesData, contactsData] = await Promise.all([
+        const [
+          portfolioData,
+          brandsData,
+          clientsData,
+          themesData,
+          contactsData,
+          analytics,
+          traffic,
+          realTime,
+        ] = await Promise.all([
           portfolioAPI.getAll(),
           brandsAPI.getAll(),
           clientsAPI.getAll(),
           themesAPI.getAll(),
           contactsAPI.getAll(),
+          getAnalyticsOverview('7days'),
+          getDailyTraffic('7days'),
+          getRealTimeUsers(),
         ]);
 
         setStats({
@@ -39,6 +59,10 @@ export default function Dashboard() {
           themes: themesData?.length || 0,
           contacts: contactsData?.length || 0,
         });
+
+        setAnalyticsStats(analytics);
+        setDailyTraffic(traffic);
+        setRealTimeUsers(realTime);
 
         // Get recent projects (mix of portfolio, brands, clients, themes)
         const recent = [
@@ -56,62 +80,76 @@ export default function Dashboard() {
     };
 
     fetchData();
+  }, []);
 
+  useEffect(() => {
     // Initialize charts after component mounts
     const initCharts = async () => {
+      if (!dailyTraffic.labels.length) return;
+
       const Chart = (await import('chart.js/auto')).default;
-      
+
       const ctxLine = document.getElementById('installChart') as HTMLCanvasElement;
       if (ctxLine) {
+        const existingChart = Chart.getChart(ctxLine);
+        if (existingChart) existingChart.destroy();
+
         new Chart(ctxLine.getContext('2d')!, {
           type: 'line',
           data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [{
-              label: 'views',
-              data: [8, 12, 9, 15, 20, 18, 24],
-              borderColor: '#0d4be1',
-              backgroundColor: 'rgba(13, 75, 225, 0.08)',
-              tension: 0.2,
-              pointBackgroundColor: '#0d4be1',
-              pointBorderColor: '#fff',
-              pointRadius: 4,
-              fill: true,
-              borderWidth: 3
-            }]
+            labels: dailyTraffic.labels,
+            datasets: [
+              {
+                label: 'Page Views',
+                data: dailyTraffic.pageViews,
+                borderColor: '#0d4be1',
+                backgroundColor: 'rgba(13, 75, 225, 0.08)',
+                tension: 0.2,
+                pointBackgroundColor: '#0d4be1',
+                pointBorderColor: '#fff',
+                pointRadius: 4,
+                fill: true,
+                borderWidth: 3,
+              },
+            ],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { 
-              y: { beginAtZero: true, grid: { color: '#dee9f0' } }, 
-              x: { grid: { display: false } } 
-            }
-          }
+            scales: {
+              y: { beginAtZero: true, grid: { color: '#dee9f0' } },
+              x: { grid: { display: false } },
+            },
+          },
         });
       }
 
       const ctxDoughnut = document.getElementById('stageChart') as HTMLCanvasElement;
       if (ctxDoughnut) {
+        const existingChart = Chart.getChart(ctxDoughnut);
+        if (existingChart) existingChart.destroy();
+
         new Chart(ctxDoughnut.getContext('2d')!, {
           type: 'doughnut',
           data: {
             labels: ['portfolio', 'brands', 'themes'],
-            datasets: [{
-              data: [stats.portfolio, stats.brands, stats.themes],
-              backgroundColor: ['#0d4be1', '#0530a7', '#5a9bcf'],
-              borderWidth: 0,
-              borderRadius: 8,
-              spacing: 4
-            }]
+            datasets: [
+              {
+                data: [stats.portfolio, stats.brands, stats.themes],
+                backgroundColor: ['#0d4be1', '#0530a7', '#5a9bcf'],
+                borderWidth: 0,
+                borderRadius: 8,
+                spacing: 4,
+              },
+            ],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             cutout: '65%',
-            plugins: { legend: { display: false } }
-          }
+            plugins: { legend: { display: false } },
+          },
         });
       }
     };
@@ -119,7 +157,7 @@ export default function Dashboard() {
     if (!loading) {
       initCharts();
     }
-  }, [loading, stats.portfolio, stats.brands, stats.themes]);
+  }, [loading, stats.portfolio, stats.brands, stats.themes, dailyTraffic]);
 
   if (loading) {
     return (
@@ -205,30 +243,81 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="row g-4 mb-4">
-          <div className="col-sm-6 col-xl-3">
-            <div className="card p-3 p-xl-3 h-100">
-              <div className="d-flex align-items-center gap-3">
-                <div className="stat-icon-circle">
-                  <i className="bi bi-envelope"></i>
+        {/* Analytics Stats Row */}
+        {analyticsStats && (
+          <div className="row g-4 mb-4">
+            <div className="col-sm-6 col-xl-3">
+              <div className="card p-3 p-xl-3 h-100">
+                <div className="d-flex align-items-center gap-3">
+                  <div className="stat-icon-circle">
+                    <i className="bi bi-eye"></i>
+                  </div>
+                  <div>
+                    <span className="text-secondary text-uppercase small fw-semibold">page views</span>
+                    <h2 className="fw-bold mt-1 mb-0">{analyticsStats.pageViews?.toLocaleString() || 0}</h2>
+                    <span className="text-info small"><i className="bi bi-graph-up"></i> Last 7 days</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-secondary text-uppercase small fw-semibold">messages</span>
-                  <h2 className="fw-bold mt-1 mb-0">{stats.contacts}</h2>
-                  <span className="text-warning small"><i className="bi bi-envelope-fill"></i> Inbox</span>
+              </div>
+            </div>
+            <div className="col-sm-6 col-xl-3">
+              <div className="card p-3 p-xl-3 h-100">
+                <div className="d-flex align-items-center gap-3">
+                  <div className="stat-icon-circle">
+                    <i className="bi bi-people"></i>
+                  </div>
+                  <div>
+                    <span className="text-secondary text-uppercase small fw-semibold">visitors</span>
+                    <h2 className="fw-bold mt-1 mb-0">{analyticsStats.uniqueVisitors?.toLocaleString() || 0}</h2>
+                    <span className="text-success small"><i className="bi bi-person-check"></i> Unique</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-6 col-xl-3">
+              <div className="card p-3 p-xl-3 h-100">
+                <div className="d-flex align-items-center gap-3">
+                  <div className="stat-icon-circle">
+                    <i className="bi bi-activity"></i>
+                  </div>
+                  <div>
+                    <span className="text-secondary text-uppercase small fw-semibold">active now</span>
+                    <h2 className="fw-bold mt-1 mb-0">{realTimeUsers}</h2>
+                    <span className="text-success small">
+                      <i className="bi bi-circle-fill" style={{ fontSize: '8px' }}></i> Live
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-6 col-xl-3">
+              <div className="card p-3 p-xl-3 h-100">
+                <div className="d-flex align-items-center gap-3">
+                  <div className="stat-icon-circle">
+                    <i className="bi bi-envelope"></i>
+                  </div>
+                  <div>
+                    <span className="text-secondary text-uppercase small fw-semibold">messages</span>
+                    <h2 className="fw-bold mt-1 mb-0">{stats.contacts}</h2>
+                    <span className="text-warning small"><i className="bi bi-envelope-fill"></i> Inbox</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="row g-4 mb-4">
           <div className="col-lg-7">
             <div className="card p-3 p-xl-4">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <i className="bi bi-bar-chart-steps fs-4"></i>
-                <h5 className="fw-semibold mb-0">Portfolio views (last 7 days)</h5>
-                <span className="badge-soft-green ms-2"><i className="bi bi-arrow-up"></i> +16%</span>
+                <h5 className="fw-semibold mb-0">Website traffic (last 7 days)</h5>
+                {analyticsStats && analyticsStats.pageViews > 0 && (
+                  <span className="badge-soft-green ms-2">
+                    <i className="bi bi-arrow-up"></i> {analyticsStats.pageViews} views
+                  </span>
+                )}
               </div>
               <div className="chart-container">
                 <canvas id="installChart" width="400" height="180"></canvas>

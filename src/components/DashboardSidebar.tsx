@@ -105,6 +105,16 @@ export default function DashboardSidebar() {
             <i className="bi bi-chat-dots"></i> <span>Comments</span>
           </Link>
         </div>
+        <div className="nav-item">
+          <Link href="/dashboard/analytics" className={`nav-link ${isActive('/dashboard/analytics') ? 'active' : ''}`}>
+            <i className="bi bi-graph-up"></i> <span>Analytics</span>
+          </Link>
+        </div>
+        <div className="nav-item">
+          <Link href="/dashboard/users" className={`nav-link ${isActive('/dashboard/users') ? 'active' : ''}`}>
+            <i className="bi bi-person-gear"></i> <span>Users</span>
+          </Link>
+        </div>
       </div>
 
       <div className="nav-sidebar" style={{ marginTop: 'auto', paddingTop: 0, paddingBottom: '0.5rem' }}>
