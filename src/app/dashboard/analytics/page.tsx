@@ -18,7 +18,7 @@ interface Stats {
   pageViews: number;
   uniqueVisitors: number;
   sessions: number;
-  avgPageViewsPerSession: string;
+  avgPageViewsPerSession: string | number;
 }
 
 export default function AnalyticsPage() {

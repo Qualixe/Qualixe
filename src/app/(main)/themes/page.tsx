@@ -101,11 +101,11 @@ const ThemesPage = () => {
                   <div className="theme-content">
                     <div className="theme-header">
                       <h3 className="theme-name">{theme.name}</h3>
-                      <div className="theme-rating">
+                      {/* <div className="theme-rating">
                         <i className="bi bi-star-fill"></i>
                         <span>{theme.rating}</span>
                         <span className="theme-reviews">({theme.reviews_count})</span>
-                      </div>
+                      </div> */}
                     </div>
                     
                     <p className="theme-description">{theme.description}</p>
