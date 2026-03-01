@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import NotificationDropdown from '@/components/NotificationDropdown';
+import DashboardHeader from '@/components/DashboardHeader';
 import { authAPI } from '../../../../lib/auth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -130,15 +130,7 @@ export default function SettingsPage() {
       <DashboardSidebar />
 
       <div className="main-content">
-        <div className="top-bar">
-          <h5 className="page-title"><i className="bi bi-gear me-2"></i>Settings <span>/</span> Profile</h5>
-          <div className="top-bar-right">
-            <NotificationDropdown />
-            <div className="avatar-small">
-              {fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'AD'}
-            </div>
-          </div>
-        </div>
+        <DashboardHeader icon="bi-gear" title="Settings" subtitle="Profile" />
 
         <div className="row g-4">
           <div className="col-lg-8">

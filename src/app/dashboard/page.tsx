@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import NotificationDropdown from '@/components/NotificationDropdown';
-import UserAvatar from '@/components/UserAvatar';
+import DashboardHeader from '@/components/DashboardHeader';
 import { portfolioAPI } from '../../../lib/api/portfolio';
 import { brandsAPI } from '../../../lib/api/brands';
 import { clientsAPI } from '../../../lib/api/clients';
@@ -175,14 +174,7 @@ export default function Dashboard() {
       <DashboardSidebar />
 
       <div className="main-content">
-        <div className="top-bar">
-          <h5 className="page-title"><i className="bi bi-grid-fill me-2"></i>Dashboard <span>/</span> overview</h5>
-          <div className="top-bar-right">
-            <i className="bi bi-search text-secondary"></i>
-            <NotificationDropdown />
-            <UserAvatar />
-          </div>
-        </div>
+        <DashboardHeader icon="bi-grid-fill" title="Dashboard" subtitle="overview" />
 
         <div className="row g-4 mb-4">
           <div className="col-sm-6 col-xl-3">

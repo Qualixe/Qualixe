@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import NotificationDropdown from '@/components/NotificationDropdown';
-import UserAvatar from '@/components/UserAvatar';
+import DashboardHeader from '@/components/DashboardHeader';
 import {
   getAllUsers,
   createUser,
@@ -259,15 +258,7 @@ export default function UsersPage() {
       <DashboardSidebar />
 
       <div className="main-content">
-        <div className="top-bar">
-          <h5 className="page-title">
-            <i className="bi bi-people me-2"></i>Users <span>/</span> management
-          </h5>
-          <div className="top-bar-right">
-            <NotificationDropdown />
-            <UserAvatar />
-          </div>
-        </div>
+        <DashboardHeader icon="bi-people" title="Users" subtitle="management" />
 
         {/* Stats Cards */}
         {stats && (

@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import NotificationDropdown from '@/components/NotificationDropdown';
-import UserAvatar from '@/components/UserAvatar';
+import DashboardHeader from '@/components/DashboardHeader';
 import {
   getAnalyticsOverview,
   getTopPages,
@@ -189,11 +188,11 @@ export default function AnalyticsPage() {
       <DashboardSidebar />
 
       <div className="main-content">
-        <div className="top-bar">
-          <h5 className="page-title">
-            <i className="bi bi-graph-up me-2"></i>Analytics <span>/</span> insights
-          </h5>
-          <div className="top-bar-right">
+        <DashboardHeader
+          icon="bi-graph-up"
+          title="Analytics"
+          subtitle="insights"
+          actions={
             <select
               className="form-select form-select-sm"
               style={{ width: 'auto', marginRight: '15px' }}
@@ -205,10 +204,8 @@ export default function AnalyticsPage() {
               <option value="30days">Last 30 Days</option>
               <option value="90days">Last 90 Days</option>
             </select>
-            <NotificationDropdown />
-            <UserAvatar />
-          </div>
-        </div>
+          }
+        />
 
         {/* Stats Cards */}
         {loading ? (

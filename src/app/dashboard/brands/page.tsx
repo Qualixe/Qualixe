@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import NotificationDropdown from '@/components/NotificationDropdown';
-import UserAvatar from '@/components/UserAvatar';
+import DashboardHeader from '@/components/DashboardHeader';
 import { brandsAPI, Brand } from '../../../../lib/api/brands';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -143,14 +142,7 @@ export default function BrandsPage() {
       <DashboardSidebar />
 
       <div className="main-content">
-        <div className="top-bar">
-          <h5 className="page-title"><i className="bi bi-award me-2"></i>Brands <span>/</span> partners</h5>
-          <div className="top-bar-right">
-            <i className="bi bi-search text-secondary"></i>
-            <NotificationDropdown />
-            <UserAvatar />
-          </div>
-        </div>
+        <DashboardHeader icon="bi-award" title="Brands" subtitle="partners" />
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>

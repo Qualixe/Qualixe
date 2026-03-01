@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import NotificationDropdown from '@/components/NotificationDropdown';
-import UserAvatar from '@/components/UserAvatar';
+import DashboardHeader from '@/components/DashboardHeader';
 import { blogCommentsAPI, BlogComment } from '../../../../../lib/api/blog';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -96,16 +95,7 @@ export default function CommentsApprovalPage() {
       <DashboardSidebar />
 
       <div className="main-content">
-        <div className="top-bar">
-          <h5 className="page-title">
-            <i className="bi bi-chat-dots me-2"></i>Blog Comments <span>/</span> moderation
-          </h5>
-          <div className="top-bar-right">
-            <i className="bi bi-search text-secondary"></i>
-            <NotificationDropdown />
-            <UserAvatar />
-          </div>
-        </div>
+        <DashboardHeader icon="bi-chat-dots" title="Blog Comments" subtitle="moderation" />
 
         {loading ? (
           <div className="text-center py-5">

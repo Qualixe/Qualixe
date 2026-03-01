@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import NotificationDropdown from '@/components/NotificationDropdown';
-import UserAvatar from '@/components/UserAvatar';
+import DashboardHeader from '@/components/DashboardHeader';
 import { contactsAPI, Contact } from '../../../../lib/api/contacts';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -83,14 +82,7 @@ export default function ContactsPage() {
       <DashboardSidebar />
 
       <div className="main-content">
-        <div className="top-bar">
-          <h5 className="page-title"><i className="bi bi-envelope me-2"></i>Contact Messages</h5>
-          <div className="top-bar-right">
-            <i className="bi bi-search text-secondary"></i>
-            <NotificationDropdown />
-            <UserAvatar />
-          </div>
-        </div>
+        <DashboardHeader icon="bi-envelope" title="Contact Messages" />
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>
