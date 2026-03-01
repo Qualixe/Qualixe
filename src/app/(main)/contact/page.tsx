@@ -1,5 +1,5 @@
 
-import PageBanner from '../../components/PageBanner'
+import PageBanner from '../../../components/PageBanner'
 import './Contact.css'
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -8,7 +8,7 @@ import { FaPhone } from "react-icons/fa6";
 import Link from 'next/link';
 import { IoIosMail } from "react-icons/io";
 import { FaMapMarkerAlt } from "react-icons/fa";
-import ContactForm from '../../components/ContactForm';
+import ContactForm from '../../../components/ContactForm';
 
 
 function Contact() {

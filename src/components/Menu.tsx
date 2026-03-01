@@ -9,6 +9,7 @@ export default function Menu({ onLinkClick }: { onLinkClick?: () => void }) {
     { href: '/about', label: 'About' },
     { href: '/services', label: 'Services' },
     { href: '/portfolio', label: 'Portfolio' },
+    { href: '/themes', label: 'Themes' },
     { href: '/contact', label: 'Contact' },
   ]
 
