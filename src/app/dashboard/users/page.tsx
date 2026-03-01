@@ -412,7 +412,9 @@ export default function UsersPage() {
                             className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
                             style={{ width: '32px', height: '32px', fontSize: '14px' }}
                           >
-                            {user.full_name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
+                            {(user.full_name && user.full_name.charAt(0).toUpperCase()) || 
+                             (user.email && user.email.charAt(0).toUpperCase()) || 
+                             'U'}
                           </div>
                           <span className="fw-semibold">{user.full_name || 'No name'}</span>
                         </div>
@@ -618,8 +620,9 @@ export default function UsersPage() {
                         className="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
                         style={{ width: '80px', height: '80px', fontSize: '32px' }}
                       >
-                        {viewingUser.full_name?.charAt(0).toUpperCase() ||
-                          viewingUser.email.charAt(0).toUpperCase()}
+                        {(viewingUser.full_name && viewingUser.full_name.charAt(0).toUpperCase()) ||
+                          (viewingUser.email && viewingUser.email.charAt(0).toUpperCase()) ||
+                          'U'}
                       </div>
                       <h5 className="mb-1">{viewingUser.full_name || 'No name'}</h5>
                       <p className="text-muted mb-2">{viewingUser.email}</p>

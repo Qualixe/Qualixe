@@ -161,7 +161,19 @@ export async function getUserStats() {
   try {
     const { data, error } = await supabase.from('user_stats').select('*').single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching user stats:', error);
+      // Return default stats if view doesn't exist
+      return {
+        total_users: 0,
+        active_users: 0,
+        inactive_users: 0,
+        suspended_users: 0,
+        admin_users: 0,
+        new_users_30d: 0,
+      };
+    }
+    
     return data;
   } catch (error) {
     console.error('Error fetching user stats:', error);
