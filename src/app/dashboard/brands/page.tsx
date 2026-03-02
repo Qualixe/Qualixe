@@ -3,17 +3,16 @@
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import DashboardHeader from '@/components/DashboardHeader';
+import ImageUploadField from '@/components/ImageUploadField';
 import { brandsAPI, Brand } from '../../../../lib/api/brands';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { uploadImage } from '../../../../lib/uploadImage';
 
 export default function BrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<Brand>({
     name: '',
     logo_url: '',
@@ -46,32 +45,6 @@ export default function BrandsPage() {
       console.error(error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const imageUrl = await uploadImage(file, 'brands');
-      setFormData(prev => ({ ...prev, logo_url: imageUrl }));
-      toast.success('Logo uploaded successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to upload logo');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -291,22 +264,14 @@ export default function BrandsPage() {
                       required
                     />
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label">Brand Logo</label>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                    />
-                    {uploading && <small className="text-muted">Uploading...</small>}
-                    {formData.logo_url && (
-                      <div className="mt-2">
-                        <img src={formData.logo_url} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'contain', borderRadius: '4px' }} />
-                      </div>
-                    )}
-                  </div>
+                  
+                  <ImageUploadField
+                    label="Brand Logo"
+                    currentImageUrl={formData.logo_url}
+                    onImageChange={(url) => setFormData(prev => ({ ...prev, logo_url: url }))}
+                    folder="brands"
+                  />
+
                   <div className="mb-3">
                     <label className="form-label">Website URL</label>
                     <input
@@ -369,7 +334,7 @@ export default function BrandsPage() {
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary" disabled={uploading}>
+                  <button type="submit" className="btn btn-primary">
                     {editingBrand ? 'Update' : 'Create'}
                   </button>
                 </div>

@@ -3,17 +3,16 @@
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import DashboardHeader from '@/components/DashboardHeader';
+import ImageUploadField from '@/components/ImageUploadField';
 import { clientsAPI, Client } from '../../../../lib/api/clients';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { uploadImage } from '../../../../lib/uploadImage';
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<Client>({
     name: '',
     logo_url: '',
@@ -53,32 +52,6 @@ export default function ClientsPage() {
       console.error(error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const imageUrl = await uploadImage(file, 'clients');
-      setFormData(prev => ({ ...prev, logo_url: imageUrl }));
-      toast.success('Logo uploaded successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to upload logo');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -355,44 +328,17 @@ export default function ClientsPage() {
                     </div>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label">Client Logo</label>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                    />
-                    {uploading && <small className="text-muted">Uploading...</small>}
-                    {formData.logo_url && (
-                      <div className="mt-2">
-                        <div 
-                          style={{ 
-                            width: '120px', 
-                            height: '120px', 
-                            backgroundColor: formData.background_color || '#f0f9ff',
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '12px',
-                            border: '1px solid #dee2e6'
-                          }}
-                        >
-                          <img 
-                            src={formData.logo_url} 
-                            alt="Preview" 
-                            style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <ImageUploadField
+                    label="Client Logo"
+                    currentImageUrl={formData.logo_url}
+                    onImageChange={(url) => setFormData(prev => ({ ...prev, logo_url: url }))}
+                    folder="clients"
+                    backgroundColor={formData.background_color}
+                  />
 
                   <div className="mb-3">
                     <label className="form-label">Background Color</label>
-                    <div className="d-flex gap-2 align-items-center">
+                    <div className="d-flex gap-2 align-items-center mb-2">
                       <input
                         type="color"
                         className="form-control form-control-color"
@@ -411,27 +357,28 @@ export default function ClientsPage() {
                         pattern="^#[0-9A-Fa-f]{6}$"
                         style={{ maxWidth: '120px' }}
                       />
-                      <div className="d-flex gap-1">
-                        {['#f0f9ff', '#fef3c7', '#fce7f3', '#dbeafe', '#e0e7ff', '#fef2f2', '#ecfccb', '#f3e8ff'].map(color => (
-                          <button
-                            key={color}
-                            type="button"
-                            className="btn btn-sm"
-                            style={{ 
-                              width: '30px', 
-                              height: '30px', 
-                              backgroundColor: color,
-                              border: formData.background_color === color ? '2px solid #0d4be1' : '1px solid #dee2e6',
-                              borderRadius: '4px',
-                              padding: 0
-                            }}
-                            onClick={() => setFormData(prev => ({ ...prev, background_color: color }))}
-                            title={color}
-                          />
-                        ))}
-                      </div>
                     </div>
-                    <small className="text-muted">Choose a background color for the logo display</small>
+                    <div className="d-flex gap-1 flex-wrap">
+                      {['#f0f9ff', '#fef3c7', '#fce7f3', '#dbeafe', '#e0e7ff', '#fef2f2', '#ecfccb', '#f3e8ff'].map(color => (
+                        <button
+                          key={color}
+                          type="button"
+                          className="btn btn-sm"
+                          style={{ 
+                            width: '35px', 
+                            height: '35px', 
+                            backgroundColor: color,
+                            border: formData.background_color === color ? '3px solid #0d4be1' : '1px solid #dee2e6',
+                            borderRadius: '6px',
+                            padding: 0,
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => setFormData(prev => ({ ...prev, background_color: color }))}
+                          title={color}
+                        />
+                      ))}
+                    </div>
+                    <small className="text-muted d-block mt-2">Choose a background color for the logo display</small>
                   </div>
 
                   <div className="row">
@@ -474,7 +421,7 @@ export default function ClientsPage() {
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary" disabled={uploading}>
+                  <button type="submit" className="btn btn-primary">
                     {editingClient ? 'Update' : 'Create'}
                   </button>
                 </div>

@@ -6,14 +6,13 @@ import DashboardHeader from '@/components/DashboardHeader';
 import { themesAPI, Theme } from '../../../../lib/api/themes';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { uploadImage } from '../../../../lib/uploadImage';
+import ImageUploadField from '@/components/ImageUploadField';
 
 export default function ThemesPage() {
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<Theme>({
     name: '',
     category: '',
@@ -52,32 +51,6 @@ export default function ThemesPage() {
       console.error(error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const imageUrl = await uploadImage(file, 'themes');
-      setFormData(prev => ({ ...prev, image_url: imageUrl }));
-      toast.success('Image uploaded successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to upload image');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -343,22 +316,12 @@ export default function ThemesPage() {
                     />
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label">Theme Image</label>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                    />
-                    {uploading && <small className="text-muted">Uploading...</small>}
-                    {formData.image_url && (
-                      <div className="mt-2">
-                        <img src={formData.image_url} alt="Preview" style={{ width: '100%', maxWidth: '200px', borderRadius: '4px' }} />
-                      </div>
-                    )}
-                  </div>
+                  <ImageUploadField
+                    label="Theme Image"
+                    currentImageUrl={formData.image_url}
+                    onImageChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                    folder="themes"
+                  />
                   <div className="row">
                     <div className="col-md-6 mb-3">
                       <label className="form-label">Demo URL</label>
@@ -468,7 +431,7 @@ export default function ThemesPage() {
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary" disabled={uploading}>
+                  <button type="submit" className="btn btn-primary">
                     {editingTheme ? 'Update' : 'Create'}
                   </button>
                 </div>

@@ -6,7 +6,7 @@ import DashboardHeader from '@/components/DashboardHeader';
 import { blogAPI, BlogPost } from '../../../../lib/api/blog';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { uploadImage } from '../../../../lib/uploadImage';
+import ImageUploadField from '@/components/ImageUploadField';
 import { authAPI } from '../../../../lib/auth';
 
 export default function BlogManagementPage() {
@@ -14,7 +14,6 @@ export default function BlogManagementPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -42,22 +41,6 @@ export default function BlogManagementPage() {
       toast.error('Failed to load posts');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const imageUrl = await uploadImage(file, 'blog');
-      setFormData({ ...formData, featured_image: imageUrl });
-      toast.success('Image uploaded successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to upload image');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -334,25 +317,12 @@ export default function BlogManagementPage() {
                       <small className="text-muted">You can use HTML tags for formatting</small>
                     </div>
 
-                    <div className="mb-3">
-                      <label className="form-label">Featured Image</label>
-                      <input
-                        type="file"
-                        className="form-control"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={uploading}
-                      />
-                      {uploading && <small className="text-primary">Uploading...</small>}
-                      {formData.featured_image && (
-                        <img
-                          src={formData.featured_image}
-                          alt="Preview"
-                          className="mt-2"
-                          style={{ maxWidth: '200px', borderRadius: '8px' }}
-                        />
-                      )}
-                    </div>
+                    <ImageUploadField
+                      label="Featured Image"
+                      currentImageUrl={formData.featured_image}
+                      onImageChange={(url) => setFormData({ ...formData, featured_image: url })}
+                      folder="blog"
+                    />
 
                     <div className="row">
                       <div className="col-md-6 mb-3">

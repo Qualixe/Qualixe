@@ -3,17 +3,16 @@
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import DashboardHeader from '@/components/DashboardHeader';
+import ImageUploadField from '@/components/ImageUploadField';
 import { portfolioAPI, Portfolio } from '../../../../lib/api/portfolio';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { uploadImage } from '../../../../lib/uploadImage';
 
 export default function PortfolioPage() {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingPortfolio, setEditingPortfolio] = useState<Portfolio | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<Portfolio>({
     title: '',
     category: '',
@@ -47,34 +46,6 @@ export default function PortfolioPage() {
       console.error(error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const imageUrl = await uploadImage(file, 'portfolio');
-      setFormData(prev => ({ ...prev, image_url: imageUrl }));
-      toast.success('Image uploaded successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to upload image');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -340,22 +311,12 @@ export default function PortfolioPage() {
                     />
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label">Project Image</label>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                    />
-                    {uploading && <small className="text-muted">Uploading...</small>}
-                    {formData.image_url && (
-                      <div className="mt-2">
-                        <img src={formData.image_url} alt="Preview" style={{ width: '100%', maxWidth: '200px', borderRadius: '4px' }} />
-                      </div>
-                    )}
-                  </div>
+                  <ImageUploadField
+                    label="Project Image"
+                    currentImageUrl={formData.image_url}
+                    onImageChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                    folder="portfolio"
+                  />
 
                   <div className="mb-3">
                     <label className="form-label">Status</label>
@@ -375,7 +336,7 @@ export default function PortfolioPage() {
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary" disabled={uploading}>
+                  <button type="submit" className="btn btn-primary">
                     {editingPortfolio ? 'Update' : 'Create'}
                   </button>
                 </div>
