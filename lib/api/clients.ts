@@ -10,6 +10,7 @@ export interface Client {
   projects_count?: number;
   status?: string;
   joined_date?: string;
+  background_color?: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -23,6 +23,7 @@ export default function ClientsPage() {
     projects_count: 0,
     status: 'active',
     joined_date: new Date().toISOString().split('T')[0],
+    background_color: '#f0f9ff',
   });
   const [stats, setStats] = useState({ total: 0, active: 0, newThisMonth: 0 });
 
@@ -131,6 +132,7 @@ export default function ClientsPage() {
       projects_count: 0,
       status: 'active',
       joined_date: new Date().toISOString().split('T')[0],
+      background_color: '#f0f9ff',
     });
     setEditingClient(null);
   };
@@ -224,7 +226,24 @@ export default function ClientsPage() {
                               <td><span className="fw-semibold">{client.name}</span></td>
                               <td>
                                 {client.logo_url ? (
-                                  <img src={client.logo_url} alt={client.name} style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                                  <div 
+                                    style={{ 
+                                      width: '50px', 
+                                      height: '50px', 
+                                      backgroundColor: client.background_color || '#f0f9ff',
+                                      borderRadius: '8px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      padding: '8px'
+                                    }}
+                                  >
+                                    <img 
+                                      src={client.logo_url} 
+                                      alt={client.name} 
+                                      style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                                    />
+                                  </div>
                                 ) : (
                                   <span className="avatar-placeholder">
                                     {client.name.substring(0, 2).toUpperCase()}
@@ -348,9 +367,71 @@ export default function ClientsPage() {
                     {uploading && <small className="text-muted">Uploading...</small>}
                     {formData.logo_url && (
                       <div className="mt-2">
-                        <img src={formData.logo_url} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'contain', borderRadius: '4px' }} />
+                        <div 
+                          style={{ 
+                            width: '120px', 
+                            height: '120px', 
+                            backgroundColor: formData.background_color || '#f0f9ff',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '12px',
+                            border: '1px solid #dee2e6'
+                          }}
+                        >
+                          <img 
+                            src={formData.logo_url} 
+                            alt="Preview" 
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                          />
+                        </div>
                       </div>
                     )}
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Background Color</label>
+                    <div className="d-flex gap-2 align-items-center">
+                      <input
+                        type="color"
+                        className="form-control form-control-color"
+                        name="background_color"
+                        value={formData.background_color || '#f0f9ff'}
+                        onChange={handleChange}
+                        style={{ width: '60px', height: '40px' }}
+                      />
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="background_color"
+                        value={formData.background_color || '#f0f9ff'}
+                        onChange={handleChange}
+                        placeholder="#f0f9ff"
+                        pattern="^#[0-9A-Fa-f]{6}$"
+                        style={{ maxWidth: '120px' }}
+                      />
+                      <div className="d-flex gap-1">
+                        {['#f0f9ff', '#fef3c7', '#fce7f3', '#dbeafe', '#e0e7ff', '#fef2f2', '#ecfccb', '#f3e8ff'].map(color => (
+                          <button
+                            key={color}
+                            type="button"
+                            className="btn btn-sm"
+                            style={{ 
+                              width: '30px', 
+                              height: '30px', 
+                              backgroundColor: color,
+                              border: formData.background_color === color ? '2px solid #0d4be1' : '1px solid #dee2e6',
+                              borderRadius: '4px',
+                              padding: 0
+                            }}
+                            onClick={() => setFormData(prev => ({ ...prev, background_color: color }))}
+                            title={color}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <small className="text-muted">Choose a background color for the logo display</small>
                   </div>
 
                   <div className="row">

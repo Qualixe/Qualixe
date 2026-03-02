@@ -13,6 +13,7 @@ interface Client {
   logo_url: string;
   website_url: string;
   industry?: string;
+  background_color?: string;
 }
 
 function ClientsGrid() {
@@ -61,7 +62,12 @@ function ClientsGrid() {
           {clients.map((c) => (
             <div key={c.id} className="client-item">
               <Link href={c.website_url || '#'} target="_blank" rel="noopener noreferrer">
-                <Image src={c.logo_url} className="client-img" alt={c.name} />
+                <div 
+                  className="client-logo-bg"
+                  style={{ backgroundColor: c.background_color || '#f0f9ff' }}
+                >
+                  <Image src={c.logo_url} className="client-img" alt={c.name} />
+                </div>
               </Link>
             </div>
           ))}

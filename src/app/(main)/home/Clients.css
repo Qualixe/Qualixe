@@ -32,17 +32,28 @@
     /* 5 items per row by default, accounting for margin */
     max-width: calc(20% - 20px);
     position: relative;
-
 }
+
 .client-item.white{
     background-color: #36426d61;
 }
 
+.client-logo-bg {
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    transition: transform 0.3s ease;
+}
 
 .client-item:hover {
-    
     box-shadow: 0 8px 30px rgba(12, 60, 195, 0.15);
-    
+}
+
+.client-item:hover .client-logo-bg {
+    transform: scale(1.02);
 }
 
 /* ----------  LOGO  ---------- */
