@@ -10,7 +10,7 @@ import './portfolio.css';
 import SkeletonCard from './Skeleton';
 import { portfolioAPI } from '../../../../lib/api/portfolio';
 
-const limit = 6;
+const limit = 3;
 
 interface PortfolioItem {
   id: string;
