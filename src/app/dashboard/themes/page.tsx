@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import { themesAPI, Theme } from '../../../../lib/api/themes';
@@ -29,6 +29,7 @@ export default function ThemesPage() {
   });
   const [featureInput, setFeatureInput] = useState('');
   const [stats, setStats] = useState({ total: 0, active: 0, categories: 0 });
+  const dragIndex = useRef<number | null>(null);
 
   useEffect(() => {
     fetchThemes();
@@ -52,6 +53,23 @@ export default function ThemesPage() {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDragStart = (index: number) => { dragIndex.current = index; };
+
+  const handleDrop = async (dropIndex: number) => {
+    if (dragIndex.current === null || dragIndex.current === dropIndex) return;
+    const reordered = [...themes];
+    const [moved] = reordered.splice(dragIndex.current, 1);
+    reordered.splice(dropIndex, 0, moved);
+    dragIndex.current = null;
+    setThemes(reordered);
+    try {
+      await themesAPI.updateOrder(reordered.map((t, i) => ({ id: t.id!, sort_order: i })));
+      toast.success('Order saved');
+    } catch {
+      toast.error('Failed to save order');
     }
   };
 
@@ -197,13 +215,13 @@ export default function ThemesPage() {
               <div className="col-12">
                 <div className="card p-4">
                   <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h4 className="mb-0">All Themes</h4>
+                    <div>
+                      <h4 className="mb-0">All Themes</h4>
+                      <small className="text-muted"><i className="bi bi-grip-vertical me-1"></i>Drag rows to reorder</small>
+                    </div>
                     <button 
                       className="btn btn-primary btn-sm"
-                      onClick={() => {
-                        resetForm();
-                        setShowModal(true);
-                      }}
+                      onClick={() => { resetForm(); setShowModal(true); }}
                     >
                       <i className="bi bi-plus-circle me-2"></i>Add Theme
                     </button>
@@ -211,12 +229,22 @@ export default function ThemesPage() {
                   <div className="table-responsive">
                     <table className="table table-hover align-middle">
                       <thead>
-                        <tr><th>Theme Name</th><th>Category</th><th>Price</th><th>Rating</th><th>Version</th><th>Status</th><th>Actions</th></tr>
+                        <tr><th style={{ width: '40px' }}></th><th>Theme Name</th><th>Category</th><th>Price</th><th>Rating</th><th>Version</th><th>Status</th><th>Actions</th></tr>
                       </thead>
                       <tbody>
                         {themes.length > 0 ? (
-                          themes.map((theme) => (
-                            <tr key={theme.id}>
+                          themes.map((theme, index) => (
+                            <tr
+                              key={theme.id}
+                              draggable
+                              onDragStart={() => handleDragStart(index)}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={() => handleDrop(index)}
+                              style={{ cursor: 'grab' }}
+                            >
+                              <td style={{ color: '#aaa' }}>
+                                <i className="bi bi-grip-vertical fs-5"></i>
+                              </td>
                               <td>
                                 <div className="d-flex align-items-center gap-2">
                                   {theme.image_url && (
@@ -240,16 +268,10 @@ export default function ThemesPage() {
                                 </span>
                               </td>
                               <td>
-                                <button 
-                                  className="btn btn-sm btn-outline-primary me-2"
-                                  onClick={() => handleEdit(theme)}
-                                >
+                                <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleEdit(theme)}>
                                   <i className="bi bi-pencil"></i>
                                 </button>
-                                <button 
-                                  className="btn btn-sm btn-outline-danger"
-                                  onClick={() => handleDelete(theme.id!)}
-                                >
+                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(theme.id!)}>
                                   <i className="bi bi-trash"></i>
                                 </button>
                               </td>
@@ -257,7 +279,7 @@ export default function ThemesPage() {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={7} className="text-center">No themes found</td>
+                            <td colSpan={8} className="text-center">No themes found</td>
                           </tr>
                         )}
                       </tbody>

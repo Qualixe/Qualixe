@@ -11,6 +11,7 @@ export interface Client {
   status?: string;
   joined_date?: string;
   background_color?: string;
+  sort_order?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -20,7 +21,7 @@ export const clientsAPI = {
     const { data, error } = await supabase
       .from('clients')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('sort_order', { ascending: true, nullsFirst: false });
     
     if (error) throw error;
     return data;
@@ -68,5 +69,12 @@ export const clientsAPI = {
     
     if (error) throw error;
     return true;
+  },
+
+  async updateOrder(items: { id: string; sort_order: number }[]) {
+    const updates = items.map(({ id, sort_order }) =>
+      supabase.from('clients').update({ sort_order }).eq('id', id)
+    );
+    await Promise.all(updates);
   }
 };

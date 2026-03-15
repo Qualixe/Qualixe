@@ -9,6 +9,7 @@ export interface Portfolio {
   image_url?: string;
   project_url?: string;
   status?: string;
+  sort_order?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -19,7 +20,7 @@ export const portfolioAPI = {
     const { data, error } = await supabase
       .from('portfolio')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('sort_order', { ascending: true, nullsFirst: false });
     
     if (error) throw error;
     return data;
@@ -71,5 +72,12 @@ export const portfolioAPI = {
     
     if (error) throw error;
     return true;
+  },
+
+  async updateOrder(items: { id: string; sort_order: number }[]) {
+    const updates = items.map(({ id, sort_order }) =>
+      supabase.from('portfolio').update({ sort_order }).eq('id', id)
+    );
+    await Promise.all(updates);
   }
 };

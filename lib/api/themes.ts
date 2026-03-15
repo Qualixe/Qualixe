@@ -13,6 +13,7 @@ export interface Theme {
   demo_url?: string;
   version?: string;
   store_url?: string;
+  sort_order?: number;
   status?: string;
   created_at?: string;
   updated_at?: string;
@@ -23,8 +24,7 @@ export const themesAPI = {
     const { data, error } = await supabase
       .from('themes')
       .select('*')
-      .order('created_at', { ascending: false });
-    
+      .order('sort_order', { ascending: true, nullsFirst: false });
     if (error) throw error;
     return data;
   },
@@ -64,12 +64,15 @@ export const themesAPI = {
   },
 
   async delete(id: string) {
-    const { error } = await supabase
-      .from('themes')
-      .delete()
-      .eq('id', id);
-    
+    const { error } = await supabase.from('themes').delete().eq('id', id);
     if (error) throw error;
     return true;
+  },
+
+  async updateOrder(items: { id: string; sort_order: number }[]) {
+    const updates = items.map(({ id, sort_order }) =>
+      supabase.from('themes').update({ sort_order }).eq('id', id)
+    );
+    await Promise.all(updates);
   }
 };
