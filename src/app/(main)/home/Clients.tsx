@@ -60,11 +60,11 @@ function ClientsGrid() {
         {/* ----------  GRID  ---------- */}
         <div className="clients-grid">
           {clients.map((c) => (
-            <div key={c.id} className="client-item">
+            <div key={c.id} className="client-item" style={{ backgroundColor: c.background_color || '#f0f9ff' }}>
               <Link href={c.website_url || '#'} target="_blank" rel="noopener noreferrer">
                 <div 
                   className="client-logo-bg"
-                  style={{ backgroundColor: c.background_color || '#f0f9ff' }}
+                  
                 >
                   <Image src={c.logo_url} className="client-img" alt={c.name} />
                 </div>
