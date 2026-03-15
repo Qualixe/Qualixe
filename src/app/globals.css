@@ -51,7 +51,7 @@ img {
 }
 
 .button {
-  background-color:var(--btn-bg);
+  background-color: var(--btn-bg);
   color: var(--btn-color);
   text-decoration: none;
   padding: 12px 25px;
@@ -65,14 +65,9 @@ img {
   color: var(--btn-color);
 }
 
-
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .sub-heading {
@@ -91,8 +86,7 @@ img {
   text-transform: capitalize;
 }
 
-
-@media only screen and (max-width:767px) {
+@media only screen and (max-width: 767px) {
   .container {
     max-width: 100%;
   }
@@ -100,9 +94,8 @@ img {
     flex-direction: column-reverse;
   }
   .heading {
-      font-size: 28px;
-      line-height: 36px;
-      margin-bottom: 15px;
+    font-size: 28px;
+    line-height: 36px;
+    margin-bottom: 15px;
   }
-
 }

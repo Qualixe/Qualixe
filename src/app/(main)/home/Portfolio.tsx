@@ -1,14 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Image from 'next/image';
-import { FaEye } from 'react-icons/fa';
 import Link from 'next/link';
-import './portfolio.css';
+import { FaEye } from 'react-icons/fa';
 import SkeletonCard from './Skeleton';
 import { portfolioAPI } from '../../../../lib/api/portfolio';
+import './portfolio.css';
 
 const limit = 3;
 
@@ -44,41 +41,48 @@ const Portfolio: React.FC = () => {
   const displayedPortfolios = randomView(portfolios).slice(0, limit);
 
   return (
-    <div className='portfolio-section'>
-      <Container>
-        <Row>
-          <Col>
-            <h2 className='portfolio-heading heading text-center'>Latest Creative Work</h2>
-          </Col>
-        </Row>
+    <section className="portfolio-section">
+      <div className="container">
+        <h2 className="heading portfolio-heading text-center">Latest Creative Work</h2>
 
-        <Row>
+        <div className="portfolio-grid">
           {loading
-            ? Array.from({ length: limit }).map((_, index) => (
-                <Col key={index} lg={4} md={4} sm={12} className='portfolio-item pb-4'>
+            ? Array.from({ length: limit }).map((_, i) => (
+                <div key={i}>
                   <SkeletonCard />
-                </Col>
+                </div>
               ))
             : displayedPortfolios.map((item) => (
-                <Col key={item.id} lg={4} md={4} sm={12} className='portfolio-item pb-4'>
-                  <a href={item.project_url} target='_blank' rel="noopener noreferrer" className='portfolio-item-link'>
-                    <Image src={item.image_url} alt={item.title}  className='portfolio-img' width={400} height={500}/>
-                    <span className='portfolio-btn'>
+                <div key={item.id} className="portfolio-item">
+                  <a
+                    href={item.project_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="portfolio-item-link"
+                  >
+                    <Image
+                      src={item.image_url}
+                      alt={item.title}
+                      fill
+                      className="portfolio-img"
+                    />
+                    <span className="portfolio-btn">
                       <FaEye />
                       <span>View Live</span>
                     </span>
-                    <span className='portfolio-item-overly'></span>
+                    <span className="portfolio-item-overly" />
                   </a>
-                </Col>
+                </div>
               ))}
-          <Col className='text-center portfolio-button mt-5'>
-            <Link href="/portfolio" className='button portfolios-btn'>
-              View All
-            </Link>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+        </div>
+
+        <div className="text-center portfolio-button">
+          <Link href="/portfolio" className="button portfolios-btn">
+            View All
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 };
 
