@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import PageBanner from "@/components/PageBanner";
 import './portfolio.css';
+import '../home/portfolio.css';
 import { FaEye } from "react-icons/fa";
 import { Col, Container, Row } from "react-bootstrap";
 import Image from "next/image";
@@ -52,7 +53,7 @@ function Page() {
                 : portfolios.map((item) => (
                     <Col key={item.id} lg={4} md={4} sm={12} className='portfolio-item pb-4'>
                       <a href={item.project_url} target='_blank' rel="noopener noreferrer" className='portfolio-item-link'>
-                        <Image src={item.image_url} alt={item.title} className='portfolio-img' width={400} height={500}/>
+                        <Image src={item.image_url} alt={item.title} fill className='portfolio-img'/>
                         <span className='portfolio-btn'>
                           <FaEye />
                           <span>View Live</span>
