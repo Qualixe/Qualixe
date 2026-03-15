@@ -14,6 +14,8 @@ interface ImageUploadFieldProps {
   backgroundColor?: string;
 }
 
+type InputMode = 'upload' | 'url';
+
 export default function ImageUploadField({
   label,
   currentImageUrl,
@@ -24,6 +26,8 @@ export default function ImageUploadField({
 }: ImageUploadFieldProps) {
   const [uploading, setUploading] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [mode, setMode] = useState<InputMode>('upload');
+  const [urlInput, setUrlInput] = useState('');
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,6 +55,18 @@ export default function ImageUploadField({
     }
   };
 
+  const handleUrlApply = () => {
+    const trimmed = urlInput.trim();
+    if (!trimmed) return;
+    if (!/^https?:\/\/.+/.test(trimmed)) {
+      toast.error('Please enter a valid URL starting with http:// or https://');
+      return;
+    }
+    onImageChange(trimmed);
+    setUrlInput('');
+    toast.success('Image URL applied');
+  };
+
   const handleLibrarySelect = (url: string) => {
     onImageChange(url);
     toast.success('Image selected from library');
@@ -62,34 +78,69 @@ export default function ImageUploadField({
         {label} {required && <span className="text-danger">*</span>}
       </label>
 
-      <div className="d-flex gap-2 mb-2">
-        <div className="flex-grow-1">
-          <input
-            type="file"
-            className="form-control"
-            accept="image/*"
-            onChange={handleFileUpload}
-            disabled={uploading}
-          />
-        </div>
+      {/* Mode tabs */}
+      <div className="d-flex gap-1 mb-2">
         <button
           type="button"
-          className="btn btn-outline-primary"
-          onClick={() => setShowLibrary(true)}
-          disabled={uploading}
-          title="Choose from library"
+          className={`btn btn-sm ${mode === 'upload' ? 'btn-primary' : 'btn-outline-secondary'}`}
+          onClick={() => setMode('upload')}
         >
-          <i className="bi bi-images"></i>
+          <i className="bi bi-upload me-1"></i>Upload
+        </button>
+        <button
+          type="button"
+          className={`btn btn-sm ${mode === 'url' ? 'btn-primary' : 'btn-outline-secondary'}`}
+          onClick={() => setMode('url')}
+        >
+          <i className="bi bi-link-45deg me-1"></i>URL
         </button>
       </div>
+
+      {mode === 'upload' ? (
+        <div className="d-flex gap-2 mb-2">
+          <div className="flex-grow-1">
+            <input
+              type="file"
+              className="form-control"
+              accept="image/*"
+              onChange={handleFileUpload}
+              disabled={uploading}
+            />
+          </div>
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            onClick={() => setShowLibrary(true)}
+            disabled={uploading}
+            title="Choose from library"
+          >
+            <i className="bi bi-images"></i>
+          </button>
+        </div>
+      ) : (
+        <div className="d-flex gap-2 mb-2">
+          <input
+            type="url"
+            className="form-control"
+            placeholder="https://example.com/image.jpg"
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleUrlApply())}
+          />
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            onClick={handleUrlApply}
+          >
+            Apply
+          </button>
+        </div>
+      )}
 
       {uploading && (
         <div className="mb-2">
           <div className="progress" style={{ height: '4px' }}>
-            <div
-              className="progress-bar progress-bar-striped progress-bar-animated"
-              style={{ width: '100%' }}
-            ></div>
+            <div className="progress-bar progress-bar-striped progress-bar-animated" style={{ width: '100%' }}></div>
           </div>
           <small className="text-muted">Uploading...</small>
         </div>
@@ -115,11 +166,7 @@ export default function ImageUploadField({
               <img
                 src={currentImageUrl}
                 alt="Preview"
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
-                }}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
               />
             </div>
             <button
@@ -135,7 +182,7 @@ export default function ImageUploadField({
       )}
 
       <small className="text-muted d-block mt-1">
-        Upload a new image or choose from existing library
+        Upload a file, paste a URL, or choose from existing library
       </small>
 
       {showLibrary && (

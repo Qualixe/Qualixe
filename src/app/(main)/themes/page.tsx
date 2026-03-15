@@ -123,7 +123,7 @@ const ThemesPage = () => {
                         <span className="price-label">Starting at</span>
                         <span className="price-value">${theme.price}</span>
                       </div>
-                      <button className="theme-buy-btn">
+                      <button className="theme-buy-btn" onClick={() => openModal(theme)}>
                         View Details <i className="bi bi-arrow-right"></i>
                       </button>
                     </div>
@@ -166,10 +166,20 @@ const ThemesPage = () => {
               <img src={selectedTheme.image_url} alt={selectedTheme.name} className="modal-image" />
             </div>
             <div className="modal-footer">
-              <button className="modal-btn modal-btn-primary" onClick={() => window.open(selectedTheme.demo_url, '_blank')}>
+              <button 
+                className="modal-btn modal-btn-primary" 
+                onClick={() => selectedTheme.demo_url ? window.open(selectedTheme.demo_url, '_blank') : null}
+                disabled={!selectedTheme.demo_url}
+                style={{ opacity: selectedTheme.demo_url ? 1 : 0.5, cursor: selectedTheme.demo_url ? 'pointer' : 'not-allowed' }}
+              >
                 View Full Demo <i className="bi bi-arrow-right"></i>
               </button>
-              <button className="modal-btn modal-btn-secondary" onClick={() => alert(`Purchase $${selectedTheme.price}`)}>
+              <button 
+                className="modal-btn modal-btn-secondary" 
+                onClick={() => selectedTheme.store_url ? window.open(selectedTheme.store_url, '_blank') : null}
+                disabled={!selectedTheme.store_url}
+                style={{ opacity: selectedTheme.store_url ? 1 : 0.5, cursor: selectedTheme.store_url ? 'pointer' : 'not-allowed' }}
+              >
                 Purchase ${selectedTheme.price}
               </button>
             </div>

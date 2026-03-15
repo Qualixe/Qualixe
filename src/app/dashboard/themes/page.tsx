@@ -23,6 +23,7 @@ export default function ThemesPage() {
     reviews_count: 0,
     features: [],
     demo_url: '',
+    store_url: '',
     version: '',
     status: 'active',
   });
@@ -105,6 +106,7 @@ export default function ThemesPage() {
       reviews_count: 0,
       features: [],
       demo_url: '',
+      store_url: '',
       version: '',
       status: 'active',
     });
@@ -332,6 +334,17 @@ export default function ThemesPage() {
                         value={formData.demo_url || ''}
                         onChange={handleChange}
                         placeholder="https://demo.example.com"
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Purchase URL</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="store_url"
+                        value={formData.store_url || ''}
+                        onChange={handleChange}
+                        placeholder="https://store.example.com/theme"
                       />
                     </div>
 

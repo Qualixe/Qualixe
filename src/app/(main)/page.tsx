@@ -13,8 +13,6 @@ function page() {
       <Services />
       <Portfolio />
       <ClientsGrid />
-      
-      
     </div>
   )
 }
