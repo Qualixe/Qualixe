@@ -35,10 +35,7 @@ const Portfolio: React.FC = () => {
     }
   };
 
-  const randomView = (arr: PortfolioItem[]): PortfolioItem[] =>
-    [...arr].sort(() => Math.random() - 0.5);
-
-  const displayedPortfolios = randomView(portfolios).slice(0, limit);
+  const displayedPortfolios = portfolios.slice(0, limit);
 
   return (
     <section className="portfolio-section">
