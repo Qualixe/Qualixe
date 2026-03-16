@@ -5,10 +5,16 @@ export interface Contact {
   full_name: string;
   email: string;
   phone?: string;
+  address?: string;
   country: string;
-  state: string;
-  zip_code: string;
+  state?: string;
+  zip_code?: string;
   company_name?: string;
+  business_name?: string;
+  business_type?: string;
+  theme?: string;
+  budget?: string;
+  meeting_time?: string;
   note?: string;
   created_at?: string;
 }

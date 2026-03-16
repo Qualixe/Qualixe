@@ -6,3 +6,8 @@ ALTER TABLE contacts
   ADD COLUMN IF NOT EXISTS theme VARCHAR(255),
   ADD COLUMN IF NOT EXISTS budget VARCHAR(100),
   ADD COLUMN IF NOT EXISTS meeting_time VARCHAR(100);
+
+-- Drop old NOT NULL constraints no longer needed
+ALTER TABLE contacts
+  ALTER COLUMN state DROP NOT NULL,
+  ALTER COLUMN zip_code DROP NOT NULL;
