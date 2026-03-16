@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { z } from "zod";
 import { supabase } from "../../lib/supabaseClient";
 import { countries } from "../../lib/countries";
+import { themesAPI, Theme } from "../../lib/api/themes";
 import "./ContactForm.css";
 
 const ContactFormSchema = z.object({
@@ -27,7 +28,7 @@ type ContactFormData = z.infer<typeof ContactFormSchema>;
 type FormErrors = { [key in keyof ContactFormData]?: string };
 
 const BUSINESS_TYPES = [
-  "E-commerce", "Fashion & Apparel", "Food & Beverage", "Health & Wellness",
+  "Clothing", "Fashion & Apparel", "Food & Beverage", "Health & Wellness",
   "Beauty & Cosmetics", "Home & Living", "Electronics", "Sports & Outdoors",
   "Jewelry & Accessories", "Books & Education", "Other",
 ];
@@ -37,10 +38,6 @@ const BUDGETS = [
   "$2,500 – $5,000", "$5,000 – $10,000", "$10,000+",
 ];
 
-const MEETING_TIMES = [
-  "Morning (9am – 12pm)", "Afternoon (12pm – 3pm)",
-  "Late Afternoon (3pm – 6pm)", "Evening (6pm – 9pm)",
-];
 
 export default function ContactForm() {
   const [form, setForm] = useState<ContactFormData>({
@@ -50,6 +47,11 @@ export default function ContactForm() {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [themes, setThemes] = useState<Theme[]>([]);
+
+  useEffect(() => {
+    themesAPI.getAll().then(setThemes).catch(() => {});
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -137,18 +139,21 @@ export default function ContactForm() {
         <p className="form-section-label">Business Info</p>
         <div className="row">
           <div className="col-md-6 mb-3">
-            <input type="text" name="business_name" placeholder="Business Name" className="form-control" value={form.business_name} onChange={handleChange} />
+            <input type="text" name="business_name" placeholder="Your Business Name" className="form-control" value={form.business_name} onChange={handleChange} />
           </div>
           <div className="col-md-6 mb-3">
             <select name="business_type" className="form-control" value={form.business_type} onChange={handleChange}>
-              <option value="">Business Type</option>
+              <option value=""> Select Business Type</option>
               {BUSINESS_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
         </div>
         <div className="row">
           <div className="col-md-6 mb-3">
-            <input type="text" name="theme" placeholder="Theme (e.g. EcoFusion, UrbanGear)" className="form-control" value={form.theme} onChange={handleChange} />
+            <select name="theme" className="form-control" value={form.theme} onChange={handleChange}>
+              <option value="">Select Theme</option>
+              {themes.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
+            </select>
           </div>
           <div className="col-md-6 mb-3">
             <select name="budget" className="form-control" value={form.budget} onChange={handleChange}>
@@ -159,10 +164,15 @@ export default function ContactForm() {
         </div>
         <div className="row">
           <div className="col-md-12 mb-3">
-            <select name="meeting_time" className="form-control" value={form.meeting_time} onChange={handleChange}>
-              <option value="">Preferred Meeting Time</option>
-              {MEETING_TIMES.map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
+            <label className="form-label text-secondary small">Preferred Meeting Time</label>
+            <input
+              type="datetime-local"
+              name="meeting_time"
+              className="form-control"
+              value={form.meeting_time}
+              onChange={handleChange}
+              min={new Date().toISOString().slice(0, 16)}
+            />
           </div>
         </div>
 
