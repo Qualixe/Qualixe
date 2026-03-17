@@ -26,6 +26,20 @@ export const portfolioAPI = {
     return data;
   },
 
+  // Get paginated portfolio items
+  async getPaginated(page: number, limit: number = 9) {
+    const from = page * limit;
+    const to = from + limit - 1;
+    const { data, error, count } = await supabase
+      .from('portfolio')
+      .select('*', { count: 'exact' })
+      .order('sort_order', { ascending: true, nullsFirst: false })
+      .range(from, to);
+
+    if (error) throw error;
+    return { data: data || [], count: count || 0 };
+  },
+
   // Get single portfolio item
   async getById(id: string) {
     const { data, error } = await supabase
