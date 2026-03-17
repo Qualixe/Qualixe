@@ -94,17 +94,10 @@
   margin-bottom: 40px;
 }
 
-.post-body h2 {
-  font-size: 2rem;
-  margin: 40px 0 20px;
-  color: #0c3cc3;
-}
-
-.post-body h3 {
-  font-size: 1.5rem;
-  margin: 30px 0 15px;
-  color: #333;
-}
+.post-body h1 { font-size: 2rem; font-weight: 700; margin: 32px 0 16px; color: #111; }
+.post-body h2 { font-size: 1.8rem; margin: 40px 0 20px; color: #0c3cc3; }
+.post-body h3 { font-size: 1.4rem; margin: 30px 0 15px; color: #333; }
+.post-body h4 { font-size: 1.15rem; font-weight: 600; margin: 24px 0 12px; }
 
 .post-body p {
   margin-bottom: 20px;
@@ -144,12 +137,27 @@
 }
 
 .post-body pre {
-  background: #f5f5f5;
+  background: #1e1e1e;
+  color: #d4d4d4;
   padding: 20px;
   border-radius: 8px;
   overflow-x: auto;
   margin: 20px 0;
 }
+
+.post-body pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+.post-body a { color: #0c3cc3; text-decoration: underline; }
+.post-body hr { border: none; border-top: 2px solid #e0e0e0; margin: 30px 0; }
+.post-body mark { background: #ffe066; padding: 1px 3px; border-radius: 3px; }
+.post-body strong { font-weight: 700; }
+.post-body em { font-style: italic; }
+.post-body u { text-decoration: underline; }
+.post-body s { text-decoration: line-through; }
 
 /* Tags */
 .post-tags {

@@ -8,6 +8,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ImageUploadField from '@/components/ImageUploadField';
 import { authAPI } from '../../../../lib/auth';
+import RichTextEditor from '@/components/RichTextEditor';
 
 export default function BlogManagementPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -307,14 +308,11 @@ export default function BlogManagementPage() {
 
                     <div className="mb-3">
                       <label className="form-label">Content *</label>
-                      <textarea
-                        className="form-control"
-                        rows={8}
+                      <RichTextEditor
                         value={formData.content}
-                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                        required
-                      ></textarea>
-                      <small className="text-muted">You can use HTML tags for formatting</small>
+                        onChange={(html) => setFormData({ ...formData, content: html })}
+                        placeholder="Write your article content here..."
+                      />
                     </div>
 
                     <ImageUploadField
