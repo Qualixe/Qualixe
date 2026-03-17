@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PageBanner from '@/components/PageBanner';
 import './themes.css';
 import { themesAPI, Theme } from '../../../../lib/api/themes';
+import ContactForm from '@/components/ContactForm';
 
 const ThemesPage = () => {
   const [selectedTheme, setSelectedTheme] = useState<any>(null);
@@ -11,6 +12,7 @@ const ThemesPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [categories, setCategories] = useState<string[]>(['All']);
+  const [contactTheme, setContactTheme] = useState<string | null>(null);
 
   useEffect(() => {
     fetchThemes();
@@ -44,6 +46,17 @@ const ThemesPage = () => {
 
   const closeModal = () => {
     setSelectedTheme(null);
+    document.body.style.overflow = 'auto';
+  };
+
+  const openContact = (themeName: string) => {
+    setSelectedTheme(null);
+    setContactTheme(themeName);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeContact = () => {
+    setContactTheme(null);
     document.body.style.overflow = 'auto';
   };
 
@@ -176,12 +189,26 @@ const ThemesPage = () => {
               </button>
               <button 
                 className="modal-btn modal-btn-secondary" 
-                onClick={() => selectedTheme.store_url ? window.open(selectedTheme.store_url, '_blank') : null}
-                disabled={!selectedTheme.store_url}
-                style={{ opacity: selectedTheme.store_url ? 1 : 0.5, cursor: selectedTheme.store_url ? 'pointer' : 'not-allowed' }}
+                onClick={() => openContact(selectedTheme.name)}
               >
-                Purchase ${selectedTheme.price}
+                Contact to Purchase
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {contactTheme && (
+        <div className="theme-modal" onClick={closeContact}>
+          <div className="theme-modal-content theme-modal-contact" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={closeContact}>
+              <i className="bi bi-x-lg"></i>
+            </button>
+            <div className="modal-header">
+              <h2>Contact to Purchase</h2>
+              <span className="modal-category">{contactTheme}</span>
+            </div>
+            <div className="modal-contact-body">
+              <ContactForm defaultTheme={contactTheme} />
             </div>
           </div>
         </div>

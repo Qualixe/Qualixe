@@ -39,12 +39,22 @@ const BUDGETS = [
 ];
 
 
-export default function ContactForm() {
+interface ContactFormProps {
+  defaultTheme?: string;
+}
+
+export default function ContactForm({ defaultTheme }: ContactFormProps = {}) {
   const [form, setForm] = useState<ContactFormData>({
     full_name: "", email: "", phone: "", address: "", country: "",
-    business_name: "", business_type: "", theme: "", budget: "",
+    business_name: "", business_type: "", theme: defaultTheme || "", budget: "",
     meeting_time: "", note: "",
   });
+
+  useEffect(() => {
+    if (defaultTheme) {
+      setForm(prev => ({ ...prev, theme: defaultTheme }));
+    }
+  }, [defaultTheme]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [themes, setThemes] = useState<Theme[]>([]);

@@ -672,3 +672,19 @@
     right: 15px;
   }
 }
+
+/* Contact modal variant */
+.theme-modal-contact {
+  max-width: 700px;
+  width: 95%;
+}
+
+.modal-contact-body {
+  padding: 0 32px 32px;
+  overflow-y: auto;
+  max-height: calc(90vh - 120px);
+}
+
+.modal-contact-body .contact-form-container {
+  padding: 0;
+}
