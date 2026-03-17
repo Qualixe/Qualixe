@@ -118,9 +118,18 @@ export const blogAPI = {
 
   // Increment views
   async incrementViews(id: string) {
-    const { data, error } = await supabase.rpc('increment_post_views', { post_id: id });
-    if (error) console.error('Error incrementing views:', error);
-    return data;
+    const { data: post } = await supabase
+      .from('blog_posts')
+      .select('views')
+      .eq('id', id)
+      .single();
+
+    if (post == null) return;
+
+    await supabase
+      .from('blog_posts')
+      .update({ views: (post.views || 0) + 1 })
+      .eq('id', id);
   },
 
   // Get posts by category

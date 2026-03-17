@@ -47,8 +47,9 @@ export default function BlogPostPage() {
       const hasLiked = await blogLikesAPI.hasLiked(postData.id, userIp);
       setLiked(hasLiked);
 
-      // Increment views (don't await)
-      blogAPI.incrementViews(postData.id);
+      // Increment views and update displayed count
+      await blogAPI.incrementViews(postData.id);
+      setPost(prev => prev ? { ...prev, views: (prev.views || 0) + 1 } : prev);
     } catch (error) {
       console.error('Error loading post:', error);
       toast.error('Failed to load blog post');
