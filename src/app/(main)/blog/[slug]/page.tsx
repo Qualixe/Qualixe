@@ -265,11 +265,11 @@ export default function BlogPostPage() {
                 </div>
               </div>
 
-              {/* Comments Section */}
-              <div className="comments-section">
+              
+              {/* <div className="comments-section">
                 <h3>Comments ({comments.length})</h3>
 
-                {/* Comment Form */}
+              \
                 <form className="comment-form" onSubmit={handleCommentSubmit}>
                   <h4>Leave a Comment</h4>
                   <div className="form-row">
@@ -307,7 +307,7 @@ export default function BlogPostPage() {
                   <p className="form-note">Your comment will be reviewed before being published.</p>
                 </form>
 
-                {/* Comments List */}
+              
                 <div className="comments-list">
                   {comments.length === 0 ? (
                     <p className="no-comments">No comments yet. Be the first to comment!</p>
@@ -328,7 +328,7 @@ export default function BlogPostPage() {
                     ))
                   )}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
