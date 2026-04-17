@@ -193,8 +193,8 @@ export default function BlogPostPage() {
                 <span>{formatDate(post.published_at || post.created_at)}</span>
               </div>
               <div className="post-stats">
-                <span><i className="bi bi-eye"></i> {post.views} views</span>
-                <span><i className="bi bi-chat"></i> {comments.length} comments</span>
+                <span><i className="bi bi-eye"></i> {post.views}</span>
+                {/* <span><i className="bi bi-chat"></i> {comments.length} comments</span> */}
               </div>
             </div>
           </div>
