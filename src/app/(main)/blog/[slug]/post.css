@@ -13,6 +13,9 @@
   font-size: 0.9rem;
   opacity: 0.9;
 }
+.post-title h1 {
+    font-size: 35px;
+}
 
 .breadcrumb a {
   color: white;
@@ -97,10 +100,10 @@
   margin-bottom: 40px;
 }
 
-.post-body h1 { font-size: 2rem; font-weight: 700; margin: 32px 0 16px; color: #111; }
-.post-body h2 { font-size: 1.8rem; margin: 40px 0 20px; color: #0c3cc3; }
-.post-body h3 { font-size: 1.4rem; margin: 30px 0 15px; color: #0c3cc3; }
-.post-body h4 { font-size: 1.15rem; font-weight: 600; margin: 24px 0 12px; }
+.post-body h1 { font-size: 2rem; font-weight: 700;  color: #111; }
+.post-body h2 { font-size: 1.8rem; color: #0c3cc3; }
+.post-body h3 { font-size: 1.4rem;  color: #0c3cc3; }
+.post-body h4 { font-size: 1.15rem; font-weight: 600;  }
 
 .post-body p {
   margin-bottom: 20px;
@@ -513,4 +516,15 @@
   .comment-avatar i {
     font-size: 2rem;
   }
+  .post-featured-image {
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 00px;
+  max-height: 500px;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+.post-content {
+  padding: 40px 0;
+}
 }

@@ -167,7 +167,7 @@ export default function BlogPostPage() {
 
       {/* Article Header */}
       <article className="blog-post">
-        <div className="post-header">
+      {/*  <div className="post-header">
           <div className="container">
             <div className="breadcrumb">
               <Link href="/">Home</Link>
@@ -194,11 +194,12 @@ export default function BlogPostPage() {
               </div>
               <div className="post-stats">
                 <span><i className="bi bi-eye"></i> {post.views}</span>
-                {/* <span><i className="bi bi-chat"></i> {comments.length} comments</span> */}
+                
               </div>
             </div>
           </div>
         </div>
+      */}
 
         {/* Featured Image */}
         {post.featured_image && (
@@ -206,6 +207,26 @@ export default function BlogPostPage() {
             <img src={post.featured_image} alt={post.title} />
           </div>
         )}
+         <div className='post-title'>
+          <div className='content-wrapper'>
+            <h1>{post.title}</h1>
+
+            <div className="post-meta">
+              <div className="author-info">
+                <i className="bi bi-person-circle"></i>
+                <span>{post.author_name || 'Qualixe Team'}</span>
+              </div>
+              <div className="post-date">
+                <i className="bi bi-calendar"></i>
+                <span>{formatDate(post.published_at || post.created_at)}</span>
+              </div>
+              <div className="post-stats">
+                <span><i className="bi bi-eye"></i> {post.views}</span>
+                {/* <span><i className="bi bi-chat"></i> {comments.length} comments</span> */}
+              </div>
+            </div>
+            </div>
+            </div>
 
         {/* Post Content */}
         <div className="post-content">
