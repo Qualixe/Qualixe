@@ -16,12 +16,12 @@ const services =[
     {
         "heading" : "Digital Marketing",
         "icon" : "digital", 
-        "content" : "Crafting visually stunning and user-friendly interfaces is our forte. Our UI/UX design services are geared towards creating digital experiences that resonate with your audience. Whether it's a website, app, or software, our design experts employ the latest trends and technologies to ensure your brand stands out in the crowded digital "
+        "content" : "In the vast and ever-evolving digital ecosystem, our digital marketing strategies are tailored to amplify your brand's reach and impact. From search engine optimization (SEO) to social media marketing and beyond, we develop and execute campaigns that drive engagement, generate leads, and ultimately boost your bottom line."
     },
     {
         "heading" : "UI/UX Design",
         "icon" : "code",
-        "content" : "In the vast and ever-evolving digital ecosystem, our digital marketing strategies are tailored to amplify your brand's reach and impact. From search engine optimization (SEO) to social media marketing and beyond, we develop and execute campaigns that drive engagement, generate leads, and ultimately boost your bottom line."
+        "content" : "Crafting visually stunning and user-friendly interfaces is our forte. Our UI/UX design services are geared towards creating digital experiences that resonate with your audience. Whether it's a website, app, or software, our design experts employ the latest trends and technologies to ensure your brand stands out in the crowded digital"
     }
 ]
 
