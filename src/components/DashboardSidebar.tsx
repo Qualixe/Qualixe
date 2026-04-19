@@ -111,6 +111,16 @@ export default function DashboardSidebar() {
           </Link>
         </div>
         <div className="nav-item">
+          <Link href="/dashboard/products" className={`nav-link ${isActive('/dashboard/products') ? 'active' : ''}`}>
+            <i className="bi bi-box-seam"></i> <span>Products</span>
+          </Link>
+        </div>
+        <div className="nav-item">
+          <Link href="/dashboard/orders" className={`nav-link ${isActive('/dashboard/orders') ? 'active' : ''}`}>
+            <i className="bi bi-receipt"></i> <span>Orders</span>
+          </Link>
+        </div>
+        <div className="nav-item">
           <Link href="/dashboard/media" className={`nav-link ${isActive('/dashboard/media') ? 'active' : ''}`}>
             <i className="bi bi-images"></i> <span>Media</span>
           </Link>

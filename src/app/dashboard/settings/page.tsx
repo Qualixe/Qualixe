@@ -8,6 +8,8 @@ import { authAPI } from '../../../../lib/auth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const DRAWER_KEY = 'cart_drawer_enabled';
+
 export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -25,9 +27,15 @@ export default function SettingsPage() {
   
   // Account info
   const [memberSince, setMemberSince] = useState('');
+  const [drawerEnabled, setDrawerEnabledState] = useState(true);
 
   useEffect(() => {
     loadUserData();
+    // Read drawer preference from localStorage
+    try {
+      const pref = localStorage.getItem(DRAWER_KEY);
+      setDrawerEnabledState(pref === null ? true : pref === 'true');
+    } catch {}
   }, []);
 
   const loadUserData = async () => {
@@ -97,6 +105,12 @@ export default function SettingsPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const toggleDrawer = (val: boolean) => {
+    setDrawerEnabledState(val);
+    try { localStorage.setItem(DRAWER_KEY, String(val)); } catch {}
+    toast.success(`Cart drawer ${val ? 'enabled' : 'disabled'}`);
   };
 
   const handleSignOut = async () => {
@@ -250,6 +264,38 @@ export default function SettingsPage() {
                 <p className="fw-semibold small text-break" style={{ fontSize: '0.75rem' }}>
                   {user?.id?.slice(0, 8)}...
                 </p>
+              </div>
+            </div>
+
+            {/* Cart Drawer */}
+            <div className="card p-4 mb-4">
+              <h5 className="mb-1">Cart Drawer</h5>
+              <p className="text-muted small mb-3">
+                When enabled, adding a product opens a slide-in drawer. When disabled, the cart icon links to the <strong>/cart</strong> page instead.
+              </p>
+              <div className="d-flex align-items-center justify-content-between p-3 rounded-3" style={{ background: '#f8f9fc', border: '1px solid #e8edf5' }}>
+                <div className="d-flex align-items-center gap-2">
+                  <i className={`bi ${drawerEnabled ? 'bi-layout-sidebar-reverse text-primary' : 'bi-cart3 text-secondary'} fs-5`}></i>
+                  <div>
+                    <div className="fw-semibold" style={{ fontSize: 14 }}>
+                      {drawerEnabled ? 'Drawer is enabled' : 'Drawer is disabled'}
+                    </div>
+                    <div className="text-muted" style={{ fontSize: 12 }}>
+                      {drawerEnabled ? 'Slide-in cart drawer active' : 'Cart page mode active'}
+                    </div>
+                  </div>
+                </div>
+                <div className="form-check form-switch mb-0">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="drawerToggle"
+                    checked={drawerEnabled}
+                    onChange={(e) => toggleDrawer(e.target.checked)}
+                    style={{ width: '2.5em', height: '1.4em', cursor: 'pointer' }}
+                  />
+                </div>
               </div>
             </div>
 

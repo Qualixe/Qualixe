@@ -11,6 +11,7 @@ import Ribon from "@/components/Ribon";
 import WhatsAppChat from "@/components/WhatsAppChat";
 import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import { CartProvider } from "@/context/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,11 +50,13 @@ export default function RootLayout({
       >
         <GoogleTagManagerNoScript gtmId={gtmId} />
         <AnalyticsTracker />
-        <Header />
-        {children}
-        <WhatsAppChat />
-        <Ribon />
-        <Footer />
+        <CartProvider>
+          <Header />
+          {children}
+          <WhatsAppChat />
+          <Ribon />
+          <Footer />
+        </CartProvider>
 
       </body>
     </html>

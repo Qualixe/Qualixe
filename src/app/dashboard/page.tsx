@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import { portfolioAPI } from '../../../lib/api/portfolio';
@@ -27,6 +27,8 @@ export default function Dashboard() {
   const [realTimeUsers, setRealTimeUsers] = useState(0);
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const lineChartRef = useRef<any>(null);
+  const doughnutChartRef = useRef<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,18 +84,19 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    // Initialize charts after component mounts
+    if (loading) return;
+
+    let cancelled = false;
+
     const initCharts = async () => {
       if (!dailyTraffic.labels.length) return;
-
       const Chart = (await import('chart.js/auto')).default;
+      if (cancelled) return;
 
       const ctxLine = document.getElementById('installChart') as HTMLCanvasElement;
       if (ctxLine) {
-        const existingChart = Chart.getChart(ctxLine);
-        if (existingChart) existingChart.destroy();
-
-        new Chart(ctxLine.getContext('2d')!, {
+        lineChartRef.current?.destroy();
+        lineChartRef.current = new Chart(ctxLine.getContext('2d')!, {
           type: 'line',
           data: {
             labels: dailyTraffic.labels,
@@ -126,10 +129,8 @@ export default function Dashboard() {
 
       const ctxDoughnut = document.getElementById('stageChart') as HTMLCanvasElement;
       if (ctxDoughnut) {
-        const existingChart = Chart.getChart(ctxDoughnut);
-        if (existingChart) existingChart.destroy();
-
-        new Chart(ctxDoughnut.getContext('2d')!, {
+        doughnutChartRef.current?.destroy();
+        doughnutChartRef.current = new Chart(ctxDoughnut.getContext('2d')!, {
           type: 'doughnut',
           data: {
             labels: ['portfolio', 'brands', 'themes'],
@@ -153,9 +154,15 @@ export default function Dashboard() {
       }
     };
 
-    if (!loading) {
-      initCharts();
-    }
+    initCharts();
+
+    return () => {
+      cancelled = true;
+      lineChartRef.current?.destroy();
+      doughnutChartRef.current?.destroy();
+      lineChartRef.current = null;
+      doughnutChartRef.current = null;
+    };
   }, [loading, stats.portfolio, stats.brands, stats.themes, dailyTraffic]);
 
   if (loading) {

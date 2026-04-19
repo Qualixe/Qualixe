@@ -302,3 +302,31 @@ body {
     padding: 0.6rem 1.2rem; 
   }
 }
+
+/* ===== PRODUCTS UPLOAD ZONE ===== */
+.products-upload-zone {
+  border: 2px dashed #c8d8f0;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 200ms, background 200ms;
+  background: #f8fbff;
+  overflow: hidden;
+}
+.products-upload-zone:hover {
+  border-color: #0d4be1;
+  background: #f0f5ff;
+}
+.products-upload-zone__empty {
+  padding: 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.products-upload-zone__filled {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
