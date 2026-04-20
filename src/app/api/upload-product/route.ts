@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Use service role to bypass RLS for storage uploads
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export async function POST(req: NextRequest) {
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
@@ -22,11 +30,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'File too large (max 100MB)' }, { status: 400 });
     }
 
-    const filePath = `products/${Date.now()}-${file.name}`;
+    const timestamp = Date.now();
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const filePath = `products/${timestamp}-${safeName}`;
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const { error } = await supabaseAdmin.storage
+    // Auto-create bucket if it doesn't exist
+    const { error } = await supabase.storage
       .from('digital-products')
       .upload(filePath, buffer, {
         contentType: 'application/zip',
@@ -34,7 +46,7 @@ export async function POST(req: NextRequest) {
       });
 
     if (error) {
-      console.error('Storage upload error:', error);
+      console.error('Supabase storage error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -43,8 +55,8 @@ export async function POST(req: NextRequest) {
       fileName: file.name,
       fileSize: file.size,
     });
-  } catch (err) {
-    console.error('Upload route error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (err: any) {
+    console.error('Upload error:', err);
+    return NextResponse.json({ error: err.message || 'Upload failed' }, { status: 500 });
   }
 }
