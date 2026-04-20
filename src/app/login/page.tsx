@@ -6,12 +6,13 @@ import { authAPI } from '../../../lib/auth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com'];
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // Check if user is already logged in
@@ -20,23 +21,25 @@ export default function LoginPage() {
       try {
         const session = await authAPI.getSession();
         if (session) {
-          router.replace('/dashboard');
-        } else {
-          setChecking(false);
+          router.push('/dashboard');
         }
-      } catch {
-        setChecking(false);
+      } catch (error) {
+        // User not logged in, stay on login page
       }
     };
     checkSession();
   }, [router]);
 
-  if (checking) return null;
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (loading) return;
+    if (loading) return; // Prevent multiple submissions
+    
+    // Check if email is in admin list
+    if (!ADMIN_EMAILS.includes(email)) {
+      toast.error('Access denied. Only admin accounts can access the dashboard.');
+      return;
+    }
     
     setLoading(true);
 
