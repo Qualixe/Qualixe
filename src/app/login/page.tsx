@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '../../../lib/auth';
-import { supabase } from '../../../lib/supabaseClient';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com'];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,42 +35,18 @@ export default function LoginPage() {
     
     if (loading) return; // Prevent multiple submissions
     
+    // Check if email is in admin list
+    if (!ADMIN_EMAILS.includes(email)) {
+      toast.error('Access denied. Only admin accounts can access the dashboard.');
+      return;
+    }
+    
     setLoading(true);
 
     try {
       const data = await authAPI.signIn({ email, password });
-
+      
       if (data && data.session) {
-        // Check role from user_profiles
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('role')
-          .eq('id', data.session.user.id)
-          .single();
-
-        console.log('Profile lookup:', { profile, profileError, userId: data.session.user.id });
-
-        if (profileError) {
-          await authAPI.signOut();
-          toast.error(`Profile error: ${profileError.message}`);
-          setLoading(false);
-          return;
-        }
-
-        if (!profile) {
-          await authAPI.signOut();
-          toast.error('No profile found for this user.');
-          setLoading(false);
-          return;
-        }
-
-        if (profile.role !== 'admin') {
-          await authAPI.signOut();
-          toast.error(`Access denied. Your role is "${profile.role}", not "admin".`);
-          setLoading(false);
-          return;
-        }
-
         toast.success('Login successful!');
         
         // Wait a moment for session to be fully established
