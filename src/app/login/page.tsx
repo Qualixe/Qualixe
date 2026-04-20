@@ -47,9 +47,25 @@ export default function LoginPage() {
           .eq('id', data.session.user.id)
           .single();
 
-        if (profileError || !profile || profile.role !== 'admin') {
+        console.log('Profile lookup:', { profile, profileError, userId: data.session.user.id });
+
+        if (profileError) {
           await authAPI.signOut();
-          toast.error('Access denied. Only admin accounts can access the dashboard.');
+          toast.error(`Profile error: ${profileError.message}`);
+          setLoading(false);
+          return;
+        }
+
+        if (!profile) {
+          await authAPI.signOut();
+          toast.error('No profile found for this user.');
+          setLoading(false);
+          return;
+        }
+
+        if (profile.role !== 'admin') {
+          await authAPI.signOut();
+          toast.error(`Access denied. Your role is "${profile.role}", not "admin".`);
           setLoading(false);
           return;
         }
