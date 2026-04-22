@@ -102,15 +102,7 @@ export default function ShopPage() {
                     {/* Preview */}
                     <div className="product-card__preview">
                       {product.preview_url ? (
-                        <>
-                          <img src={product.preview_url} alt={product.name} className="product-card__preview-img" loading="lazy" />
-                          <div className="product-card__preview-overlay">
-                            <button className="product-card__preview-zoom"
-                              onClick={() => setLightbox(product.preview_url!)} aria-label="View preview">
-                              <Eye size={16} /> Preview
-                            </button>
-                          </div>
-                        </>
+                        <img src={product.preview_url} alt={product.name} className="product-card__preview-img" loading="lazy" />
                       ) : (
                         <div className="product-card__preview-inner">
                           <div className="preview-bar"><span /><span /><span /></div>
@@ -155,6 +147,12 @@ export default function ShopPage() {
                           )}
                         </div>
                         <div className="product-card__actions">
+                          {product.preview_url && (
+                            <button className="product-card__btn product-card__btn--demo"
+                              onClick={() => setLightbox(product.preview_url!)} title="Preview">
+                              <Eye size={15} />
+                            </button>
+                          )}
                           {product.demo_url && (
                             <a href={product.demo_url} target="_blank" rel="noopener noreferrer"
                               className="product-card__btn product-card__btn--demo">
@@ -163,7 +161,7 @@ export default function ShopPage() {
                           )}
                           {free ? (
                             <button className="product-card__btn product-card__btn--free"
-                              onClick={() => window.open((product as any).file_path, '_blank')}>
+                              onClick={() => window.open(product.file_path, '_blank')}>
                               <Download size={16} /> Get Free
                             </button>
                           ) : inCart ? (
