@@ -103,6 +103,7 @@
   line-height: 1.8;
   color: #333;
   margin-bottom: 40px;
+  font-family: var(--font-poppins), sans-serif;
 }
 
 .post-body h1 { font-size: 2rem; font-weight: 700;  color: #111; }

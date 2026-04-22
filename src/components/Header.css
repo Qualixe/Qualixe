@@ -60,7 +60,8 @@
     padding: 28px 0;
 }
 .mobile-nav,
-.navbar-icon {
+.navbar-icon,
+.mobile-header-wrap {
     display: none;
 }
 
@@ -69,7 +70,30 @@
 }
 @media only screen and (max-width:767px) {
     .header-wrap {
+        display: none;
+    }
+    .mobile-header-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         padding: 8px 0;
+    }
+    .mobile-header-left,
+    .mobile-header-right {
+        width: 40px;
+        display: flex;
+        align-items: center;
+    }
+    .mobile-header-right {
+        justify-content: flex-end;
+    }
+    .mobile-header-center {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+    }
+    .mobile-header-center .header__logo {
+        max-width: 130px;
     }
     .desk-nav,
     .header-btn {

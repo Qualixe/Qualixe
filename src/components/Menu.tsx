@@ -14,7 +14,14 @@ interface NavItem {
 const links: NavItem[] = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About' },
-  { href: '/services', label: 'Services'},
+  {
+    label: 'Services',
+    children: [
+      { href: '/services/shopify-development', label: 'Shopify Development', icon: 'bi-shop' },
+      { href: '/services/digital-marketing', label: 'Digital Marketing', icon: 'bi-megaphone' },
+      { href: '/services/uiux-design', label: 'UI/UX Design', icon: 'bi-vector-pen' },
+    ],
+  },
   { href: '/portfolio', label: 'Portfolio' },
   {
     label: 'Themes',

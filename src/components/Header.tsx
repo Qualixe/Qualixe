@@ -20,6 +20,7 @@ function Header() {
   return (
     <div className='header-section'>
       <div className='container'>
+        {/* Desktop layout */}
         <div className='header-wrap'>
           <HeaderLogo />
           <div className='desk-nav'>
@@ -28,6 +29,19 @@ function Header() {
           <div className='header-right'>
             <CartIcon />
             <HeaderButton shownav={showMobileNav} />
+          </div>
+        </div>
+
+        {/* Mobile layout: hamburger | logo | cart */}
+        <div className='mobile-header-wrap'>
+          <div className='mobile-header-left'>
+            <HeaderButton shownav={showMobileNav} />
+          </div>
+          <div className='mobile-header-center'>
+            <HeaderLogo />
+          </div>
+          <div className='mobile-header-right'>
+            <CartIcon />
           </div>
         </div>
       </div>
