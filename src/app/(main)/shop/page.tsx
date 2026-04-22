@@ -16,60 +16,9 @@ interface Product {
   badge_color?: string;
   preview_url?: string;
   demo_url?: string;
+  file_path?: string;
   features: string[];
   active: boolean;
-}
-
-function FreeClaimModal({ product, onClose }: { product: Product; onClose: () => void }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const router = useRouter();
-
-  async function handleClaim(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const res = await fetch('/api/claim-free', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, productId: product.id }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.token) { setError(data.error || 'Something went wrong.'); return; }
-      router.push(`/shop/success?token=${data.token}`);
-    } catch (err: any) {
-      setError(err?.message || 'Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <>
-      <div className="shop-modal-backdrop" onClick={onClose} />
-      <div className="shop-modal">
-        <button className="shop-modal__close" onClick={onClose} aria-label="Close">&#x2715;</button>
-        <div className="shop-modal__icon">&#x26A1;</div>
-        <h3 className="shop-modal__title">Get it for Free</h3>
-        <p className="shop-modal__sub">Enter your details to get instant access.</p>
-        <form onSubmit={handleClaim} className="shop-modal__form">
-          <input className="form-control mb-2" placeholder="Your full name"
-            value={name} onChange={e => setName(e.target.value)} required />
-          <input type="email" className="form-control mb-3" placeholder="you@example.com"
-            value={email} onChange={e => setEmail(e.target.value)} required />
-          {error && <div className="alert alert-danger py-2 small mb-2">{error}</div>}
-          <button type="submit" className="product-card__btn w-100 justify-content-center" disabled={loading}>
-            {loading
-              ? <><span className="spinner-border spinner-border-sm me-2" />Processing...</>
-              : <><Download size={16} /> Download Free</>}
-          </button>
-        </form>
-      </div>
-    </>
-  );
 }
 
 export default function ShopPage() {
@@ -78,7 +27,6 @@ export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<string | null>(null);
-  const [freeProduct, setFreeProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     fetch('/api/products')
@@ -98,7 +46,6 @@ export default function ShopPage() {
 
   return (
     <main className="shop-page">
-      {freeProduct && <FreeClaimModal product={freeProduct} onClose={() => setFreeProduct(null)} />}
 
       {/* Hero */}
       <section className="shop-hero">
@@ -216,7 +163,7 @@ export default function ShopPage() {
                           )}
                           {free ? (
                             <button className="product-card__btn product-card__btn--free"
-                              onClick={() => setFreeProduct(product)}>
+                              onClick={() => window.open((product as any).file_path, '_blank')}>
                               <Download size={16} /> Get Free
                             </button>
                           ) : inCart ? (
