@@ -6,9 +6,10 @@ import { blogAPI, BlogPost } from '../../../../lib/api/blog';
 import './blog.css';
 
 export default function BlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [allPosts, setAllPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   useEffect(() => {
@@ -18,7 +19,7 @@ export default function BlogPage() {
   const loadPosts = async () => {
     try {
       const data = await blogAPI.getAllPublished();
-      setPosts(data || []);
+      setAllPosts(data || []);
     } catch (error) {
       console.error('Error loading posts:', error);
     } finally {
@@ -26,33 +27,36 @@ export default function BlogPage() {
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      loadPosts();
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const data = await blogAPI.search(searchQuery);
-      setPosts(data || []);
-    } catch (error) {
-      console.error('Error searching posts:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = () => {
+    setSearchQuery(searchInput.trim());
+    setSelectedCategory('all');
   };
 
-  const filterByCategory = (category: string) => {
+  const handleCategoryFilter = (category: string) => {
     setSelectedCategory(category);
-    if (category === 'all') {
-      loadPosts();
-    } else {
-      blogAPI.getByCategory(category).then(data => setPosts(data || []));
-    }
+    setSearchQuery('');
+    setSearchInput('');
   };
 
-  const categories = ['all', ...Array.from(new Set(posts.map(p => p.category).filter((cat): cat is string => Boolean(cat))))];
+  // Derive categories from the full list — deduplicated by lowercase
+  const categories = ['all', ...Array.from(new Map(
+    allPosts
+      .map(p => p.category?.trim())
+      .filter((cat): cat is string => Boolean(cat))
+      .map(cat => [cat.toLowerCase(), cat])
+  ).values())];
+
+  // All filtering done client-side
+  const filteredPosts = allPosts.filter(post => {
+    const matchesCategory = selectedCategory === 'all' || post.category?.trim().toLowerCase() === selectedCategory.toLowerCase();
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      post.title?.toLowerCase().includes(q) ||
+      post.excerpt?.toLowerCase().includes(q) ||
+      post.category?.toLowerCase().includes(q) ||
+      post.tags?.some(t => t.toLowerCase().includes(q));
+    return matchesCategory && matchesSearch;
+  });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -79,9 +83,9 @@ export default function BlogPage() {
             <input
               type="text"
               placeholder="Search articles..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
             <button onClick={handleSearch}>
               <i className="bi bi-search"></i>
@@ -93,7 +97,7 @@ export default function BlogPage() {
               <button
                 key={cat}
                 className={selectedCategory === cat ? 'active' : ''}
-                onClick={() => filterByCategory(cat)}
+                onClick={() => handleCategoryFilter(cat)}
               >
                 {cat === 'all' ? 'All' : cat}
               </button>
@@ -110,15 +114,15 @@ export default function BlogPage() {
               <div className="spinner"></div>
               <p>Loading articles...</p>
             </div>
-          ) : posts.length === 0 ? (
+          ) : filteredPosts.length === 0 ? (
             <div className="empty-state">
               <i className="bi bi-file-earmark-text"></i>
               <h3>No articles found</h3>
-              <p>Check back soon for new content!</p>
+              <p>{searchQuery ? `No results for "${searchQuery}"` : 'Check back soon for new content!'}</p>
             </div>
           ) : (
             <div className="blog-grid">
-              {posts.map(post => (
+              {filteredPosts.map(post => (
                 <article key={post.id} className="blog-card">
                   {post.featured_image && (
                     <Link href={`/blog/${post.slug}`}>

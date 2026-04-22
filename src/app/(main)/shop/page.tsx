@@ -157,10 +157,12 @@ export default function ShopPage() {
                       {product.preview_url ? (
                         <>
                           <img src={product.preview_url} alt={product.name} className="product-card__preview-img" loading="lazy" />
-                          <button className="product-card__preview-zoom"
-                            onClick={() => setLightbox(product.preview_url!)} aria-label="View preview">
-                            <Eye size={16} /> Preview
-                          </button>
+                          <div className="product-card__preview-overlay">
+                            <button className="product-card__preview-zoom"
+                              onClick={() => setLightbox(product.preview_url!)} aria-label="View preview">
+                              <Eye size={16} /> Preview
+                            </button>
+                          </div>
                         </>
                       ) : (
                         <div className="product-card__preview-inner">
@@ -257,8 +259,31 @@ export default function ShopPage() {
       {/* Lightbox */}
       {lightbox && (
         <div className="shop-lightbox" onClick={() => setLightbox(null)}>
-          <button className="shop-lightbox__close" onClick={() => setLightbox(null)} aria-label="Close">&#x2715;</button>
-          <img src={lightbox} alt="Preview" onClick={e => e.stopPropagation()} />
+          <div className="shop-lightbox__content" onClick={e => e.stopPropagation()}>
+            <button className="shop-lightbox__close" onClick={() => setLightbox(null)} aria-label="Close">&#x2715;</button>
+            <div className="shop-lightbox__header">
+              <h3>{products.find(p => p.preview_url === lightbox)?.name ?? 'Preview'}</h3>
+              <span className="shop-lightbox__tag">HTML Template</span>
+            </div>
+            <div className="shop-lightbox__img-wrap">
+              <img src={lightbox} alt="Preview" />
+            </div>
+            <div className="shop-lightbox__footer">
+              {products.find(p => p.preview_url === lightbox)?.demo_url && (
+                <a
+                  href={products.find(p => p.preview_url === lightbox)!.demo_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shop-lightbox__btn shop-lightbox__btn--primary"
+                >
+                  <Eye size={16} /> View Live Demo
+                </a>
+              )}
+              <button className="shop-lightbox__btn shop-lightbox__btn--secondary" onClick={() => setLightbox(null)}>
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>
