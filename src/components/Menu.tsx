@@ -28,7 +28,7 @@ const links: NavItem[] = [
     children: [
       
       { href: '/themes', label: 'Shopify Themes', icon: 'bi-palette' },
-      { href: '/shop', label: 'HTML Themes', icon: 'Code' },
+      { href: '/shop', label: 'HTML Themes', icon: 'bi-code-slash' },
       
     ],
   }
