@@ -100,7 +100,8 @@ export default function ShopPage() {
                     )}
 
                     {/* Preview */}
-                    <div className="product-card__preview">
+                    <div className="product-card__preview" style={{ cursor: product.preview_url ? 'pointer' : 'default' }}
+                      onClick={() => product.preview_url && setLightbox(product.preview_url)}>
                       {product.preview_url ? (
                         <img src={product.preview_url} alt={product.name} className="product-card__preview-img" loading="lazy" />
                       ) : (
@@ -121,7 +122,18 @@ export default function ShopPage() {
                     {/* Body */}
                     <div className="product-card__body">
                       <p className="product-card__tagline">{product.tagline}</p>
-                      <h2 className="product-card__name">{product.name}</h2>
+                      <div className="d-flex align-items-center gap-2 mb-1">
+                        <h2 className="product-card__name mb-0">{product.name}</h2>
+                        {product.preview_url && (
+                          <button
+                            className="product-card__eye-btn"
+                            onClick={() => setLightbox(product.preview_url!)}
+                            title="Preview"
+                          >
+                            <Eye size={15} />
+                          </button>
+                        )}
+                      </div>
                       <p className="product-card__desc">{product.description}</p>
 
                       {product.features?.length > 0 && (
@@ -147,12 +159,6 @@ export default function ShopPage() {
                           )}
                         </div>
                         <div className="product-card__actions">
-                          {product.preview_url && (
-                            <button className="product-card__btn product-card__btn--demo"
-                              onClick={() => setLightbox(product.preview_url!)} title="Preview">
-                              <Eye size={15} />
-                            </button>
-                          )}
                           {product.demo_url && (
                             <a href={product.demo_url} target="_blank" rel="noopener noreferrer"
                               className="product-card__btn product-card__btn--demo">

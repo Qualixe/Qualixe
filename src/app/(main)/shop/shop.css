@@ -156,6 +156,28 @@
   margin: 0 0 8px;
   letter-spacing: -0.3px;
 }
+
+.product-card__eye-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #dde3f0;
+  background: #f4f7ff;
+  color: #0c3cc3;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  padding: 0;
+}
+.product-card__eye-btn:hover {
+  background: #0c3cc3;
+  border-color: #0c3cc3;
+  color: white;
+  transform: scale(1.1);
+}
 .product-card__desc {
   font-size: 14px;
   color: #666;
