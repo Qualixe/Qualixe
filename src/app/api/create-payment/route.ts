@@ -81,12 +81,27 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
+    // Read raw text first — gateway sometimes returns HTML on errors
+    const rawText = await response.text();
+    console.log('Uddokta raw response:', response.status, rawText.slice(0, 500));
+
+    // Try to parse as JSON
+    let data: any = null;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      // Gateway returned HTML (e.g. 404/500 page) — surface the status
+      console.error('Uddokta non-JSON response:', response.status, rawText.slice(0, 300));
+      return NextResponse.json(
+        { error: `Payment gateway returned HTTP ${response.status}. Check UDDOKTA_API_URL is correct. Raw: ${rawText.slice(0, 120)}` },
+        { status: 502 }
+      );
+    }
 
     if (!response.ok || !data.payment_url) {
       console.error('Uddokta Pay error:', { status: response.status, data });
       return NextResponse.json(
-        { error: `Payment gateway error: ${data?.message || data?.error || 'No payment_url returned'}` },
+        { error: `Payment gateway error: ${data?.message || data?.error || JSON.stringify(data)}` },
         { status: 502 }
       );
     }
