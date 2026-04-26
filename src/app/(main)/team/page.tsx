@@ -12,11 +12,20 @@ function SkeletonCard() {
       <div className="team-skeleton__body">
         <div className="team-skeleton__line team-skeleton__line--name" />
         <div className="team-skeleton__line team-skeleton__line--role" />
-        <div className="team-skeleton__line team-skeleton__line--bio1" />
-        <div className="team-skeleton__line team-skeleton__line--bio2" />
       </div>
     </div>
   );
+}
+
+/** Pick the best social link to show as the badge icon */
+function getBadgeLink(member: TeamMember): { href: string; icon: string; cls: string } | null {
+  if (member.linkedin_url)
+    return { href: member.linkedin_url, icon: 'bi-linkedin', cls: 'team-card__badge--linkedin' };
+  if (member.twitter_url)
+    return { href: member.twitter_url, icon: 'bi-twitter-x', cls: 'team-card__badge--twitter' };
+  if (member.email)
+    return { href: `mailto:${member.email}`, icon: 'bi-envelope', cls: 'team-card__badge--email' };
+  return null;
 }
 
 export default function TeamPage() {
@@ -33,92 +42,66 @@ export default function TeamPage() {
 
   return (
     <main className="team-page">
-      <PageBanner heading="Meet Our Team" />
+      <PageBanner heading="Our Team" />
 
       <section className="team-section">
         <div className="container">
-          <div className="text-center mb-5">
-            <p className="sub-heading" style={{ color: 'var(--theme-color)' }}>The People Behind Qualixe</p>
-            <h2 className="heading">Talented minds, one shared goal</h2>
+          <span className="team-section__label">our member</span>
+          <h2 className="team-section__title">Our Amazing Team</h2>
+
+          <div className="team-grid">
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
+            ) : members.length === 0 ? (
+              <div className="team-empty">
+                <i className="bi bi-people" />
+                <p>Team profiles coming soon.</p>
+              </div>
+            ) : (
+              members.map((member) => {
+                const badge = getBadgeLink(member);
+                return (
+                  <div key={member.id} className="team-card">
+                    {/* Portrait photo */}
+                    <div className="team-card__photo-wrap">
+                      <div className="team-card__photo-inner">
+                        {member.image_url ? (
+                          <img
+                            src={member.image_url}
+                            alt={member.name}
+                            className="team-card__photo"
+                          />
+                        ) : (
+                          <div className="team-card__photo-placeholder">
+                            <i className="bi bi-person" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Social badge overlapping bottom of photo */}
+                      {badge && (
+                        <a
+                          href={badge.href}
+                          target={badge.href.startsWith('mailto') ? undefined : '_blank'}
+                          rel="noopener noreferrer"
+                          className={`team-card__badge ${badge.cls}`}
+                          aria-label={`${member.name} social link`}
+                        >
+                          <i className={`bi ${badge.icon}`} />
+                        </a>
+                      )}
+                    </div>
+
+                    {/* Name & role */}
+                    <div className="team-card__body">
+                      <h3 className="team-card__name">{member.name}</h3>
+                      <p className="team-card__role">{member.role}</p>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
-
-          {loading ? (
-            <div className="team-grid">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          ) : members.length === 0 ? (
-            <div className="team-empty">
-              <i className="bi bi-people" />
-              <p>Our team profiles are coming soon.</p>
-            </div>
-          ) : (
-            <div className="team-grid">
-              {members.map((member) => (
-                <div key={member.id} className="team-card">
-                  {/* Photo */}
-                  <div className="team-card__photo-wrap">
-                    {member.image_url ? (
-                      <img
-                        src={member.image_url}
-                        alt={member.name}
-                        className="team-card__photo"
-                      />
-                    ) : (
-                      <div className="team-card__photo-placeholder">
-                        <i className="bi bi-person-circle" />
-                      </div>
-                    )}
-
-                    {/* Social overlay */}
-                    {(member.linkedin_url || member.twitter_url || member.email) && (
-                      <div className="team-card__overlay">
-                        {member.linkedin_url && (
-                          <a
-                            href={member.linkedin_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="team-card__social-link"
-                            aria-label={`${member.name} LinkedIn`}
-                          >
-                            <i className="bi bi-linkedin" />
-                          </a>
-                        )}
-                        {member.twitter_url && (
-                          <a
-                            href={member.twitter_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="team-card__social-link"
-                            aria-label={`${member.name} Twitter`}
-                          >
-                            <i className="bi bi-twitter-x" />
-                          </a>
-                        )}
-                        {member.email && (
-                          <a
-                            href={`mailto:${member.email}`}
-                            className="team-card__social-link"
-                            aria-label={`Email ${member.name}`}
-                          >
-                            <i className="bi bi-envelope" />
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="team-card__body">
-                    <h3 className="team-card__name">{member.name}</h3>
-                    <p className="team-card__role">{member.role}</p>
-                    {member.bio && <p className="team-card__bio">{member.bio}</p>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </section>
     </main>

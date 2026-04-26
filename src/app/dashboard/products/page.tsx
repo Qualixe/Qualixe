@@ -108,6 +108,18 @@ export default function ProductsPage() {
     setSaving(false);
   }
 
+  async function handleDuplicate(p: Product) {
+    const { id, created_at, sales_count, ...rest } = p;
+    const { error } = await supabase.from('products').insert({
+      ...rest,
+      name: `${p.name} (Copy)`,
+      active: false,   // start hidden so you can edit before publishing
+      sales_count: 0,
+    });
+    if (error) toast.error(error.message);
+    else { toast.success(`"${p.name}" duplicated — edit it before publishing`); fetchProducts(); }
+  }
+
   async function handleDelete(p: Product) {
     if (!confirm(`Delete "${p.name}"?`)) return;
     const { error } = await supabase.from('products').delete().eq('id', p.id);
@@ -267,8 +279,9 @@ export default function ProductsPage() {
                       </td>
                       <td className="text-muted small">{new Date(p.created_at).toLocaleDateString()}</td>
                       <td>
-                        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => openEdit(p)}><i className="bi bi-pencil"></i></button>
-                        <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p)}><i className="bi bi-trash"></i></button>
+                        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => openEdit(p)} title="Edit"><i className="bi bi-pencil"></i></button>
+                        <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => handleDuplicate(p)} title="Duplicate"><i className="bi bi-copy"></i></button>
+                        <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p)} title="Delete"><i className="bi bi-trash"></i></button>
                       </td>
                     </tr>
                   ))}
