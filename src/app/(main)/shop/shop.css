@@ -543,3 +543,9 @@
 .shop-modal__title { font-size: 22px; font-weight: 800; margin: 0 0 6px; color: #1a1a1a; }
 .shop-modal__sub { font-size: 14px; color: #666; margin: 0 0 20px; }
 .shop-modal__form { text-align: left; }
+button.product-card__eye-btn {
+    position: absolute;
+    right: 10px;
+    top:10px;
+    z-index: 99;
+}

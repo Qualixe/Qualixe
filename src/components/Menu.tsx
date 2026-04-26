@@ -23,6 +23,7 @@ const links: NavItem[] = [
     ],
   },
   { href: '/portfolio', label: 'Portfolio' },
+  { href: '/team', label: 'Team' },
   {
     label: 'Themes',
     children: [

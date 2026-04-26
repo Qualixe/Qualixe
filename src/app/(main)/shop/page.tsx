@@ -95,9 +95,15 @@ export default function ShopPage() {
                         {product.badge}
                       </span>
                     )}
-                    {free && (
-                      <span className="product-card__badge product-card__badge--free">FREE</span>
-                    )}
+                   {product.preview_url && (
+                          <button
+                            className="product-card__eye-btn"
+                            onClick={() => setLightbox(product.preview_url!)}
+                            title="Preview"
+                          >
+                            <Eye size={15} />
+                          </button>
+                        )}
 
                     {/* Preview */}
                     <div className="product-card__preview" style={{ cursor: product.preview_url ? 'pointer' : 'default' }}
@@ -124,15 +130,6 @@ export default function ShopPage() {
                       <p className="product-card__tagline">{product.tagline}</p>
                       <div className="d-flex align-items-center gap-2 mb-1">
                         <h2 className="product-card__name mb-0">{product.name}</h2>
-                        {product.preview_url && (
-                          <button
-                            className="product-card__eye-btn"
-                            onClick={() => setLightbox(product.preview_url!)}
-                            title="Preview"
-                          >
-                            <Eye size={15} />
-                          </button>
-                        )}
                       </div>
                       <p className="product-card__desc">{product.description}</p>
 
