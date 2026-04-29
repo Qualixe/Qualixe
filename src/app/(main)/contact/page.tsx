@@ -9,6 +9,19 @@ import Link from 'next/link';
 import { IoIosMail } from "react-icons/io";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import ContactForm from '../../../components/ContactForm';
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Contact Us – Get in Touch with Qualixe',
+  description: 'Have a project in mind? Contact Qualixe for Shopify development, digital marketing, or UI/UX design. We respond within 24 hours.',
+  alternates: { canonical: 'https://www.qualixe.com/contact' },
+  openGraph: {
+    title: 'Contact Us – Get in Touch with Qualixe',
+    description: 'Have a project in mind? Contact Qualixe — we respond within 24 hours.',
+    url: 'https://www.qualixe.com/contact',
+    images: [{ url: '/assets/img/web-logo.png', width: 1200, height: 630, alt: 'Contact Qualixe' }],
+  },
+}
 
 
 function Contact() {

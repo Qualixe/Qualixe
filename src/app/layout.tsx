@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Qualixe – Shopify Development & E-Commerce Solutions",
   description: "Qualixe builds high-converting Shopify stores, free HTML templates, and digital marketing solutions for e-commerce brands worldwide.",
   keywords: ["shopify development", "ecommerce development", "free html templates", "digital marketing", "ui ux design", "qualixe"],
-  metadataBase: new URL("https://qualixe.com"),
+  metadataBase: new URL("https://www.qualixe.com"),
   openGraph: {
     type: "website",
     siteName: "Qualixe",

@@ -30,8 +30,11 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Qualixe - IT Solutions & Services",
-  description: "Qualixe is a leading IT solutions and services provider, offering innovative technology solutions to businesses worldwide.",
+  title: {
+    template: '%s | Qualixe',
+    default: 'Qualixe – Shopify Development & E-Commerce Solutions',
+  },
+  description: 'Qualixe builds high-converting Shopify stores, free HTML templates, and digital marketing solutions for e-commerce brands worldwide.',
 };
 
 export const viewport: Viewport = {

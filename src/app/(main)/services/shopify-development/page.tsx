@@ -7,8 +7,8 @@ import '../service.css';
 const subServices = [
   {
     icon: 'bi-shop',
-    title: 'Custom Shopify Store Development',
-    desc: 'We build fully custom Shopify stores from scratch — tailored to your brand, your audience, and your business goals. Every element is crafted to convert visitors into customers.',
+    title: 'Shopify Theme Design',
+    desc: 'Even though Shopify offers a wide range of themes, every successful business has its own unique identity—something that cannot be fully expressed through a ready-made template. That’s where custom Shopify theme development becomes essential. At Qualixe, our experienced team creates fully customized Shopify stores tailored specifically to your brand. We combine design, functionality, and user experience to build a store that truly stands out in a competitive market. Using modern technologies, clean code, and conversion-focused strategies, we ensure your store is not only visually impressive but also optimized to drive sales and growth.',
   },
   {
     icon: 'bi-palette2',
@@ -108,10 +108,9 @@ export default function EcommerceDevelopmentPage() {
           <div className="service-hero-inner">
             <div className="service-hero-text">
               <span className="service-hero-badge">Shopify Development</span>
-              <h1>Build a Shopify Store That Actually Sells</h1>
+              <h1>Shopify Custom Theme Development Services for High-Converting Stores</h1>
               <p>
-                We design and develop high-converting Shopify stores for brands that want to stand out.
-                From custom themes to full-stack integrations — we handle everything.
+               Whether you’re launching a new online store or upgrading your existing one, Qualixe delivers Shopify custom theme development tailored to your needs. Our themes are designed around your brand, audience, and goals—combining creative design with high performance to turn visitors into customers.
               </p>
               <Link href="/contact" className="service-hero-cta">
                 Get a Free Quote <i className="bi bi-arrow-right"></i>
@@ -127,7 +126,7 @@ export default function EcommerceDevelopmentPage() {
       {/* Sub-services */}
       <section className="service-cards-section">
         <div className="container">
-          <h2>E-Commerce Development Services</h2>
+          <h2>Our Shopify Theme Development Services</h2>
           <p className="section-sub">Everything you need to launch, grow, and scale your online store.</p>
           <div className="row g-4">
             {subServices.map((s, i) => (
