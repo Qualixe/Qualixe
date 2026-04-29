@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import '../service.css';
+import ReadMore from '@/components/ReadMore';
 
 const subServices = [
   {
@@ -137,7 +138,7 @@ export default function UiUxDesignPage() {
                     <i className={`bi ${s.icon}`}></i>
                   </div>
                   <h3>{s.title}</h3>
-                  <p>{s.desc}</p>
+                  <ReadMore text={s.desc} />
                 </div>
               </div>
             ))}

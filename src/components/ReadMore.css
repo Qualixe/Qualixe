@@ -1,0 +1,48 @@
+/* ── ReadMore component ─────────────────────────────────── */
+
+/* Clamped preview */
+.read-more__preview {
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: #666;
+  line-height: 1.7;
+  font-size: 0.97rem;
+  margin: 0;
+}
+
+/* Full text accordion */
+.read-more__full {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.read-more__full p {
+  color: #666;
+  line-height: 1.7;
+  font-size: 0.97rem;
+  margin: 0;
+  padding-bottom: 2px;
+}
+
+/* Toggle button */
+.read-more__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0c3cc3;
+  cursor: pointer;
+  transition: opacity 150ms;
+}
+.read-more__btn:hover {
+  opacity: 0.75;
+}
+.read-more__btn i {
+  font-size: 0.8rem;
+  transition: transform 0.3s;
+}
