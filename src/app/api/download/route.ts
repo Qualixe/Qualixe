@@ -45,14 +45,27 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'File not available' }, { status: 404 });
   }
 
-  // Download file bytes from private Supabase Storage using service role
+  const filePath: string = product.file_path;
+
+  // ── External URL (http/https) — redirect directly to it ──────────────
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+    // Increment download count before redirecting
+    await supabase
+      .from('download_tokens')
+      .update({ download_count: record.download_count + 1 })
+      .eq('token', token);
+
+    return NextResponse.redirect(filePath, { status: 302 });
+  }
+
+  // ── Supabase Storage path — stream the file ───────────────────────────
   const { data: fileData, error: storageErr } = await supabase
     .storage
     .from('digital-products')
-    .download(product.file_path);
+    .download(filePath);
 
   if (storageErr || !fileData) {
-    console.error('Storage error:', storageErr?.message, '| path:', product.file_path);
+    console.error('Storage error:', storageErr?.message, '| path:', filePath);
     return NextResponse.json({ error: `Storage error: ${storageErr?.message ?? 'unknown'}` }, { status: 404 });
   }
 
