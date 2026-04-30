@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import '../service.css';
-import ReadMore from '@/components/ReadMore';
 import { getShopifyServicePage, ShopifyServicePage } from '../../../../../lib/api/shopify-service';
 import { motion } from 'motion/react';
 
@@ -125,6 +124,72 @@ export default function EcommerceDevelopmentPage() {
   return (
     <div className="service-page">
 
+      {/* JSON-LD — Service + FAQPage schema for rich results */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              '@context': 'https://schema.org',
+              '@type': 'Service',
+              name: 'Shopify Development Services',
+              description:
+                'Custom Shopify theme development, app integrations, performance optimization, and e-commerce SEO for high-converting online stores.',
+              provider: {
+                '@type': 'Organization',
+                name: 'Qualixe',
+                url: 'https://www.qualixe.com',
+                logo: 'https://www.qualixe.com/assets/img/logo.png',
+                address: {
+                  '@type': 'PostalAddress',
+                  streetAddress: 'House-06, Road-3, Mirpur-11',
+                  addressLocality: 'Dhaka',
+                  addressCountry: 'BD',
+                },
+                contactPoint: {
+                  '@type': 'ContactPoint',
+                  telephone: '+8801318552266',
+                  contactType: 'customer service',
+                },
+              },
+              serviceType: 'Shopify Development',
+              areaServed: 'Worldwide',
+              url: 'https://www.qualixe.com/services/shopify-development',
+              hasOfferCatalog: {
+                '@type': 'OfferCatalog',
+                name: 'Shopify Development Services',
+                itemListElement: [
+                  { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Custom Shopify Theme Design' } },
+                  { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Shopify Theme Customization' } },
+                  { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Shopify App & Integration Setup' } },
+                  { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Shopify Performance Optimization' } },
+                  { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'E-Commerce SEO' } },
+                  { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Ongoing Shopify Support & Maintenance' } },
+                ],
+              },
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: faq.items.map((item) => ({
+                '@type': 'Question',
+                name: item.q,
+                acceptedAnswer: { '@type': 'Answer', text: item.a },
+              })),
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.qualixe.com' },
+                { '@type': 'ListItem', position: 2, name: 'Services', item: 'https://www.qualixe.com/services' },
+                { '@type': 'ListItem', position: 3, name: 'Shopify Development', item: 'https://www.qualixe.com/services/shopify-development' },
+              ],
+            },
+          ]),
+        }}
+      />
+
       {/* Hero */}
       <section className="service-hero">
         <div className="container">
@@ -150,7 +215,7 @@ export default function EcommerceDevelopmentPage() {
                 </div>
             </div>
             <div className="service-hero-image">
-              <img src="/assets/img/service-hero.jpg" alt="Shopify Development" />
+              <img src="/assets/img/service-hero.jpg" alt="Qualixe Shopify custom theme development services" />
             </div>
           </div>
         </div>
@@ -169,7 +234,7 @@ export default function EcommerceDevelopmentPage() {
                     <i className={`bi ${s.icon}`}></i>
                   </div>
                   <h3>{s.title}</h3>
-                  <ReadMore text={s.desc} />
+                  <p>{s.desc}</p>
                 </div>
               </div>
             ))}

@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { blogAPI } from '../../lib/api/blog';
 
-const BASE_URL = 'https://qualixe.com';
+const BASE_URL = 'https://www.qualixe.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
@@ -58,7 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE_URL}/services/shopify-development`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
-      priority: 0.8,
+      priority: 0.95,
     },
     {
       url: `${BASE_URL}/services/digital-marketing`,
