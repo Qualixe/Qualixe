@@ -125,6 +125,16 @@ function SuccessContent() {
           </a>
         )}
 
+        {token && (
+          <Link
+            href={`/profile?email=${encodeURIComponent(params.get('email') ?? '')}`}
+            className="btn btn-outline-primary w-100 fw-semibold mb-2"
+          >
+            <i className="bi bi-person-circle me-2" />
+            View in My Profile
+          </Link>
+        )}
+
         {/* Timeout — manual retry */}
         {timedOut && !token && (
           <div className="mb-3">

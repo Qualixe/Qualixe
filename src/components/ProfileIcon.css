@@ -1,0 +1,17 @@
+.profile-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: background 180ms, color 180ms;
+  position: relative;
+}
+
+.profile-icon-btn:hover {
+  background: #eef2ff;
+  color: var(--theme-color);
+}

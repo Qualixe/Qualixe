@@ -86,6 +86,7 @@
     }
     .mobile-header-right {
         justify-content: flex-end;
+        gap: 4px;
     }
     .mobile-header-center {
         flex: 1;

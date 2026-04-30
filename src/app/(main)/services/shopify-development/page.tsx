@@ -5,6 +5,7 @@ import Link from 'next/link';
 import '../service.css';
 import ReadMore from '@/components/ReadMore';
 import { getShopifyServicePage, ShopifyServicePage } from '../../../../../lib/api/shopify-service';
+import { motion } from 'motion/react';
 
 // ── Static fallback (shown while loading or if DB is empty) ──
 const FALLBACK: ShopifyServicePage = {
@@ -70,6 +71,45 @@ const FALLBACK: ShopifyServicePage = {
   },
 };
 
+// ── Animated process row ─────────────────────────────────
+function ProcessRow({
+  step, index, isLeft,
+}: {
+  step: { title: string; desc: string };
+  index: number;
+  isLeft: boolean;
+}) {
+  return (
+    <div className={`process-timeline__row ${isLeft ? 'process-timeline__row--left' : 'process-timeline__row--right'}`}>
+
+      {/* Card — slides in from its side */}
+      <motion.div
+        className="process-timeline__card"
+        initial={{ opacity: 0, x: isLeft ? -60 : 60 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.55, delay: index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <h4>{step.title}</h4>
+        <p>{step.desc}</p>
+      </motion.div>
+
+      {/* Bubble — pops in with spring */}
+      <motion.div
+        className="process-timeline__bubble"
+        initial={{ opacity: 0, scale: 0.3 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 18, delay: index * 0.08 + 0.2 }}
+      >
+        {index + 1}
+      </motion.div>
+
+      <div className="process-timeline__spacer" />
+    </div>
+  );
+}
+
 export default function EcommerceDevelopmentPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [page, setPage] = useState<ShopifyServicePage>(FALLBACK);
@@ -133,25 +173,20 @@ export default function EcommerceDevelopmentPage() {
       {/* Process */}
       <section className="service-process">
         <div className="container">
-          <div className="row align-items-center g-5">
-            <div className="col-lg-5">
-              <div className="process-image">
-                <img src="/assets/img/service-proccess.png" alt="Our Development Process" />
-              </div>
-            </div>
-            <div className="col-lg-7">
-              <h2>{process.heading}</h2>
-              <p className="section-sub">{process.subheading}</p>
-              {process.items.map((step, i) => (
-                <div key={i} className="process-step">
-                  <div className="process-number">{i + 1}</div>
-                  <div className="process-step-content">
-                    <h4>{step.title}</h4>
-                    <p>{step.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="text-center mb-5">
+            <h2>{process.heading}</h2>
+            <p className="section-sub mx-auto">{process.subheading}</p>
+          </div>
+
+          <div className="process-timeline">
+            <div className="process-timeline__line" />
+
+            {process.items.map((step, i) => {
+              const isLeft = i % 2 === 0;
+              return (
+                <ProcessRow key={i} step={step} index={i} isLeft={isLeft} />
+              );
+            })}
           </div>
         </div>
       </section>

@@ -199,64 +199,135 @@
 .service-process h2 {
   font-size: 2rem;
   font-weight: 800;
-  color: #111;
+  color: #0c3cc3;
   margin-bottom: 12px;
 }
 
 .service-process .section-sub {
   color: #666;
   font-size: 1.05rem;
-  margin-bottom: 56px;
+  margin-bottom: 0;
   max-width: 560px;
 }
 
-.process-image {
+/* ── Timeline layout ─────────────────────────────────────── */
+.process-timeline {
+  position: relative;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* Vertical center line */
+.process-timeline__line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, #c8deff 0%, #a0c4ff 100%);
+  transform: translateX(-50%);
+  border-radius: 4px;
+  z-index: 0;
+}
+
+/* Each row */
+.process-timeline__row {
+  display: grid;
+  grid-template-columns: 1fr 56px 1fr;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 1;
+}
+.process-timeline__row:last-child { margin-bottom: 0; }
+
+/* Left row: card | bubble | spacer */
+.process-timeline__row--left .process-timeline__card  { grid-column: 1; grid-row: 1; }
+.process-timeline__row--left .process-timeline__bubble { grid-column: 2; grid-row: 1; }
+.process-timeline__row--left .process-timeline__spacer { grid-column: 3; grid-row: 1; }
+
+/* Right row: spacer | bubble | card */
+.process-timeline__row--right .process-timeline__spacer { grid-column: 1; grid-row: 1; }
+.process-timeline__row--right .process-timeline__bubble { grid-column: 2; grid-row: 1; }
+.process-timeline__row--right .process-timeline__card   { grid-column: 3; grid-row: 1; }
+
+/* Card */
+.process-timeline__card {
+  background: #fff;
+  border: 2px solid #1a6fd4;
   border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 12px 40px rgba(12, 60, 195, 0.1);
+  padding: 24px 28px;
+  box-shadow: 0 4px 18px rgba(12, 60, 195, 0.07);
+  transition: box-shadow 250ms, transform 250ms;
+}
+.process-timeline__card:hover {
+  box-shadow: 0 10px 32px rgba(12, 60, 195, 0.14);
+  transform: translateY(-3px);
+}
+.process-timeline__card h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 10px;
+}
+.process-timeline__card p {
+  font-size: 0.93rem;
+  color: #555;
+  line-height: 1.7;
+  margin: 0;
+  text-align: center;
 }
 
-.process-image img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.process-step {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 40px;
-}
-
-.process-step:last-child {
-  margin-bottom: 0;
-}
-
-.process-number {
-  flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  background: #0c3cc3;
-  color: white;
+/* Number bubble */
+.process-timeline__bubble {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
+  background: #1a6fd4;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 1rem;
+  margin: 0 auto;
+  box-shadow: 0 4px 14px rgba(26, 111, 212, 0.4);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
-.process-step-content h4 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #111;
-  margin-bottom: 8px;
-}
+/* Spacer — empty column on the opposite side */
+.process-timeline__spacer { /* intentionally empty */ }
 
-.process-step-content p {
-  color: #666;
-  line-height: 1.7;
-  margin: 0;
+/* ── Responsive: stack vertically on mobile ──────────────── */
+@media (max-width: 640px) {
+  .process-timeline__line { left: 22px; }
+
+  .process-timeline__row {
+    grid-template-columns: 44px 1fr;
+    grid-template-rows: auto;
+    gap: 0 16px;
+    margin-bottom: 24px;
+  }
+
+  /* All rows: bubble left, card right, no spacer */
+  .process-timeline__row--left .process-timeline__bubble,
+  .process-timeline__row--right .process-timeline__bubble {
+    grid-column: 1; grid-row: 1;
+  }
+  .process-timeline__row--left .process-timeline__card,
+  .process-timeline__row--right .process-timeline__card {
+    grid-column: 2; grid-row: 1;
+  }
+  .process-timeline__row--left .process-timeline__spacer,
+  .process-timeline__row--right .process-timeline__spacer {
+    display: none;
+  }
+
+  .process-timeline__card { padding: 18px 16px; }
+  .process-timeline__card p { text-align: left; }
 }
 
 /* ── Why Choose Us ───────────────────────────────────────── */
