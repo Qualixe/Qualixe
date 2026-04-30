@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import '../service.css';
 import ReadMore from '@/components/ReadMore';
+import { motion } from 'motion/react';
 
 const subServices = [
   {
@@ -149,27 +150,41 @@ export default function DigitalMarketingPage() {
       {/* Process */}
       <section className="service-process">
         <div className="container">
-          <div className="row align-items-center g-5">
-            <div className="col-lg-5">
-              <div className="process-image">
-                <img src="/assets/img/service-proccess.png" alt="Our Marketing Process" />
-              </div>
-            </div>
-            <div className="col-lg-7">
-              <h2>Our Marketing Process</h2>
-              <p className="section-sub">
-                A structured approach that turns your marketing budget into measurable growth.
-              </p>
-              {process.map((step, i) => (
-                <div key={i} className="process-step">
-                  <div className="process-number">{i + 1}</div>
-                  <div className="process-step-content">
+          <div className="text-center mb-5">
+            <h2>Our Marketing Process</h2>
+            <p className="section-sub mx-auto">
+              A structured approach that turns your marketing budget into measurable growth.
+            </p>
+          </div>
+          <div className="process-timeline">
+            <div className="process-timeline__line" />
+            {process.map((step, i) => {
+              const isLeft = i % 2 === 0;
+              return (
+                <div key={i} className={`process-timeline__row ${isLeft ? 'process-timeline__row--left' : 'process-timeline__row--right'}`}>
+                  <motion.div
+                    className="process-timeline__card"
+                    initial={{ opacity: 0, x: isLeft ? -60 : 60 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ duration: 0.55, delay: i * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  >
                     <h4>{step.title}</h4>
                     <p>{step.desc}</p>
-                  </div>
+                  </motion.div>
+                  <motion.div
+                    className="process-timeline__bubble"
+                    initial={{ opacity: 0, scale: 0.3 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 18, delay: i * 0.08 + 0.2 }}
+                  >
+                    {i + 1}
+                  </motion.div>
+                  <div className="process-timeline__spacer" />
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>

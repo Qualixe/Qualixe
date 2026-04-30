@@ -8,7 +8,7 @@ import { authAPI } from '../../../../lib/auth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const DRAWER_KEY = 'cart_drawer_enabled';
+const DRAWER_KEY = 'cart_drawer_enabled'; // kept for reference only — no longer used
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -28,14 +28,19 @@ export default function SettingsPage() {
   // Account info
   const [memberSince, setMemberSince] = useState('');
   const [drawerEnabled, setDrawerEnabledState] = useState(true);
+  const [drawerSaving, setDrawerSaving] = useState(false);
 
   useEffect(() => {
     loadUserData();
-    // Read drawer preference from localStorage
-    try {
-      const pref = localStorage.getItem(DRAWER_KEY);
-      setDrawerEnabledState(pref === null ? true : pref === 'true');
-    } catch {}
+    // Read drawer setting from Supabase
+    fetch('/api/site-settings?key=cart_drawer_enabled')
+      .then(r => r.json())
+      .then(data => {
+        if (typeof data.cart_drawer_enabled === 'boolean') {
+          setDrawerEnabledState(data.cart_drawer_enabled);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const loadUserData = async () => {
@@ -107,10 +112,23 @@ export default function SettingsPage() {
     }
   };
 
-  const toggleDrawer = (val: boolean) => {
+  const toggleDrawer = async (val: boolean) => {
     setDrawerEnabledState(val);
-    try { localStorage.setItem(DRAWER_KEY, String(val)); } catch {}
-    toast.success(`Cart drawer ${val ? 'enabled' : 'disabled'}`);
+    setDrawerSaving(true);
+    try {
+      const res = await fetch('/api/site-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'cart_drawer_enabled', value: val }),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      toast.success(`Cart drawer ${val ? 'enabled' : 'disabled'} — applies to all visitors`);
+    } catch {
+      toast.error('Failed to save setting');
+      setDrawerEnabledState(!val); // revert on error
+    } finally {
+      setDrawerSaving(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -285,16 +303,20 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="form-check form-switch mb-0">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    role="switch"
-                    id="drawerToggle"
-                    checked={drawerEnabled}
-                    onChange={(e) => toggleDrawer(e.target.checked)}
-                    style={{ width: '2.5em', height: '1.4em', cursor: 'pointer' }}
-                  />
+                <div className="d-flex align-items-center gap-2">
+                  {drawerSaving && <span className="spinner-border spinner-border-sm text-primary" />}
+                  <div className="form-check form-switch mb-0">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      role="switch"
+                      id="drawerToggle"
+                      checked={drawerEnabled}
+                      onChange={(e) => toggleDrawer(e.target.checked)}
+                      disabled={drawerSaving}
+                      style={{ width: '2.5em', height: '1.4em', cursor: drawerSaving ? 'not-allowed' : 'pointer' }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
