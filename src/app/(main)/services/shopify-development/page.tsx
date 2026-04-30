@@ -93,9 +93,14 @@ export default function EcommerceDevelopmentPage() {
               <span className="service-hero-badge">{hero.badge}</span>
               <h1>{hero.heading}</h1>
               <p>{hero.subheading}</p>
+              <div className='service-hero-btns'>
               <Link href={hero.cta_url} className="service-hero-cta">
                 {hero.cta_text} <i className="bi bi-arrow-right"></i>
               </Link>
+              <Link href={'tel:+8801318552266'} className='service-hero-cta2'>
+                  <i className="bi bi-telephone"></i> +8801318552266
+              </Link>
+              </div>
             </div>
             <div className="service-hero-image">
               <img src="/assets/img/service-hero.jpg" alt="Shopify Development" />

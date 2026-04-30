@@ -80,7 +80,11 @@
   line-height: 1.7;
   margin-bottom: 32px;
 }
-
+.service-hero-btns{
+  display: flex;
+  gap:10px;
+  
+}
 .service-hero-cta {
   display: inline-flex;
   align-items: center;
@@ -94,11 +98,34 @@
   text-decoration: none;
   transition: transform 0.25s, box-shadow 0.25s;
 }
+.service-hero-cta2{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  border-color: #0c3cc3;
+  background: white;
+  color:#0c3cc3;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
 
 .service-hero-cta:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(12, 60, 195, 0.35);
-  color: white;
+  color: #0c3cc3;
+  background-color: #fff;
+
+}
+.service-hero-cta2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(12, 60, 195, 0.35);
+  color: #fff;
+  background-color: #0c3cc3;
+
 }
 
 /* ── Sub-services Cards ──────────────────────────────────── */
@@ -407,6 +434,13 @@
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .service-hero-btns{
+  display: flex;
+  width: 75%;
+  flex-direction: column;
+  gap:5px;
+  
+}
   .service-hero {
     padding: 56px 0 48px;
   }
