@@ -138,7 +138,7 @@ export default function EcommerceDevelopmentPage() {
                 {hero.cta_text} <i className="bi bi-arrow-right"></i>
               </Link>
               <Link href={'tel:+8801318552266'} className='service-hero-cta2'>
-                  <i className="bi bi-telephone"></i> +8801318552266
+                  <i className="bi bi-whatsapp"></i> Whatsapp
               </Link>
               </div>
             </div>
