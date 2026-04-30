@@ -133,14 +133,21 @@ export default function EcommerceDevelopmentPage() {
               <span className="service-hero-badge">{hero.badge}</span>
               <h1>{hero.heading}</h1>
               <p>{hero.subheading}</p>
-              <div className='service-hero-btns'>
-              <Link href={hero.cta_url} className="service-hero-cta">
-                {hero.cta_text} <i className="bi bi-arrow-right"></i>
-              </Link>
-              <Link href={'tel:+8801318552266'} className='service-hero-cta2'>
-                  <i className="bi bi-whatsapp"></i> Whatsapp
-              </Link>
-              </div>
+                <div className="service-hero-btns">
+                  <Link href={hero.cta_url} className="service-hero-cta">
+                    {hero.cta_text} <i className="bi bi-arrow-right"></i>
+                  </Link>
+
+                  <a 
+                    href="https://wa.me/8801318552266" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="service-hero-cta2"
+                    style={{border:'2px solid'}}
+                  >
+                    <i className="bi bi-whatsapp"></i> WhatsApp
+                  </a>
+                </div>
             </div>
             <div className="service-hero-image">
               <img src="/assets/img/service-hero.jpg" alt="Shopify Development" />
