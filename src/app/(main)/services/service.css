@@ -505,6 +505,21 @@
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
+
+
+  .process-timeline__row--left .process-timeline__card h4 {
+    text-align: left;
+}
+.process-timeline__row--left .process-timeline__card p {
+    text-align: left;
+}
+
+.process-timeline__row--right .process-timeline__card h4 {
+    text-align: left;
+}
+.process-timeline__row--right .process-timeline__card p {
+    text-align: left;
+}
   .service-hero-btns{
   display: flex;
   width: 75%;
@@ -540,4 +555,20 @@
   .process-step {
     gap: 16px;
   }
+}
+
+
+
+.process-timeline__row--left .process-timeline__card h4 {
+    text-align: right;
+}
+.process-timeline__row--left .process-timeline__card p {
+    text-align: right;
+}
+
+.process-timeline__row--right .process-timeline__card h4 {
+    text-align: left;
+}
+.process-timeline__row--right .process-timeline__card p {
+    text-align: left;
 }
