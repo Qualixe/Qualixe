@@ -7,7 +7,7 @@ import Menu from './Menu'
 import HeaderButton from './HeaderButton'
 import CartIcon from './CartIcon'
 import CartDrawer from './CartDrawer'
-import ProfileIcon from './ProfileIcon'
+import SearchIcon from './SearchIcon'
 import { useCart } from '@/context/CartContext'
 import { X } from 'lucide-react'
 
@@ -28,13 +28,13 @@ function Header() {
             <Menu />
           </div>
           <div className='header-right'>
-            <ProfileIcon />
+            <SearchIcon />
             <CartIcon />
             <HeaderButton shownav={showMobileNav} />
           </div>
         </div>
 
-        {/* Mobile layout: hamburger | logo | profile + cart */}
+        {/* Mobile layout: hamburger | logo | search + cart */}
         <div className='mobile-header-wrap'>
           <div className='mobile-header-left'>
             <HeaderButton shownav={showMobileNav} />
@@ -43,7 +43,7 @@ function Header() {
             <HeaderLogo />
           </div>
           <div className='mobile-header-right'>
-            <ProfileIcon />
+            <SearchIcon />
             <CartIcon />
           </div>
         </div>
