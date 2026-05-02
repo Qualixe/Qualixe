@@ -84,7 +84,6 @@
   transition: color 180ms;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
 }
 .footer-col__link::before {
   content: '';
