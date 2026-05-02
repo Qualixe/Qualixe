@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './Header.css'
 import HeaderLogo from './HeaderLogo'
 import Menu from './Menu'
@@ -13,13 +13,20 @@ import { X } from 'lucide-react'
 
 function Header() {
   const [btnState, setBtnState] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const { drawerEnabled } = useCart()
 
   const showMobileNav = () => setBtnState((prev) => !prev)
   const toggleClass = btnState ? 'active' : ''
 
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', handler, { passive: true })
+    return () => window.removeEventListener('scroll', handler)
+  }, [])
+
   return (
-    <div className='header-section'>
+    <div className={`header-section ${scrolled ? 'header-section--scrolled' : ''}`}>
       <div className='container'>
         {/* Desktop layout */}
         <div className='header-wrap'>
@@ -34,7 +41,7 @@ function Header() {
           </div>
         </div>
 
-        {/* Mobile layout: hamburger | logo | search + cart */}
+        {/* Mobile layout */}
         <div className='mobile-header-wrap'>
           <div className='mobile-header-left'>
             <HeaderButton shownav={showMobileNav} />
@@ -61,7 +68,6 @@ function Header() {
 
       <div className={`mobile-nav-overly ${toggleClass}`} onClick={showMobileNav} />
 
-      {/* Cart Drawer — only when enabled */}
       {drawerEnabled && <CartDrawer />}
     </div>
   )

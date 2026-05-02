@@ -1,58 +1,125 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, Headphones, MapPin, Facebook, Linkedin } from "lucide-react";
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import "./Footer.css";
-export default function Footer() {
 
+const quickLinks = [
+  { href: '/about',     label: 'About' },
+  { href: '/services',  label: 'Services' },
+  { href: '/portfolio', label: 'Portfolio' },
+  { href: '/blog',      label: 'Blog' },
+  { href: '/shop',      label: 'Templates' },
+  { href: '/contact',   label: 'Contact' },
+];
+
+const services = [
+  { href: '/services/shopify-development', label: 'Shopify Development' },
+  { href: '/services/digital-marketing',   label: 'Digital Marketing' },
+  { href: '/services/uiux-design',         label: 'UI/UX Design' },
+  { href: '/themes',                       label: 'Shopify Themes' },
+  { href: '/shop',                         label: 'HTML Templates' },
+];
+
+export default function Footer() {
   return (
-         <div className='footer-section'>
-            <Container>
-                <Row>
-                    <Col lg={3} md={3} sm={12}> 
-                        <Image src={'/assets/img/logo.png'} alt='img' className='footer__logo' width={100} height={50} />
-                        <p className='footer-text'>
-                            We are best e-commerce solution company in bangladesh on shopify CMS platform. We have amazing and experience team members. so let&apos;s contact with us.
-                        </p>
-                    </Col> 
-                    <Col lg={3} md={3} sm={12} className='ps-lg-5'> 
-                        <h3 className='footer-heading'>Quick links</h3>
-                        <ul className='footer-nav'>
-                            <li><Link href={'/'}>Home</Link></li>
-                            <li><Link href={'/about'}>About</Link></li>
-                            <li><Link href={'/services'}>Services</Link></li>
-                            <li><Link href={'/portfolio'}>Portfolio</Link></li>
-                            <li><Link href={'/blog'}>Blogs</Link></li>
-                        </ul>
-                    </Col> 
-                    <Col lg={3} md={3} sm={12}> 
-                        <h3 className='footer-heading'>Contact Us</h3>
-                        <ul className='footer-contact'>
-                            <li><Link href={'mailhref:qualixe.info@gmail.com'}><Mail size={24} /> <span>qualixe.info@gmail.com</span></Link></li>
-                            <li><Link href={'tel:+8801318552266'}><Headphones size={24} /> <span>+88 01318 55 22 66</span></Link></li>
-                            <li><Link href={'#'}><MapPin  size={24} /> <span>House-06, Road-3, Mirpur-11, Dhaka, Bangladesh</span> </Link></li>
-                        </ul>
-                    </Col> 
-                    <Col lg={3} md={3} sm={12}> 
-                        <h3 className='footer-heading'>Follow Us</h3>
-                        <ul className='footer-social'>
-                            <li><Link href={'https://www.facebook.com/qualixe'} target='_blank'><Facebook size={35} /></Link></li>
-                            <li><Link href={'https://www.linkedin.com/company/qualixe'} target='_blank'><Linkedin size={35}/></Link></li>
-                        </ul>
-                    </Col> 
-                </Row>
-            </Container>
-            <div className='footer-copyright'>
-                <Row>
-                    <Col className='text-center'>
-                        <p className='copy-right'> 
-                        ©{ new Date().getFullYear()} All Rights Reserved. With Design by <Link href={'/'} target='_blank'>Habib Rayan</Link>
-                        </p>
-                    </Col>
-                </Row>
+    <footer className="footer">
+
+      {/* ── Main grid ── */}
+      <div className="footer-main">
+        <div className="container">
+          <div className="footer-grid">
+
+            {/* Brand col */}
+            <div className="footer-brand">
+            
+              <Image
+                src="/assets/img/logo.png"
+                alt="Qualixe"
+                width={140} height={48}
+                className="footer-brand__logo"
+              />
+              <p className="footer-brand__desc">
+                Bangladesh's leading Shopify development agency. We build high-converting
+                e-commerce stores for brands worldwide.
+              </p>
+              <div className="footer-social">
+                <a href="https://www.facebook.com/qualixe" target="_blank" rel="noopener noreferrer"
+                  className="footer-social__link" aria-label="Facebook">
+                  <i className="bi bi-facebook" />
+                </a>
+                <a href="https://www.linkedin.com/company/qualixe" target="_blank" rel="noopener noreferrer"
+                  className="footer-social__link" aria-label="LinkedIn">
+                  <i className="bi bi-linkedin" />
+                </a>
+                <a href="https://wa.me/8801318552266" target="_blank" rel="noopener noreferrer"
+                  className="footer-social__link" aria-label="WhatsApp">
+                  <i className="bi bi-whatsapp" />
+                </a>
+              </div>
             </div>
+
+            {/* Quick links */}
+            <div className="footer-col">
+              <h4 className="footer-col__heading">Quick Links</h4>
+              <ul className="footer-col__list">
+                {quickLinks.map(l => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="footer-col__link">{l.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Services */}
+            <div className="footer-col">
+              <h4 className="footer-col__heading">Services</h4>
+              <ul className="footer-col__list">
+                {services.map(s => (
+                  <li key={s.href}>
+                    <Link href={s.href} className="footer-col__link">{s.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div className="footer-col">
+              <h4 className="footer-col__heading">Contact</h4>
+              <ul className="footer-contact-list">
+                <li>
+                  <i className="bi bi-envelope" />
+                  <a href="mailto:qualixe.info@gmail.com">qualixe.info@gmail.com</a>
+                </li>
+                <li>
+                  <i className="bi bi-telephone" />
+                  <a href="tel:+8801318552266">+88 01318 55 22 66</a>
+                </li>
+                <li>
+                  <i className="bi bi-geo-alt" />
+                  <span>House-06, Road-3, Mirpur-11,<br />Dhaka, Bangladesh</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
       </div>
+
+      {/* ── Bottom bar ── */}
+      <div className="footer-bottom">
+        <div className="container">
+          <div className="footer-bottom__inner">
+            <p className="footer-bottom__copy">
+              © {new Date().getFullYear()} Qualixe. All rights reserved.
+            </p>
+            <div className="footer-bottom__links">
+              <Link href="/contact">Privacy Policy</Link>
+              <span>·</span>
+              <Link href="/contact">Terms of Service</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </footer>
   );
 }

@@ -1,7 +1,17 @@
 .header-section {
     justify-content: space-between;
     background-color: ghostwhite;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: box-shadow 250ms ease, background 250ms ease;
+}
 
+.header-section--scrolled {
+    background: rgba(248, 248, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
 }
 
 .header-wrap {
@@ -123,7 +133,7 @@
         transform: translateX(-100%);
         opacity: 0;
         visibility: hidden;
-        z-index: 2;
+        z-index: 999;
     }
     .mobile-nav.active {
         opacity: 1;
