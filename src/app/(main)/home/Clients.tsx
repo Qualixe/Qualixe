@@ -1,9 +1,5 @@
-// ClientsGrid.jsx
 "use client";
-import React, { useState, useEffect } from 'react';
-import Container from 'react-bootstrap/Container';
-import Image from 'react-bootstrap/Image';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import './Clients.css';
 import { clientsAPI } from '../../../../lib/api/clients';
 
@@ -12,7 +8,6 @@ interface Client {
   name: string;
   logo_url: string;
   website_url: string;
-  industry?: string;
   background_color?: string;
 }
 
@@ -21,59 +16,65 @@ function ClientsGrid() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchClients();
+    clientsAPI.getAll()
+      .then(data => setClients(data || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const fetchClients = async () => {
-    try {
-      const data = await clientsAPI.getAll();
-      setClients(data || []);
-    } catch (error) {
-      console.error('Failed to load clients:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="clients-section">
-        <Container>
-          <div className="text-center">
-            <h2 className="cliens-heading heading">Our Valuable Clients</h2>
-            <p>Loading...</p>
-          </div>
-        </Container>
-      </div>
-    );
-  }
+  // Duplicate the list so the marquee loops seamlessly
+  const track = [...clients, ...clients];
 
   return (
-    <div className="clients-section">
-      <Container>
-        <div className="text-center">
-            <h2 className="cliens-heading heading">
-              Our Valuable Clients
-            </h2>
+    <section className="clients-section">
+      <div className="container">
+        <div className="clients-head">
+          <span className="clients-label">Trusted By</span>
+          <h2 className="clients-heading">Brands That Trust Qualixe</h2>
+          <p className="clients-sub">
+            We've helped businesses across Bangladesh and beyond build stores that sell.
+          </p>
         </div>
+      </div>
 
-        {/* ----------  GRID  ---------- */}
-        <div className="clients-grid">
-          {clients.map((c) => (
-            <div key={c.id} className="client-item" style={{ backgroundColor: c.background_color || '#f0f9ff' }}>
-              <Link href={c.website_url || '#'} target="_blank" rel="noopener noreferrer">
-                <div 
-                  className="client-logo-bg"
-                  
-                >
-                  <Image src={c.logo_url} className="client-img" alt={c.name} />
-                </div>
-              </Link>
-            </div>
-          ))}
-        </div>
-      </Container>
-    </div>
+      {/* Full-width marquee — outside container so it bleeds edge to edge */}
+      <div className="clients-marquee-wrap">
+        {/* Fade edges */}
+        <div className="clients-fade clients-fade--left"  aria-hidden="true" />
+        <div className="clients-fade clients-fade--right" aria-hidden="true" />
+
+        {loading ? (
+          /* Skeleton strip */
+          <div className="clients-skeleton-row">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="clients-skeleton-item" />
+            ))}
+          </div>
+        ) : (
+          <div className="clients-track" aria-label="Our clients">
+            {track.map((c, i) => (
+              <a
+                key={`${c.id}-${i}`}
+                href={c.website_url || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="clients-logo"
+                aria-label={c.name}
+                tabIndex={i >= clients.length ? -1 : 0}
+                style={c.background_color ? { background: c.background_color, borderColor: c.background_color } : undefined}
+              >
+                <img
+                  src={c.logo_url}
+                  alt={c.name}
+                  className="clients-logo__img"
+                  loading="lazy"
+                />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 

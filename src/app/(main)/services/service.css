@@ -215,6 +215,7 @@
   position: relative;
   max-width: 860px;
   margin: 0 auto;
+  overflow: hidden;
 }
 
 /* Vertical center line */

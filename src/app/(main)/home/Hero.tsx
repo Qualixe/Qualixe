@@ -1,37 +1,80 @@
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Link from 'next/link';
-import './Hero.css'
-import Image from 'react-bootstrap/Image'
+import './Hero.css';
 
 function Hero() {
   return (
-    <div className='hero-section'>
-        <Container> 
-            <Row className='column-reverse-sm'>
-                <Col lg={7} xs className='my-auto'>
-                    <div className='hero-contents'>
-                        <h3 className='hero-subheading'>E-Commerce Solution Points</h3>
-                        <h1 className='hero-heading'>We build amazing <br /> E-commerce store in shopify</h1>
-                        <div className='hero-content'>
-                            <p>
-                            We strengthen our expertise in developing eCommerce stores. We are the best e-commerce service provider in Bangladesh. To connect separate systems, to enable automated data exchange.
-                            </p>    
-                        </div>
-                        <Link href={'/'} className='button hero-btn'>Get Started</Link>
-                    </div>
-                </Col>
-                <Col lg={5} xs={12}>
-                    <div className='hero-image'>
-                        <Image src={"/assets/img/hero.png"} className='hero-img' alt='Hero Image' />
-                    </div>
-                </Col>
-            </Row>
-        </Container>
-    </div>
-    
-  )
+    <section className="hero-section">
+      {/* Background blobs */}
+      <div className="hero-blob hero-blob--1" aria-hidden="true" />
+      <div className="hero-blob hero-blob--2" aria-hidden="true" />
+
+      <div className="container">
+        <div className="hero-inner">
+
+          {/* Text side */}
+          <div className="hero-text">
+            <span className="hero-badge">🚀 Shopify &amp; E-Commerce Experts</span>
+            <h1 className="hero-heading">
+              We Build Shopify Stores<br />
+              <span className="hero-heading--accent">That Actually Sell</span>
+            </h1>
+            <p className="hero-desc">
+              From custom theme development to full-stack e-commerce solutions —
+              Qualixe helps brands in Bangladesh and worldwide launch stores that
+              convert visitors into customers.
+            </p>
+
+            <div className="hero-actions">
+              <Link href="/contact" className="hero-cta hero-cta--primary">
+                Get a Free Quote
+              </Link>
+              <Link href="/portfolio" className="hero-cta hero-cta--secondary">
+                View Our Work
+              </Link>
+            </div>
+
+            {/* Social proof strip */}
+            <div className="hero-proof">
+              <div className="hero-proof__item">
+                <strong>50+</strong>
+                <span>Stores Built</span>
+              </div>
+              <div className="hero-proof__divider" />
+              <div className="hero-proof__item">
+                <strong>100%</strong>
+                <span>Client Satisfaction</span>
+              </div>
+              <div className="hero-proof__divider" />
+              <div className="hero-proof__item">
+                <strong>4.9★</strong>
+                <span>Avg Rating</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Image side */}
+          <div className="hero-visual">
+            <div className="hero-img-wrap">
+              <img
+                src="/assets/img/hero.png"
+                alt="Qualixe Shopify development"
+                className="hero-img"
+                loading="eager"
+              />
+              {/* Floating badge */}
+              <div className="hero-float hero-float--top">
+                <span>⚡</span> Shopify Expert
+              </div>
+              <div className="hero-float hero-float--bottom">
+                <span>✅</span> 4–8 Week Delivery
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  );
 }
 
-export default Hero
+export default Hero;

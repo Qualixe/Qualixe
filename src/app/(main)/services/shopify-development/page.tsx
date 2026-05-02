@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import '../service.css';
 import { getShopifyServicePage, ShopifyServicePage } from '../../../../../lib/api/shopify-service';
 import { motion } from 'motion/react';
@@ -215,7 +216,13 @@ export default function EcommerceDevelopmentPage() {
                 </div>
             </div>
             <div className="service-hero-image">
-              <img src="/assets/img/service-hero.jpg" alt="Qualixe Shopify custom theme development services" />
+              <NextImage
+                src="/assets/img/service-hero.jpg"
+                alt="Qualixe Shopify custom theme development services"
+                width={420} height={320}
+                style={{ width: '100%', height: '320px', objectFit: 'cover', display: 'block' }}
+                priority
+              />
             </div>
           </div>
         </div>

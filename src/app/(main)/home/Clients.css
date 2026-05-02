@@ -1,132 +1,165 @@
-/* ----------  CLIENTS SECTION – PREMIUM MINIMAL  ---------- */
+/* ── Clients section ────────────────────────────────────── */
 .clients-section {
-    padding: 80px 0;
-    background: var(--section-bg);
-    /* soft fallback */
+  padding: 80px 0 88px;
+  background: #fff;
+  overflow: hidden;
 }
 
-.cliens-heading {
-    margin-bottom: 40px;
+/* Heading block */
+.clients-head {
+  text-align: center;
+  margin-bottom: 52px;
 }
 
-/* ----------  FLEXBOX LAYOUT  ---------- */
-.clients-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    /* Center items when they don't fill the row */
-    margin: -10px;
-    /* Counteract item margins */
+.clients-label {
+  display: inline-block;
+  background: #eef2ff;
+  color: #0c3cc3;
+  border: 1px solid #c7d9fb;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  margin-bottom: 14px;
 }
 
-/* ----------  CARD  ---------- */
-.client-item {
-    background-color: #fff;
-    border-radius: 12px;
-    padding: 24px 16px;
-    border: 1px solid #d0d8f0;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-    margin: 10px;
-    /* Spacing between items */
-    flex: 1 1 calc(20% - 20px);
-    /* 5 items per row by default, accounting for margin */
-    max-width: calc(20% - 20px);
-    position: relative;
+.clients-heading {
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 800;
+  color: #0a1f6e;
+  margin: 0 0 10px;
+  letter-spacing: -0.5px;
 }
 
-.client-item.white{
-    background-color: #36426d61;
+.clients-sub {
+  font-size: 15px;
+  color: #777;
+  margin: 0;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
 }
 
-.client-logo-bg {
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 80px;
-    transition: transform 0.3s ease;
+/* ── Marquee wrapper ────────────────────────────────────── */
+.clients-marquee-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  max-width: 100vw;
 }
 
-.client-item:hover {
-    box-shadow: 0 8px 30px rgba(12, 60, 195, 0.15);
+/* Fade masks on left and right edges */
+.clients-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
+.clients-fade--left {
+  left: 0;
+  background: linear-gradient(to right, #fff 0%, transparent 100%);
+}
+.clients-fade--right {
+  right: 0;
+  background: linear-gradient(to left, #fff 0%, transparent 100%);
 }
 
-.client-item:hover .client-logo-bg {
-    transform: scale(1.02);
+/* ── Scrolling track ────────────────────────────────────── */
+.clients-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: max-content;
+  animation: clients-scroll 28s linear infinite;
 }
 
-/* ----------  LOGO  ---------- */
-.client-img {
-    display: block;
-    max-height: 48px;
-    /* smaller = premium */
-    height: 48px;
-    width: auto;
-    margin: 0 auto;
-    max-width: 100%;
-    padding: 0 10px;
-    object-fit: contain;
-    opacity: 1;
-    transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
-    
+/* Pause on hover */
+.clients-marquee-wrap:hover .clients-track {
+  animation-play-state: paused;
 }
 
-.client-item:hover .client-img {
- 
-    transform: scale(1.05);
+@keyframes clients-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
-
-
-.client-item a:focus-visible {
-    outline: none;
+/* ── Individual logo pill ───────────────────────────────── */
+.clients-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 36px;
+  margin: 0 8px;
+  background: #f8f9fc;
+  border: 1px solid #eef0f6;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: background 220ms, border-color 220ms, transform 220ms, box-shadow 220ms;
+  flex-shrink: 0;
+  min-width: 140px;
 }
 
-/* ----------  MOBILE  ---------- */
-@media only screen and (max-width: 1200px) {
-    .client-item {
-        flex: 1 1 calc(25% - 20px);
-        /* 4 items per row */
-        max-width: calc(25% - 20px);
-    }
+.clients-logo:hover {
+  border-color: rgba(0,0,0,0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(12, 60, 195, 0.1);
 }
 
-@media only screen and (max-width: 992px) {
-    .client-item {
-        flex: 1 1 calc(33.333% - 20px);
-        /* 3 items per row */
-        max-width: calc(33.333% - 20px);
-    }
+.clients-logo__img {
+  height: 44px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+  display: block;
+  filter: grayscale(30%);
+  opacity: 0.85;
+  transition: filter 220ms, opacity 220ms;
 }
 
-@media only screen and (max-width: 768px) {
-    .clients-section {
-        padding: 50px 0;
-    }
-
-    .cliens-heading {
-        margin-bottom: 24px;
-    }
-
-    .client-item {
-        flex: 1 1 calc(50% - 20px);
-        /* 2 items per row */
-        max-width: calc(50% - 20px);
-        padding: 16px 8px;
-        border-radius: 8px;
-    }
-
-    .client-img {
-        max-height: 36px;
-        height: 36px;
-    }
+.clients-logo:hover .clients-logo__img {
+  filter: grayscale(0%);
+  opacity: 1;
 }
 
-@media only screen and (max-width: 576px) {
-    .client-item {
-        flex: 1 1 calc(100% - 20px);
-        /* 1 item per row */
-        max-width: calc(100% - 20px);
-    }
+/* ── Skeleton ───────────────────────────────────────────── */
+@keyframes clients-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.clients-skeleton-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 0 40px;
+}
+
+.clients-skeleton-item {
+  height: 80px;
+  width: 140px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 800px 100%;
+  animation: clients-shimmer 1.4s infinite linear;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .clients-section { padding: 56px 0 64px; }
+  .clients-fade { width: 60px; }
+  .clients-logo { padding: 14px 24px; min-width: 110px; }
+  .clients-logo__img { height: 36px; max-width: 90px; }
+  .clients-skeleton-row { gap: 10px; }
+  .clients-skeleton-item { width: 110px; height: 68px; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .clients-track { animation: none; }
 }

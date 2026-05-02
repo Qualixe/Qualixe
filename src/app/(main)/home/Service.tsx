@@ -1,60 +1,62 @@
-import React from 'react'
-import './Services.css'
-import Container from 'react-bootstrap/Container';
-import { Col, Row } from 'react-bootstrap';
-import { FaShopify } from "react-icons/fa";
-import { BsMegaphone } from "react-icons/bs";
-import { FaLaptopCode } from "react-icons/fa";
+import Link from 'next/link';
+import './Services.css';
 
-
-const services =[
-    {
-        "heading" : "E-Commerce Development",
-        "icon" : "shopify",
-        "content" : "Embark on a journey of online success with our cutting-edge E-commerce development services. Specializing in Shopify, we create seamless and visually appealing online storefronts that captivate your audience. From customizing themes to optimizing user experiences, we ensure that your E-commerce platform."
-    },
-    {
-        "heading" : "Digital Marketing",
-        "icon" : "digital", 
-        "content" : "In the vast and ever-evolving digital ecosystem, our digital marketing strategies are tailored to amplify your brand's reach and impact. From search engine optimization (SEO) to social media marketing and beyond, we develop and execute campaigns that drive engagement, generate leads, and ultimately boost your bottom line."
-    },
-    {
-        "heading" : "UI/UX Design",
-        "icon" : "code",
-        "content" : "Crafting visually stunning and user-friendly interfaces is our forte. Our UI/UX design services are geared towards creating digital experiences that resonate with your audience. Whether it's a website, app, or software, our design experts employ the latest trends and technologies to ensure your brand stands out in the crowded digital"
-    }
-]
+const services = [
+  {
+    icon: '🛍️',
+    heading: 'Shopify Development',
+    content: 'Custom Shopify stores built from scratch — tailored to your brand, optimized for conversions, and delivered fast. From theme design to full-stack integrations.',
+    href: '/services/shopify-development',
+    color: '#eef2ff',
+    accent: '#0c3cc3',
+  },
+  {
+    icon: '📣',
+    heading: 'Digital Marketing',
+    content: 'Data-driven SEO, paid ads, and social media campaigns that drive real traffic and revenue. We treat your budget like our own.',
+    href: '/services/digital-marketing',
+    color: '#f0fdf4',
+    accent: '#16a34a',
+  },
+  {
+    icon: '🎨',
+    heading: 'UI/UX Design',
+    content: 'Beautiful, intuitive interfaces designed around your users. From wireframes to pixel-perfect handoff — we design experiences people love.',
+    href: '/services/uiux-design',
+    color: '#fff7ed',
+    accent: '#ea580c',
+  },
+];
 
 function Services() {
-  
   return (
-    <div className='services-section'>
-      <Container> 
-        <Row>
-            <Col>
-             <h2 className='services-heading heading text-center'>Our Services</h2>
-            </Col>
-        </Row>
-        <Row>    
-          {services.map((service, index)=> (
-            <Col key={index} lg={4} md={4} sm={12} className='service-item'>
-              <div className='service-item-content'>
-                  <span className='service-item-icon'>
-                    {service.icon === 'shopify' ? <FaShopify size={70}/>  
-                    : service.icon === 'digital' ? <BsMegaphone size={70} />
-                    : service.icon === 'code' ? <FaLaptopCode size={70} /> : '' }
-                  </span>
-                  <h3 className='service-item-heading'>{service.heading}</h3>
-                  <p className='service-item-text'>
-                  {service.content}
-                  </p>
-               </div>
-            </Col> 
+    <section className="services-section">
+      <div className="container">
+        <div className="services-head">
+          <span className="services-label">What We Do</span>
+          <h2 className="services-heading">Services Built for Growth</h2>
+          <p className="services-sub">
+            Everything you need to launch, grow, and scale your online business.
+          </p>
+        </div>
+
+        <div className="services-grid">
+          {services.map((s, i) => (
+            <div key={i} className="service-card" style={{ '--card-bg': s.color, '--card-accent': s.accent } as React.CSSProperties}>
+              <div className="service-card__icon-wrap">
+                <span className="service-card__icon">{s.icon}</span>
+              </div>
+              <h3 className="service-card__heading">{s.heading}</h3>
+              <p className="service-card__text">{s.content}</p>
+              <Link href={s.href} className="service-card__link">
+                Learn more →
+              </Link>
+            </div>
           ))}
-        </Row>
-      </Container>
-    </div>
-  )
+        </div>
+      </div>
+    </section>
+  );
 }
 
-export default Services
+export default Services;

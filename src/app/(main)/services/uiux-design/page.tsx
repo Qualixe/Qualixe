@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import '../service.css';
 import { motion } from 'motion/react';
 
@@ -119,7 +120,13 @@ export default function UiUxDesignPage() {
               </Link>
             </div>
             <div className="service-hero-image">
-              <img src="/assets/img/service-hero.jpg" alt="UI/UX Design" />
+              <NextImage
+                src="/assets/img/service-hero.jpg"
+                alt="UI/UX Design"
+                width={420} height={320}
+                style={{ width: '100%', height: '320px', objectFit: 'cover', display: 'block' }}
+                priority
+              />
             </div>
           </div>
         </div>

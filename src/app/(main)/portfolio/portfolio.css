@@ -1,3 +1,156 @@
-.page-portfolio  .portfolio-button {
-    display: none;
+/* ── Portfolio page ─────────────────────────────────────── */
+.port-section {
+  padding: 64px 0 80px;
+  background: #f5f7ff;
 }
+
+/* Intro */
+.port-intro {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.port-intro__text {
+  font-size: 16px;
+  color: #666;
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── Grid ───────────────────────────────────────────────── */
+.port-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ── Card ───────────────────────────────────────────────── */
+.port-item { position: relative; }
+
+.port-item__link {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #e5ebff;
+  background: #e8edf5;
+}
+
+.port-item__img {
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.port-item:hover .port-item__img {
+  transform: scale(1.05);
+}
+
+/* Gradient overlay */
+.port-item__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(3, 30, 105, 0.90) 0%,
+    rgba(3, 30, 105, 0.35) 55%,
+    transparent 100%
+  );
+  border-radius: 14px;
+  display: flex;
+  align-items: flex-end;
+  padding: 22px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 300ms ease, visibility 300ms ease;
+  z-index: 2;
+}
+.port-item:hover .port-item__overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Info slides up */
+.port-item__info {
+  transform: translateY(10px);
+  transition: transform 300ms ease;
+}
+.port-item:hover .port-item__info {
+  transform: translateY(0);
+}
+
+.port-item__cat {
+  display: inline-block;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 7px;
+}
+
+.port-item__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 5px;
+  line-height: 1.3;
+}
+
+.port-item__cta {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+}
+
+/* ── Skeleton ───────────────────────────────────────────── */
+@keyframes port-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.port-skeleton {
+  aspect-ratio: 4 / 5;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #e8edf5 25%, #dde3f0 50%, #e8edf5 75%);
+  background-size: 1200px 100%;
+  animation: port-shimmer 1.4s infinite linear;
+}
+
+/* ── Empty / end states ─────────────────────────────────── */
+.port-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+  color: #bbb;
+}
+.port-empty i {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.port-end {
+  text-align: center;
+  color: #aaa;
+  font-size: 14px;
+  margin-top: 40px;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 991px) {
+  .port-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 575px) {
+  .port-section { padding: 40px 0 60px; }
+  .port-grid { grid-template-columns: 1fr; gap: 14px; }
+  /* Always show overlay on touch */
+  .port-item__overlay { opacity: 1; visibility: visible; }
+  .port-item__info { transform: none; }
+}
+
+/* Keep old home portfolio classes intact */
+.page-portfolio .portfolio-button { display: none; }
