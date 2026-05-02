@@ -15,3 +15,20 @@
   background: #eef2ff;
   color: var(--theme-color);
 }
+
+/* Logged-in state — shows initials avatar */
+.profile-icon-btn--active {
+  background: #0c3cc3;
+  color: #fff !important;
+}
+.profile-icon-btn--active:hover {
+  background: #031e69;
+  color: #fff !important;
+}
+
+.profile-icon-initials {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
