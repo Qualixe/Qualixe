@@ -1,19 +1,162 @@
-.pagebanner-section {
-    background: url('/assets/img/banner-image.webp');
-    height: 220px;
-    display: flex;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+/* ── Page Banner — Modern Mesh Gradient ─────────────────── */
+.pb-section {
+  position: relative;
+  overflow: hidden;
+  background: #060d1f;
+  padding: 72px 0 68px;
+  text-align: center;
+  isolation: isolate;
 }
 
-.pagebanner-heading {
-    color: var(--white);
+/* ── Animated gradient orbs ─────────────────────────────── */
+.pb-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+  pointer-events: none;
+  animation: pb-drift 8s ease-in-out infinite alternate;
 }
 
+.pb-orb--1 {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(12, 60, 195, 0.55) 0%, transparent 70%);
+  top: -160px;
+  left: -80px;
+  animation-duration: 9s;
+}
 
-@media only screen and (max-width:767px) {
-    .pagebanner-section {
-        height: 120px;
-    }
+.pb-orb--2 {
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.35) 0%, transparent 70%);
+  top: -80px;
+  right: -60px;
+  animation-duration: 11s;
+  animation-delay: -3s;
+}
+
+.pb-orb--3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.25) 0%, transparent 70%);
+  bottom: -100px;
+  left: 40%;
+  animation-duration: 13s;
+  animation-delay: -6s;
+}
+
+@keyframes pb-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(20px, -15px) scale(1.05); }
+  100% { transform: translate(-10px, 10px) scale(0.97); }
+}
+
+/* ── Noise texture ──────────────────────────────────────── */
+.pb-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+}
+
+/* ── Content ────────────────────────────────────────────── */
+.pb-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ── Breadcrumb ─────────────────────────────────────────── */
+.pb-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50px;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pb-breadcrumb__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 150ms;
+  font-weight: 500;
+}
+.pb-breadcrumb__link:hover { color: #fff; }
+.pb-breadcrumb__link .bi-house { font-size: 11px; }
+
+.pb-breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pb-breadcrumb__sep {
+  font-size: 9px;
+  opacity: 0.4;
+}
+
+.pb-breadcrumb__current {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+/* ── Heading ────────────────────────────────────────────── */
+.pb-heading {
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin: 0;
+  /* Gradient text */
+  background: linear-gradient(135deg, #ffffff 0%, #a8c4ff 60%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Subtitle ───────────────────────────────────────────── */
+.pb-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  max-width: 500px;
+  line-height: 1.65;
+}
+
+/* ── Decorative line ────────────────────────────────────── */
+.pb-line {
+  width: 48px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #0c3cc3, #60a5fa);
+  margin-top: 4px;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .pb-section { padding: 52px 0 48px; }
+  .pb-orb--1 { width: 280px; height: 280px; }
+  .pb-orb--2 { width: 220px; height: 220px; }
+  .pb-orb--3 { width: 180px; height: 180px; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pb-orb { animation: none; }
 }

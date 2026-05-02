@@ -59,7 +59,8 @@ function Header() {
       {/* Mobile Menu */}
       <div className={`mobile-nav ${toggleClass}`}>
         <div className='mobile-nav-header'>
-          <span className='mobile-nav-close' onClick={showMobileNav}><X /></span>
+          <HeaderLogo />
+          <span className='mobile-nav-close' onClick={showMobileNav}><X size={18} /></span>
         </div>
         <div className='mobile-nav-items'>
           <Menu onLinkClick={showMobileNav} />
