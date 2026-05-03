@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '../../lib/auth';
+import { isAdminEmail } from '../../lib/adminEmails';
 
-const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com'];
+const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com']; // kept for reference — no longer used
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
         
         if (session && user) {
           // Check if user email is in admin list
-          if (ADMIN_EMAILS.includes(user.email || '')) {
+          if (isAdminEmail(user.email || '')) {
             setAuthenticated(true);
           } else {
             // User is logged in but not an admin

@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '../../../lib/auth';
+import { isAdminEmail } from '../../../lib/adminEmails';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com'];
+const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com']; // kept for reference — no longer used
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function LoginPage() {
     if (loading) return; // Prevent multiple submissions
     
     // Check if email is in admin list
-    if (!ADMIN_EMAILS.includes(email)) {
+    if (!isAdminEmail(email)) {
       toast.error('Access denied. Only admin accounts can access the dashboard.');
       return;
     }
