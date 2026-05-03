@@ -7,7 +7,11 @@ import { isAdminEmail } from '../../../lib/adminEmails';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+<<<<<<< HEAD
 const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com']; // kept for reference — no longer used
+=======
+const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com','qualixe.maruf@gmail.com'];
+>>>>>>> b58ce30374cd56fd940112bcfa307905bd2291a9
 
 export default function LoginPage() {
   const router = useRouter();
