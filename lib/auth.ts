@@ -56,9 +56,15 @@ export const authAPI = {
         .eq('id', user.id)
         .single();
 
-      if (error || !data) return false;
-      return data.role === 'admin';
-    } catch {
+      if (error) {
+        console.warn('isAdmin: profile query error', error.message);
+        // Fallback: check user_metadata role (set manually in Supabase Auth dashboard)
+        return user.user_metadata?.role === 'admin';
+      }
+
+      return data?.role === 'admin';
+    } catch (err) {
+      console.error('isAdmin error:', err);
       return false;
     }
   },
