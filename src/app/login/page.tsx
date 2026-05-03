@@ -3,66 +3,48 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '../../../lib/auth';
-import { isAdminEmail } from '../../../lib/adminEmails';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-<<<<<<< HEAD
-const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com']; // kept for reference — no longer used
-=======
-const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com','qualixe.maruf@gmail.com'];
->>>>>>> b58ce30374cd56fd940112bcfa307905bd2291a9
-
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail]                   = useState('');
+  const [password, setPassword]             = useState('');
+  const [loading, setLoading]               = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-  // Check if user is already logged in
+  // Already logged in → redirect
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const session = await authAPI.getSession();
-        if (session) {
-          router.push('/dashboard');
-        }
-      } catch (error) {
-        // User not logged in, stay on login page
-      }
-    };
-    checkSession();
+    authAPI.getSession().then(session => {
+      if (session) router.push('/dashboard');
+    }).catch(() => {});
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    if (loading) return; // Prevent multiple submissions
-    
-    // Check if email is in admin list
-    if (!isAdminEmail(email)) {
-      toast.error('Access denied. Only admin accounts can access the dashboard.');
-      return;
-    }
-    
+    if (loading) return;
     setLoading(true);
 
     try {
       const data = await authAPI.signIn({ email, password });
-      
-      if (data && data.session) {
-        toast.success('Login successful!');
-        
-        // Wait a moment for session to be fully established
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Use router.push for client-side navigation
-        router.push('/dashboard');
-      } else {
-        toast.error('Login failed - no session created');
+
+      if (!data?.session) {
+        toast.error('Login failed — no session created');
         setLoading(false);
+        return;
       }
+
+      // Check role in user_profiles — single middleware
+      const admin = await authAPI.isAdmin();
+      if (!admin) {
+        await authAPI.signOut();
+        toast.error('Access denied. You do not have admin privileges.');
+        setLoading(false);
+        return;
+      }
+
+      toast.success('Login successful!');
+      router.push('/dashboard');
     } catch (error: any) {
       toast.error(error.message || 'Login failed. Please check your credentials.');
       setLoading(false);
@@ -70,11 +52,7 @@ export default function LoginPage() {
   };
 
   const handleForgotPassword = async () => {
-    if (!email) {
-      toast.error('Please enter your email address');
-      return;
-    }
-
+    if (!email) { toast.error('Please enter your email address'); return; }
     setLoading(true);
     try {
       await authAPI.resetPassword(email);
@@ -107,52 +85,32 @@ export default function LoginPage() {
                   <label className="form-label">Email Address</label>
                   <div className="form-control-wrapper">
                     <i className="bi bi-envelope"></i>
-                    <input
-                      type="email"
-                      className="login-input"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <input type="email" className="login-input" placeholder="Enter your email"
+                      value={email} onChange={e => setEmail(e.target.value)} required />
                   </div>
                 </div>
-
                 <div className="form-group">
                   <label className="form-label">Password</label>
                   <div className="form-control-wrapper">
                     <i className="bi bi-lock"></i>
-                    <input
-                      type="password"
-                      className="login-input"
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <input type="password" className="login-input" placeholder="Enter your password"
+                      value={password} onChange={e => setPassword(e.target.value)} required />
                   </div>
                 </div>
-
                 <div className="form-options">
                   <div className="form-check">
                     <input type="checkbox" id="remember" />
                     <label htmlFor="remember">Remember me</label>
                   </div>
-                  <button 
-                    type="button" 
-                    className="forgot-link"
-                    onClick={() => setShowForgotPassword(true)}
-                  >
+                  <button type="button" className="forgot-link" onClick={() => setShowForgotPassword(true)}>
                     Forgot password?
                   </button>
                 </div>
-
                 <button type="submit" className="login-btn" disabled={loading}>
                   <span>{loading ? 'Signing in...' : 'Sign In'}</span>
                   {!loading && <i className="bi bi-arrow-right"></i>}
                 </button>
               </form>
-
               <div className="login-footer">
                 <p>Don't have an account? <a href="/signup">Sign up</a></p>
               </div>
@@ -163,33 +121,17 @@ export default function LoginPage() {
                 <label className="form-label">Email Address</label>
                 <div className="form-control-wrapper">
                   <i className="bi bi-envelope"></i>
-                  <input
-                    type="email"
-                    className="login-input"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                  <input type="email" className="login-input" placeholder="Enter your email"
+                    value={email} onChange={e => setEmail(e.target.value)} required />
                 </div>
               </div>
-
-              <button 
-                type="button" 
-                className="login-btn" 
-                onClick={handleForgotPassword}
-                disabled={loading}
-              >
+              <button type="button" className="login-btn" onClick={handleForgotPassword} disabled={loading}>
                 <span>{loading ? 'Sending...' : 'Send Reset Link'}</span>
               </button>
-
               <div className="login-footer" style={{ marginTop: '20px' }}>
-                <button 
-                  type="button"
-                  className="forgot-link"
+                <button type="button" className="forgot-link"
                   onClick={() => setShowForgotPassword(false)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                >
+                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                   ← Back to login
                 </button>
               </div>
