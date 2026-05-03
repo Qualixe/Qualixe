@@ -1,0 +1,456 @@
+/* ── Account pages (login, signup, downloads) ───────────── */
+
+.account-page {
+  min-height: 100vh;
+  background: #f4f6fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.account-page--wide {
+  align-items: flex-start;
+  padding: 48px 16px 80px;
+}
+
+/* ── Auth card ──────────────────────────────────────────── */
+.account-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 4px 32px rgba(12, 60, 195, 0.08);
+}
+
+.account-card--center {
+  text-align: center;
+}
+
+.account-card__logo {
+  width: 120px;
+  margin: 0 auto 24px;
+}
+.account-card__logo img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.account-card__title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 6px;
+  text-align: center;
+}
+
+.account-card__sub {
+  font-size: 14px;
+  color: #888;
+  text-align: center;
+  margin: 0 0 28px;
+}
+
+/* ── Form ───────────────────────────────────────────────── */
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.account-field__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-field__link {
+  font-size: 12px;
+  color: #0c3cc3;
+  text-decoration: none;
+}
+.account-field__link:hover { text-decoration: underline; }
+
+.account-field input {
+  padding: 11px 14px;
+  border: 1.5px solid #e0e6f0;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 150ms;
+  background: #fafbff;
+}
+.account-field input:focus {
+  border-color: #0c3cc3;
+  background: #fff;
+}
+
+.account-error {
+  font-size: 13px;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 0;
+}
+
+/* ── Primary button ─────────────────────────────────────── */
+.account-btn {
+  width: 100%;
+  padding: 13px;
+  background: #0c3cc3;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 200ms, transform 150ms;
+  margin-top: 4px;
+}
+.account-btn:hover:not(:disabled) {
+  background: #031e69;
+  transform: translateY(-1px);
+}
+.account-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Spinner inside button */
+.account-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: acct-spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes acct-spin {
+  to { transform: rotate(360deg); }
+}
+
+.account-footer {
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+  margin: 20px 0 0;
+}
+.account-footer a {
+  color: #0c3cc3;
+  font-weight: 600;
+  text-decoration: none;
+}
+.account-footer a:hover { text-decoration: underline; }
+
+.account-success-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+/* ── Downloads page ─────────────────────────────────────── */
+.downloads-header {
+  background: linear-gradient(135deg, #031e69 0%, #0c3cc3 100%);
+  border-radius: 20px;
+  padding: 28px 32px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  max-width: 860px;
+  margin: 0 auto 32px;
+}
+
+.downloads-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.downloads-header__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.downloads-header__name {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 2px;
+}
+
+.downloads-header__email {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+
+.downloads-header__stats {
+  display: flex;
+  gap: 28px;
+}
+
+.downloads-stat {
+  text-align: center;
+}
+.downloads-stat strong {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+.downloads-stat span {
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.downloads-signout {
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 200ms;
+  white-space: nowrap;
+}
+.downloads-signout:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Section ────────────────────────────────────────────── */
+.downloads-section {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.downloads-section__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.downloads-section__title i { color: #0c3cc3; }
+
+/* ── Download cards ─────────────────────────────────────── */
+.downloads-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.download-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border: 1px solid #eef0f6;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  transition: box-shadow 200ms;
+}
+.download-card:hover {
+  box-shadow: 0 6px 24px rgba(12,60,195,0.1);
+}
+
+.download-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #0c3cc3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.download-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.download-card__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.download-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #888;
+}
+.download-card__meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.download-card__price {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111;
+  flex-shrink: 0;
+}
+.download-card__price--free { color: #16a34a; }
+
+.download-card__action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.download-card__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: #0c3cc3;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 200ms;
+  white-space: nowrap;
+}
+.download-card__btn:hover { background: #031e69; color: #fff; }
+
+.download-card__btn--disabled {
+  background: #f0f0f0;
+  color: #999;
+  cursor: not-allowed;
+}
+.download-card__btn--disabled:hover { background: #f0f0f0; color: #999; }
+
+.download-card__support {
+  font-size: 11px;
+  color: #0c3cc3;
+  text-decoration: none;
+}
+.download-card__support:hover { text-decoration: underline; }
+
+/* ── Empty state ────────────────────────────────────────── */
+.downloads-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.downloads-empty i {
+  font-size: 48px;
+  color: #d0d8f0;
+  display: block;
+  margin-bottom: 14px;
+}
+.downloads-empty h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px;
+}
+.downloads-empty p {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 20px;
+}
+
+/* ── Back link ──────────────────────────────────────────── */
+.downloads-back {
+  max-width: 860px;
+  margin: 24px auto 0;
+  text-align: center;
+}
+.downloads-back a {
+  font-size: 13px;
+  color: #888;
+  text-decoration: none;
+}
+.downloads-back a:hover { color: #0c3cc3; }
+
+/* ── Skeleton ───────────────────────────────────────────── */
+@keyframes acct-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.downloads-skeleton {
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+.downloads-skeleton__header {
+  height: 112px;
+  border-radius: 20px;
+  margin-bottom: 32px;
+  background: linear-gradient(90deg, #e8edf5 25%, #dde3f0 50%, #e8edf5 75%);
+  background-size: 1200px 100%;
+  animation: acct-shimmer 1.4s infinite linear;
+}
+.downloads-skeleton__card {
+  height: 88px;
+  border-radius: 16px;
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 1200px 100%;
+  animation: acct-shimmer 1.4s infinite linear;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .account-card { padding: 28px 20px; }
+  .downloads-header { padding: 20px 16px; }
+  .downloads-header__stats { gap: 16px; }
+  .download-card { flex-wrap: wrap; padding: 16px; }
+  .download-card__action { flex-direction: row; align-items: center; width: 100%; }
+}

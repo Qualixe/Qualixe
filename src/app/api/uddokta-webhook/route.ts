@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { invoice_id } = body;
 
+    console.log('Webhook received body:', JSON.stringify(body));
+
     if (!invoice_id) {
       return NextResponse.json({ error: 'Missing invoice_id' }, { status: 400 });
     }
@@ -33,7 +35,17 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ invoice_id }),
     });
 
-    const payment = await verifyRes.json();
+    // Read raw text first to avoid JSON parse crash
+    const rawText = await verifyRes.text();
+    console.log('Verify response:', verifyRes.status, rawText.slice(0, 500));
+
+    let payment: any;
+    try {
+      payment = JSON.parse(rawText);
+    } catch {
+      console.error('Verify returned non-JSON:', rawText.slice(0, 300));
+      return NextResponse.json({ error: 'Verify endpoint returned non-JSON' }, { status: 502 });
+    }
 
     if (!verifyRes.ok || payment.status !== 'COMPLETED') {
       console.warn('Payment not completed:', payment);

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Poppins } from "next/font/google";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -23,9 +23,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
-  title: "Qualixe - IT Solutions & Services",
-  description: "Qualixe is a leading IT solutions and services provider, offering innovative technology solutions to businesses worldwide.",
+  title: {
+    template: '%s | Qualixe',
+    default: 'Qualixe – Shopify Development & E-Commerce Solutions',
+  },
+  description: 'Qualixe builds high-converting Shopify stores, free HTML templates, and digital marketing solutions for e-commerce brands worldwide.',
 };
 
 export const viewport: Viewport = {
@@ -46,7 +55,7 @@ export default function RootLayout({
         <GoogleTagManager gtmId={gtmId} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
       >
         <GoogleTagManagerNoScript gtmId={gtmId} />
         <AnalyticsTracker />

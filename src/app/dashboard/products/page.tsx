@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import NotificationDropdown from '@/components/NotificationDropdown';
 import UserAvatar from '@/components/UserAvatar';
@@ -42,9 +42,6 @@ export default function ProductsPage() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState<typeof EMPTY>({ ...EMPTY });
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchProducts(); }, []);
 
@@ -86,31 +83,9 @@ export default function ProductsPage() {
   const removeFeature = (i: number) =>
     setForm(f => ({ ...f, features: f.features.filter((_, idx) => idx !== i) }));
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.name.endsWith('.zip')) { toast.error('Only .zip files are allowed'); e.target.value = ''; return; }
-    if (file.size > 100 * 1024 * 1024) { toast.error('File too large (max 100MB)'); e.target.value = ''; return; }
-
-    setUploading(true);
-    setUploadProgress(30);
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/upload-product', { method: 'POST', body: fd });
-      setUploadProgress(90);
-      const data = await res.json();
-      if (!res.ok) toast.error('Upload failed: ' + data.error);
-      else {
-        setForm(f => ({ ...f, file_path: data.filePath, file_name: data.fileName, file_size: data.fileSize }));
-        toast.success('File uploaded');
-      }
-    } catch { toast.error('Upload failed: network error'); }
-    finally { setUploading(false); setUploadProgress(0); e.target.value = ''; }
-  }
-
-  async function handleSave(e: React.FormEvent) {    e.preventDefault();
-    if (!form.file_path) { toast.error('Please upload a ZIP file first'); return; }
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.file_path) { toast.error('Please enter a ZIP file URL'); return; }
     setSaving(true);
 
     const payload = {
@@ -131,6 +106,18 @@ export default function ProductsPage() {
     if (error) toast.error(error.message);
     else { toast.success(editing ? 'Product updated' : 'Product created'); setShowModal(false); fetchProducts(); }
     setSaving(false);
+  }
+
+  async function handleDuplicate(p: Product) {
+    const { id, created_at, sales_count, ...rest } = p;
+    const { error } = await supabase.from('products').insert({
+      ...rest,
+      name: `${p.name} (Copy)`,
+      active: false,   // start hidden so you can edit before publishing
+      sales_count: 0,
+    });
+    if (error) toast.error(error.message);
+    else { toast.success(`"${p.name}" duplicated — edit it before publishing`); fetchProducts(); }
   }
 
   async function handleDelete(p: Product) {
@@ -292,8 +279,9 @@ export default function ProductsPage() {
                       </td>
                       <td className="text-muted small">{new Date(p.created_at).toLocaleDateString()}</td>
                       <td>
-                        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => openEdit(p)}><i className="bi bi-pencil"></i></button>
-                        <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p)}><i className="bi bi-trash"></i></button>
+                        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => openEdit(p)} title="Edit"><i className="bi bi-pencil"></i></button>
+                        <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => handleDuplicate(p)} title="Duplicate"><i className="bi bi-copy"></i></button>
+                        <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p)} title="Delete"><i className="bi bi-trash"></i></button>
                       </td>
                     </tr>
                   ))}
@@ -335,8 +323,29 @@ export default function ProductsPage() {
                       <div className="input-group">
                         <span className="input-group-text">$</span>
                         <input type="number" className="form-control" min="0" step="0.01"
-                          value={form.price} onChange={e => setForm(f => ({ ...f, price: parseFloat(e.target.value) }))} required />
+                          value={form.price}
+                          onChange={e => setForm(f => ({ ...f, price: parseFloat(e.target.value) || 0 }))}
+                          disabled={form.price === 0}
+                          required />
                       </div>
+                    </div>
+
+                    {/* Free toggle */}
+                    <div className="col-12">
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="form-check form-switch mb-0">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="freeToggle"
+                            checked={form.price === 0}
+                            onChange={e => setForm(f => ({ ...f, price: e.target.checked ? 0 : 9.99 }))}
+                          />
+                          <label className="form-check-label fw-semibold" htmlFor="freeToggle">Free Product</label>
+                        </div>
+                        {form.price === 0 && <span className="badge bg-success">FREE</span>}
+                      </div>
+                      <small className="text-muted">Toggle on to make this product free to download</small>
                     </div>
 
                     {/* Tagline */}
@@ -417,34 +426,21 @@ export default function ProductsPage() {
                       </div>
                     </div>
 
-                    {/* ZIP Upload */}
+                    {/* ZIP File URL */}
                     <div className="col-12">
-                      <label className="form-label fw-semibold">ZIP File *</label>
-                      <div className="products-upload-zone" onClick={() => fileRef.current?.click()}>
-                        {form.file_name ? (
-                          <div className="products-upload-zone__filled">
-                            <i className="bi bi-file-zip text-primary fs-2"></i>
-                            <div>
-                              <div className="fw-semibold">{form.file_name}</div>
-                              <div className="text-muted small">{formatSize(form.file_size)}</div>
-                            </div>
-                            <span className="badge bg-success">Uploaded</span>
-                          </div>
-                        ) : (
-                          <div className="products-upload-zone__empty">
-                            <i className="bi bi-cloud-upload fs-1 text-muted"></i>
-                            <p className="mb-1 fw-semibold">Click to upload ZIP file</p>
-                            <p className="text-muted small mb-0">Max 100MB · .zip only</p>
-                          </div>
-                        )}
+                      <label className="form-label fw-semibold">ZIP File URL *</label>
+                      <div className="input-group">
+                        <span className="input-group-text"><i className="bi bi-file-zip"></i></span>
+                        <input
+                          className="form-control"
+                          placeholder="https://example.com/files/template.zip"
+                          value={form.file_path}
+                          onChange={e => setForm(f => ({ ...f, file_path: e.target.value, file_name: e.target.value.split('/').pop() || '', file_size: 0 }))}
+                          type="url"
+                          required
+                        />
                       </div>
-                      <input ref={fileRef} type="file" accept=".zip" className="d-none"
-                        onChange={handleFileUpload} disabled={uploading} />
-                      {uploading && (
-                        <div className="progress mt-2" style={{ height: 6 }}>
-                          <div className="progress-bar progress-bar-striped progress-bar-animated" style={{ width: `${uploadProgress}%` }} />
-                        </div>
-                      )}
+                      <small className="text-muted">Paste the direct download URL of your ZIP file</small>
                     </div>
 
                     {/* Active */}
@@ -461,7 +457,7 @@ export default function ProductsPage() {
                 {/* Sticky footer — always visible */}
                 <div className="modal-footer border-top" style={{ flexShrink: 0 }}>
                   <button type="button" className="btn btn-light" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary px-4" disabled={saving || uploading}>
+                  <button type="submit" className="btn btn-primary px-4" disabled={saving}>
                     {saving
                       ? <><span className="spinner-border spinner-border-sm me-2" />Saving...</>
                       : <><i className="bi bi-check-lg me-1"></i>{editing ? 'Update' : 'Create'} Product</>}

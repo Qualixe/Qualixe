@@ -3,7 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 
 const UDDOKTA_API_KEY = process.env.UDDOKTA_API_KEY!;
 const UDDOKTA_API_URL = process.env.UDDOKTA_API_URL!;
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
+
+// Prefer NEXT_PUBLIC_BASE_URL, fall back to VERCEL_URL (auto-set by Vercel on every deployment)
+const BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null);
 
 function getServiceClient() {
   return createClient(
@@ -14,6 +18,20 @@ function getServiceClient() {
 
 export async function POST(req: NextRequest) {
   try {
+    // Guard: catch missing env vars early with a clear message
+    if (!UDDOKTA_API_KEY) {
+      console.error('create-payment: UDDOKTA_API_KEY is not set');
+      return NextResponse.json({ error: 'Payment gateway not configured (API key missing)' }, { status: 500 });
+    }
+    if (!UDDOKTA_API_URL) {
+      console.error('create-payment: UDDOKTA_API_URL is not set');
+      return NextResponse.json({ error: 'Payment gateway not configured (API URL missing)' }, { status: 500 });
+    }
+    if (!BASE_URL) {
+      console.error('create-payment: NEXT_PUBLIC_BASE_URL and VERCEL_URL are both missing');
+      return NextResponse.json({ error: 'Server base URL not configured' }, { status: 500 });
+    }
+
     const { name, email, productId } = await req.json();
 
     if (!name || !email || !productId) {
@@ -29,6 +47,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error || !product) {
+      console.error('create-payment: product lookup failed', error);
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
@@ -51,6 +70,8 @@ export async function POST(req: NextRequest) {
       webhook_url: `${BASE_URL}/api/uddokta-webhook`,
     };
 
+    console.log('create-payment: calling Uddokta Pay', { url: UDDOKTA_API_URL, base: BASE_URL, productId });
+
     const response = await fetch(UDDOKTA_API_URL, {
       method: 'POST',
       headers: {
@@ -60,16 +81,34 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
+    // Read raw text first — gateway sometimes returns HTML on errors
+    const rawText = await response.text();
+    console.log('Uddokta raw response:', response.status, rawText.slice(0, 500));
+
+    // Try to parse as JSON
+    let data: any = null;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      // Gateway returned HTML (e.g. 404/500 page) — surface the status
+      console.error('Uddokta non-JSON response:', response.status, rawText.slice(0, 300));
+      return NextResponse.json(
+        { error: `Payment gateway returned HTTP ${response.status}. Check UDDOKTA_API_URL is correct. Raw: ${rawText.slice(0, 120)}` },
+        { status: 502 }
+      );
+    }
 
     if (!response.ok || !data.payment_url) {
-      console.error('Uddokta Pay error:', data);
-      return NextResponse.json({ error: 'Failed to initiate payment' }, { status: 502 });
+      console.error('Uddokta Pay error:', { status: response.status, data });
+      return NextResponse.json(
+        { error: `Payment gateway error: ${data?.message || data?.error || JSON.stringify(data)}` },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json({ payment_url: data.payment_url });
-  } catch (err) {
-    console.error('create-payment error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (err: any) {
+    console.error('create-payment unhandled error:', err?.message ?? err);
+    return NextResponse.json({ error: `Internal server error: ${err?.message ?? 'unknown'}` }, { status: 500 });
   }
 }

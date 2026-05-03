@@ -128,9 +128,34 @@ export default function BlogPostPage() {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading article...</p>
+      <div className="post-skeleton">
+        {/* Featured image skeleton */}
+        <div className="post-skeleton__image" />
+
+        <div className="container">
+          <div className="content-wrapper">
+            {/* Title */}
+            <div className="post-skeleton__line post-skeleton__line--title" />
+            <div className="post-skeleton__line post-skeleton__line--title-short" />
+
+            {/* Meta row */}
+            <div className="post-skeleton__meta">
+              <div className="post-skeleton__line post-skeleton__line--meta" />
+              <div className="post-skeleton__line post-skeleton__line--meta" />
+              <div className="post-skeleton__line post-skeleton__line--meta-sm" />
+            </div>
+
+            {/* Body paragraphs */}
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="post-skeleton__para">
+                <div className="post-skeleton__line post-skeleton__line--full" />
+                <div className="post-skeleton__line post-skeleton__line--full" />
+                <div className="post-skeleton__line post-skeleton__line--full" />
+                <div className="post-skeleton__line post-skeleton__line--three-quarter" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

@@ -101,19 +101,23 @@ const ThemesPage = () => {
             {filteredThemes.length > 0 ? (
               filteredThemes.map((theme) => (
                 <div key={theme.id} className="theme-card">
-                  <div className="theme-image-wrapper" onClick={() => openModal(theme)}>
+                  <div className="theme-image-wrapper" style={{ cursor: 'pointer' }} onClick={() => openModal(theme)}>
                     <img src={theme.image_url} alt={theme.name} className="theme-image" />
-                    <div className="theme-overlay">
-                      <button className="theme-preview-btn">
-                        <i className="bi bi-eye"></i> Live Preview
-                      </button>
-                    </div>
                     <span className="theme-category-badge">{theme.category}</span>
                   </div>
                   
                   <div className="theme-content">
                     <div className="theme-header">
-                      <h3 className="theme-name">{theme.name}</h3>
+                      <div className="d-flex align-items-center gap-2">
+                        <h3 className="theme-name mb-0">{theme.name}</h3>
+                        <button
+                          className="theme-eye-btn"
+                          onClick={() => openModal(theme)}
+                          title="Preview"
+                        >
+                          <i className="bi bi-eye"></i>
+                        </button>
+                      </div>
                       {/* <div className="theme-rating">
                         <i className="bi bi-star-fill"></i>
                         <span>{theme.rating}</span>

@@ -76,6 +76,11 @@ export default function DashboardSidebar() {
           </Link>
         </div>
         <div className="nav-item">
+          <Link href="/dashboard/services/shopify" className={`nav-link ${isActive('/dashboard/services/shopify') ? 'active' : ''}`}>
+            <i className="bi bi-shop"></i> <span>Shopify Page</span>
+          </Link>
+        </div>
+        <div className="nav-item">
           <Link href="/dashboard/brands" className={`nav-link ${isActive('/dashboard/brands') ? 'active' : ''}`}>
             <i className="bi bi-award"></i> <span>Brands</span>
           </Link>
@@ -83,6 +88,11 @@ export default function DashboardSidebar() {
         <div className="nav-item">
           <Link href="/dashboard/clients" className={`nav-link ${isActive('/dashboard/clients') ? 'active' : ''}`}>
             <i className="bi bi-people"></i> <span>Clients</span>
+          </Link>
+        </div>
+        <div className="nav-item">
+          <Link href="/dashboard/team" className={`nav-link ${isActive('/dashboard/team') ? 'active' : ''}`}>
+            <i className="bi bi-person-badge"></i> <span>Team</span>
           </Link>
         </div>
         <div className="nav-item">

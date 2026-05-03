@@ -25,8 +25,6 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | null>(null);
-
-const DRAWER_KEY = 'cart_drawer_enabled';
 const CART_KEY = 'cart_items';
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -36,14 +34,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // 1. Restore cart items from localStorage (fast, local)
     try {
       const stored = localStorage.getItem(CART_KEY);
       if (stored) setItems(JSON.parse(stored));
-
-      const drawerPref = localStorage.getItem(DRAWER_KEY);
-      setDrawerEnabledState(drawerPref === null ? true : drawerPref === 'true');
     } catch {}
-    setHydrated(true);
+
+    // 2. Fetch drawer setting from Supabase via API (global, cross-device)
+    fetch('/api/site-settings?key=cart_drawer_enabled')
+      .then(r => r.json())
+      .then(data => {
+        // value is stored as a JSONB boolean: true / false
+        if (typeof data.cart_drawer_enabled === 'boolean') {
+          setDrawerEnabledState(data.cart_drawer_enabled);
+        }
+      })
+      .catch(() => {
+        // Network error — keep default true
+      })
+      .finally(() => {
+        setHydrated(true);
+      });
   }, []);
 
   useEffect(() => {
@@ -59,16 +70,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
   const clearCart = () => setItems([]);
 
+  // setDrawerEnabled is only called from the dashboard — it updates Supabase via the API
   const setDrawerEnabled = (v: boolean) => {
     setDrawerEnabledState(v);
-    try { localStorage.setItem(DRAWER_KEY, String(v)); } catch {}
     if (!v) setIsOpen(false);
   };
 
   const total = items.reduce((sum, i) => sum + i.price, 0);
 
-  // Suppress rendering cart-dependent UI until localStorage is read.
-  // Children still render — only cart state is deferred.
   if (!hydrated) {
     return (
       <CartContext.Provider value={{

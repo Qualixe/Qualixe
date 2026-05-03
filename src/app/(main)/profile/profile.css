@@ -1,0 +1,295 @@
+/* ── Profile Page ───────────────────────────────────────── */
+.profile-page {
+  background: #f8f9fc;
+  min-height: 80vh;
+  padding: 56px 0 80px;
+}
+
+/* ── Email lookup card ──────────────────────────────────── */
+.profile-lookup {
+  max-width: 480px;
+  margin: 0 auto 48px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 4px 24px rgba(12, 60, 195, 0.08);
+  text-align: center;
+}
+.profile-lookup__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: #0c3cc3;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+.profile-lookup h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 8px;
+}
+.profile-lookup p {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+.profile-lookup__form {
+  display: flex;
+  gap: 10px;
+}
+.profile-lookup__form input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1.5px solid #e0e6f0;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 150ms;
+}
+.profile-lookup__form input:focus {
+  border-color: #0c3cc3;
+}
+.profile-lookup__form button {
+  padding: 12px 20px;
+  background: #0c3cc3;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 200ms;
+}
+.profile-lookup__form button:hover { background: #031e69; }
+.profile-lookup__form button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Profile header ─────────────────────────────────────── */
+.profile-header {
+  background: linear-gradient(135deg, #031e69 0%, #0c3cc3 100%);
+  border-radius: 20px;
+  padding: 32px 36px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.profile-header__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.profile-header__info h2 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+.profile-header__info p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+.profile-header__stats {
+  margin-left: auto;
+  display: flex;
+  gap: 32px;
+  flex-shrink: 0;
+}
+.profile-header__stat {
+  text-align: center;
+}
+.profile-header__stat strong {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+.profile-header__stat span {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Section heading ────────────────────────────────────── */
+.profile-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.profile-section-title i {
+  color: #0c3cc3;
+}
+
+/* ── Order cards ────────────────────────────────────────── */
+.profile-orders {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.order-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border: 1px solid #eef0f6;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: box-shadow 200ms;
+}
+.order-card:hover {
+  box-shadow: 0 6px 24px rgba(12,60,195,0.1);
+}
+.order-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #0c3cc3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.order-card__info {
+  flex: 1;
+  min-width: 0;
+}
+.order-card__name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.order-card__meta {
+  font-size: 13px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.order-card__meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.order-card__amount {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111;
+  flex-shrink: 0;
+}
+.order-card__amount--free {
+  color: #16a34a;
+}
+.order-card__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.order-card__download {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: #0c3cc3;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 200ms;
+  white-space: nowrap;
+}
+.order-card__download:hover { background: #031e69; color: #fff; }
+.order-card__download--expired {
+  background: #f0f0f0;
+  color: #999;
+  cursor: not-allowed;
+}
+.order-card__download--expired:hover { background: #f0f0f0; color: #999; }
+.order-card__limit {
+  font-size: 11px;
+  color: #aaa;
+  text-align: right;
+}
+
+/* ── Empty state ────────────────────────────────────────── */
+.profile-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.profile-empty i {
+  font-size: 52px;
+  color: #d0d8f0;
+  display: block;
+  margin-bottom: 16px;
+}
+.profile-empty h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px;
+}
+.profile-empty p {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 20px;
+}
+
+/* ── Change email button ────────────────────────────────── */
+.profile-change-email {
+  background: none;
+  border: none;
+  color: #0c3cc3;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  margin-top: 8px;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .profile-page { padding: 32px 0 60px; }
+  .profile-header { flex-wrap: wrap; padding: 24px 20px; }
+  .profile-header__stats { margin-left: 0; gap: 20px; }
+  .order-card { flex-wrap: wrap; padding: 18px 16px; }
+  .order-card__actions { flex-direction: row; align-items: center; width: 100%; }
+  .profile-lookup { padding: 28px 20px; }
+  .profile-lookup__form { flex-direction: column; }
+}

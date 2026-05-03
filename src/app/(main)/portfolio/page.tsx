@@ -1,117 +1,143 @@
-"use client"
+"use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import PageBanner from "@/components/PageBanner";
-import './portfolio.css';
-import '../home/portfolio.css';
-import { FaEye } from "react-icons/fa";
-import { Col, Container, Row } from "react-bootstrap";
 import Image from "next/image";
-import SkeletonCard from "./Skeleton";
+import PageBanner from "@/components/PageBanner";
 import ClientsGrid from "../home/Clients";
 import { portfolioAPI } from '../../../../lib/api/portfolio';
+import './portfolio.css';
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 9;
 
 interface PortfolioItem {
   id: string;
   title: string;
   image_url: string;
   project_url: string;
+  category?: string;
 }
 
-function Page() {
-  const [loading, setLoading] = useState(true);
+function SkeletonGrid({ count }: { count: number }) {
+  return (
+    <>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="port-skeleton" />
+      ))}
+    </>
+  );
+}
+
+export default function PortfolioPage() {
+  const [loading, setLoading]         = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [portfolios, setPortfolios] = useState<PortfolioItem[]>([]);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [portfolios, setPortfolios]   = useState<PortfolioItem[]>([]);
+  const [page, setPage]               = useState(0);
+  const [hasMore, setHasMore]         = useState(true);
+  const sentinelRef                   = useRef<HTMLDivElement>(null);
 
   const fetchPage = useCallback(async (pageNum: number) => {
     try {
       const { data, count } = await portfolioAPI.getPaginated(pageNum, PAGE_SIZE);
       setPortfolios(prev => pageNum === 0 ? data : [...prev, ...data]);
       setHasMore((pageNum + 1) * PAGE_SIZE < count);
-    } catch (error) {
-      console.error('Failed to load portfolio:', error);
+    } catch (err) {
+      console.error('Failed to load portfolio:', err);
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchPage(0);
-  }, [fetchPage]);
+  useEffect(() => { fetchPage(0); }, [fetchPage]);
 
+  // Infinite scroll sentinel
   useEffect(() => {
     if (!hasMore || loading) return;
-
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loadingMore) {
+      ([entry]) => {
+        if (entry.isIntersecting && !loadingMore) {
           setLoadingMore(true);
-          setPage(prev => {
-            const next = prev + 1;
-            fetchPage(next);
-            return next;
-          });
+          setPage(prev => { fetchPage(prev + 1); return prev + 1; });
         }
       },
       { threshold: 0.1 }
     );
-
-    const sentinel = sentinelRef.current;
-    if (sentinel) observer.observe(sentinel);
-    return () => { if (sentinel) observer.unobserve(sentinel); };
+    const el = sentinelRef.current;
+    if (el) observer.observe(el);
+    return () => { if (el) observer.unobserve(el); };
   }, [hasMore, loading, loadingMore, fetchPage]);
 
   return (
     <>
-      <div className="page-portfolio">
-        <PageBanner heading="Our Latest Creative Endeavors" />
-        <div className="page-portfolio-content">
-          <div className='portfolio-section'>
-            <Container>
-              <Row>
-                {loading
-                  ? Array.from({ length: PAGE_SIZE }).map((_, index) => (
-                      <Col key={index} lg={4} md={4} sm={12} className='portfolio-item pb-4'>
-                        <SkeletonCard />
-                      </Col>
-                    ))
-                  : portfolios.map((item) => (
-                      <Col key={item.id} lg={4} md={4} sm={12} className='portfolio-item pb-4'>
-                        <a href={item.project_url} target='_blank' rel="noopener noreferrer" className='portfolio-item-link'>
-                          <Image src={item.image_url} alt={item.title} fill className='portfolio-img' />
-                          <span className='portfolio-btn'>
-                            <FaEye />
-                            <span>View Live</span>
-                          </span>
-                          <span className='portfolio-item-overly'></span>
-                        </a>
-                      </Col>
-                    ))}
-              </Row>
+      <PageBanner heading="Our Portfolio" />
 
-              {loadingMore && (
-                <Row>
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <Col key={index} lg={4} md={4} sm={12} className='portfolio-item pb-4'>
-                      <SkeletonCard />
-                    </Col>
-                  ))}
-                </Row>
-              )}
+      <section className="port-section">
+        <div className="container">
 
-              <div ref={sentinelRef} style={{ height: 1 }} />
-            </Container>
+          {/* Intro */}
+          <div className="port-intro">
+            <p className="port-intro__text">
+              A collection of Shopify stores, e-commerce websites, and digital experiences
+              we've crafted for brands across Bangladesh and worldwide.
+            </p>
           </div>
+
+          {/* Grid */}
+          <div className="port-grid">
+            {loading ? (
+              <SkeletonGrid count={PAGE_SIZE} />
+            ) : portfolios.length === 0 ? (
+              <div className="port-empty">
+                <i className="bi bi-briefcase" />
+                <p>No portfolio items yet.</p>
+              </div>
+            ) : (
+              portfolios.map(item => (
+                <div key={item.id} className="port-item">
+                  <a
+                    href={item.project_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="port-item__link"
+                    aria-label={`View ${item.title}`}
+                  >
+                    <Image
+                      src={item.image_url}
+                      alt={item.title}
+                      fill
+                      className="port-item__img"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                    {/* Gradient overlay */}
+                    <div className="port-item__overlay">
+                      <div className="port-item__info">
+                        {item.category && (
+                          <span className="port-item__cat">{item.category}</span>
+                        )}
+                        <h3 className="port-item__title">{item.title}</h3>
+                        <span className="port-item__cta">View Live ↗</span>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              ))
+            )}
+
+            {/* Load-more skeletons */}
+            {loadingMore && <SkeletonGrid count={3} />}
+          </div>
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} style={{ height: 1 }} />
+
+          {/* End of results */}
+          {!hasMore && !loading && portfolios.length > 0 && (
+            <p className="port-end">You've seen all our work ✓</p>
+          )}
+
         </div>
-      </div>
+      </section>
+
       <ClientsGrid />
     </>
   );
 }
-
-export default Page;
