@@ -6,7 +6,7 @@ import { authAPI } from '../../../lib/auth';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com'];
+const ADMIN_EMAILS = ['qualixe.info@gmail.com', 'qualixe.hridoy@gmail.com','qualixe.maruf@gmail.com'];
 
 export default function LoginPage() {
   const router = useRouter();
