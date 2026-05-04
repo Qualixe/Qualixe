@@ -238,7 +238,15 @@ export default function BlogPostPage() {
 
             <div className="post-meta">
               <div className="author-info">
-                <i className="bi bi-person-circle"></i>
+                {post.author_avatar ? (
+                  <img
+                    src={post.author_avatar}
+                    alt={post.author_name || 'Author'}
+                    style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <i className="bi bi-person-circle"></i>
+                )}
                 <span>{post.author_name || 'Qualixe Team'}</span>
               </div>
               <div className="post-date">
@@ -247,7 +255,6 @@ export default function BlogPostPage() {
               </div>
               <div className="post-stats">
                 <span><i className="bi bi-eye"></i> {post.views}</span>
-                {/* <span><i className="bi bi-chat"></i> {comments.length} comments</span> */}
               </div>
             </div>
             </div>

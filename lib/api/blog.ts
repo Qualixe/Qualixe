@@ -9,6 +9,7 @@ export interface BlogPost {
   featured_image?: string;
   author_id?: string;
   author_name?: string;
+  author_avatar?: string;   // from user_profiles.avatar_url
   category?: string;
   tags?: string[];
   published: boolean;
@@ -20,6 +21,7 @@ export interface BlogPost {
   created_at: string;
   updated_at: string;
   published_at?: string;
+  status?: string;
 }
 
 export interface BlogComment {
@@ -33,16 +35,40 @@ export interface BlogComment {
 }
 
 export const blogAPI = {
-  // Get all published posts
+  // Get all published posts — includes author name from user_profiles
   async getAllPublished() {
     const { data, error } = await supabase
       .from('blog_posts')
-      .select('*')
+      .select(`
+        *,
+        user_profiles!blog_posts_author_id_fkey (
+          full_name,
+          avatar_url
+        )
+      `)
       .eq('published', true)
       .order('published_at', { ascending: false });
 
-    if (error) throw error;
-    return data;
+    if (error) {
+      // Fallback without join
+      const { data: fallback, error: fbErr } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('published', true)
+        .order('published_at', { ascending: false });
+      if (fbErr) throw fbErr;
+      return fallback;
+    }
+
+    return (data ?? []).map((post: any) => {
+      const profile = post.user_profiles;
+      return {
+        ...post,
+        author_name: profile?.full_name || post.author_name || 'Qualixe Team',
+        author_avatar: profile?.avatar_url || null,
+        user_profiles: undefined,
+      };
+    });
   },
 
   // Get all posts (admin)
@@ -56,16 +82,39 @@ export const blogAPI = {
     return data;
   },
 
-  // Get post by slug
+  // Get post by slug — joins user_profiles for real author name + avatar
   async getBySlug(slug: string) {
     const { data, error } = await supabase
       .from('blog_posts')
-      .select('*')
+      .select(`
+        *,
+        user_profiles!blog_posts_author_id_fkey (
+          full_name,
+          avatar_url
+        )
+      `)
       .eq('slug', slug)
       .single();
 
-    if (error) throw error;
-    return data;
+    if (error) {
+      // Fallback: fetch without join if FK doesn't exist
+      const { data: fallback, error: fallbackErr } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+      if (fallbackErr) throw fallbackErr;
+      return fallback;
+    }
+
+    // Merge profile data into the post object
+    const profile = (data as any).user_profiles;
+    return {
+      ...data,
+      author_name: profile?.full_name || data.author_name || 'Qualixe Team',
+      author_avatar: profile?.avatar_url || null,
+      user_profiles: undefined,
+    };
   },
 
   // Get post by ID

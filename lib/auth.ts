@@ -44,25 +44,33 @@ export const authAPI = {
     return session;
   },
 
-  // Check if the currently logged-in user has role = 'admin' in user_profiles
+  // Check if the currently logged-in user is an admin.
+  // Checks user_profiles.role first, falls back to NEXT_PUBLIC_ADMIN_EMAILS env var.
   async isAdmin(): Promise<boolean> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
 
+      // 1. Try user_profiles table first
       const { data, error } = await supabase
         .from('user_profiles')
         .select('role')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.warn('isAdmin: profile query error', error.message);
-        // Fallback: check user_metadata role (set manually in Supabase Auth dashboard)
-        return user.user_metadata?.role === 'admin';
+      if (!error && data?.role === 'admin') return true;
+
+      // 2. Fallback: check NEXT_PUBLIC_ADMIN_EMAILS env var
+      const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+        .split(',')
+        .map(e => e.trim().toLowerCase())
+        .filter(Boolean);
+
+      if (adminEmails.length > 0) {
+        return adminEmails.includes((user.email || '').toLowerCase());
       }
 
-      return data?.role === 'admin';
+      return false;
     } catch (err) {
       console.error('isAdmin error:', err);
       return false;
