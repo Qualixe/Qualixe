@@ -70,7 +70,7 @@
   line-height: 1.2;
   margin-bottom: 20px;
   max-width: 700px;
-  color: #0a1f6e;
+  color: #000000;
 }
 
 .service-hero p {
@@ -553,6 +553,10 @@
 
   .process-step {
     gap: 16px;
+  }
+
+  .service-hero-cta{
+    padding: 14px 24px;
   }
 }
 
