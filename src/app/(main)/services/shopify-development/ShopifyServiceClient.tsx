@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
 import { motion } from 'motion/react';
-import { ShopifyServicePage } from '../../../../../lib/api/shopify-service';
+import type { ShopifyServicePage } from '../../../../../lib/api/shopify-service';
 import '../service.css';
 
 function ProcessRow({ step, index, isLeft }: { step: { title: string; desc: string }; index: number; isLeft: boolean }) {
@@ -40,7 +40,6 @@ export default function ShopifyServiceClient({ page }: { page: ShopifyServicePag
 
   return (
     <div className="service-page">
-      {/* Hero */}
       <section className="service-hero">
         <div className="container">
           <div className="service-hero-inner">
@@ -59,19 +58,13 @@ export default function ShopifyServiceClient({ page }: { page: ShopifyServicePag
               </div>
             </div>
             <div className="service-hero-image">
-              <NextImage
-                src="/assets/img/service-hero.jpg"
-                alt="Qualixe Shopify custom theme development services"
-                width={420} height={320}
-                style={{ width: '100%', height: '320px', objectFit: 'cover', display: 'block' }}
-                priority
-              />
+              <NextImage src="/assets/img/service-hero.jpg" alt="Qualixe Shopify custom theme development services"
+                width={420} height={320} style={{ width: '100%', height: '320px', objectFit: 'cover', display: 'block' }} priority />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Services */}
       <section className="service-cards-section">
         <div className="container">
           <h2>{services.heading}</h2>
@@ -90,7 +83,6 @@ export default function ShopifyServiceClient({ page }: { page: ShopifyServicePag
         </div>
       </section>
 
-      {/* Process */}
       <section className="service-process">
         <div className="container">
           <div className="text-center mb-5">
@@ -106,7 +98,6 @@ export default function ShopifyServiceClient({ page }: { page: ShopifyServicePag
         </div>
       </section>
 
-      {/* Why Us */}
       <section className="service-why">
         <div className="container">
           <h2>{why_us.heading}</h2>
@@ -124,7 +115,6 @@ export default function ShopifyServiceClient({ page }: { page: ShopifyServicePag
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="service-faq">
         <div className="container">
           <div className="row">
@@ -137,8 +127,7 @@ export default function ShopifyServiceClient({ page }: { page: ShopifyServicePag
                 <div key={i} className="faq-item">
                   <button className={`faq-question ${openFaq === i ? 'open' : ''}`}
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                    {item.q}
-                    <i className="bi bi-chevron-down"></i>
+                    {item.q}<i className="bi bi-chevron-down"></i>
                   </button>
                   <div className={`faq-answer ${openFaq === i ? 'open' : ''}`}>{item.a}</div>
                 </div>
@@ -148,7 +137,6 @@ export default function ShopifyServiceClient({ page }: { page: ShopifyServicePag
         </div>
       </section>
 
-      {/* CTA */}
       <section className="service-cta">
         <div className="container">
           <h2>{cta.heading}</h2>
