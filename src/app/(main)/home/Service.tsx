@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import './Services.css';
 import type { HomeServices } from '../../../../lib/api/home-page';
+import { FALLBACK } from './fallback';
 
-function Services({ data }: { data: HomeServices }) {
+function Services({ data = FALLBACK.services }: { data?: HomeServices }) {
   return (
     <section className="services-section">
       <div className="container">

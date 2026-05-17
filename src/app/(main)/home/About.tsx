@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import './About.css';
 import type { HomeAbout } from '../../../../lib/api/home-page';
+import { FALLBACK } from './fallback';
 
-function About({ data }: { data: HomeAbout }) {
+function About({ data = FALLBACK.about }: { data?: HomeAbout }) {
   return (
     <section className="about-section">
       <div className="container">
