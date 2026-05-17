@@ -1,76 +1,53 @@
 import Link from 'next/link';
 import './Hero.css';
+import type { HomeHero } from '../../../../lib/api/home-page';
 
-function Hero() {
+function Hero({ data }: { data: HomeHero }) {
   return (
     <section className="hero-section">
-      {/* Background blobs */}
       <div className="hero-blob hero-blob--1" aria-hidden="true" />
       <div className="hero-blob hero-blob--2" aria-hidden="true" />
 
       <div className="container">
         <div className="hero-inner">
-
-          {/* Text side */}
           <div className="hero-text">
-            <span className="hero-badge">🚀 Shopify &amp; E-Commerce Experts</span>
+            <span className="hero-badge">{data.badge}</span>
             <h1 className="hero-heading">
-              We Build Shopify Stores<br />
-              <span className="hero-heading--accent">That Actually Sell</span>
+              {data.heading_line1}<br />
+              <span className="hero-heading--accent">{data.heading_line2}</span>
             </h1>
-            <p className="hero-desc">
-              From custom theme development to full-stack e-commerce solutions —
-              Qualixe helps brands in Bangladesh and worldwide launch stores that
-              convert visitors into customers.
-            </p>
+            <p className="hero-desc">{data.description}</p>
 
             <div className="hero-actions">
-              <Link href="/contact" className="hero-cta hero-cta--primary">
-                Get a Free Quote
+              <Link href={data.cta_primary_url} className="hero-cta hero-cta--primary">
+                {data.cta_primary_text}
               </Link>
-              <Link href="/portfolio" className="hero-cta hero-cta--secondary">
-                View Our Work
+              <Link href={data.cta_secondary_url} className="hero-cta hero-cta--secondary">
+                {data.cta_secondary_text}
               </Link>
             </div>
 
-            {/* Social proof strip */}
             <div className="hero-proof">
-              <div className="hero-proof__item">
-                <strong>50+</strong>
-                <span>Stores Built</span>
-              </div>
-              <div className="hero-proof__divider" />
-              <div className="hero-proof__item">
-                <strong>100%</strong>
-                <span>Client Satisfaction</span>
-              </div>
-              <div className="hero-proof__divider" />
-              <div className="hero-proof__item">
-                <strong>4.9★</strong>
-                <span>Avg Rating</span>
-              </div>
+              {data.proof.map((p, i) => (
+                <>
+                  {i > 0 && <div key={`div-${i}`} className="hero-proof__divider" />}
+                  <div key={i} className="hero-proof__item">
+                    <strong>{p.value}</strong>
+                    <span>{p.label}</span>
+                  </div>
+                </>
+              ))}
             </div>
           </div>
 
-          {/* Image side */}
           <div className="hero-visual">
             <div className="hero-img-wrap">
-              <img
-                src="/assets/img/hero.png"
-                alt="Qualixe Shopify development"
-                className="hero-img"
-                loading="eager"
-              />
-              {/* Floating badge */}
-              <div className="hero-float hero-float--top">
-                <span>⚡</span> Shopify Expert
-              </div>
-              <div className="hero-float hero-float--bottom">
-                <span>✅</span> 4–8 Week Delivery
-              </div>
+              <img src="/assets/img/hero.png" alt="Qualixe Shopify development"
+                className="hero-img" loading="eager" />
+              <div className="hero-float hero-float--top">{data.float_top}</div>
+              <div className="hero-float hero-float--bottom">{data.float_bottom}</div>
             </div>
           </div>
-
         </div>
       </div>
     </section>

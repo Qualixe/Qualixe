@@ -4,6 +4,8 @@ import Services from './home/Service';
 import Portfolio from './home/Portfolio';
 import ClientsGrid from './home/Clients';
 import type { Metadata } from 'next';
+import { getHomePage } from '../../../lib/api/home-page';
+import { FALLBACK } from './home/fallback';
 
 export const metadata: Metadata = {
   title: 'Qualixe – Shopify Development & E-Commerce Solutions',
@@ -50,27 +52,17 @@ const organizationSchema = {
   ],
 };
 
-const websiteSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'Qualixe',
-  url: 'https://www.qualixe.com',
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: 'https://www.qualixe.com/search?q={search_term_string}',
-    'query-input': 'required name=search_term_string',
-  },
-};
+export default async function HomePage() {
+  const data = await getHomePage();
+  const page = data ?? FALLBACK;
 
-export default function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
       <div>
-        <Hero />
-        <About />
-        <Services />
+        <Hero data={page.hero} />
+        <About data={page.about} />
+        <Services data={page.services} />
         <Portfolio />
         <ClientsGrid />
       </div>

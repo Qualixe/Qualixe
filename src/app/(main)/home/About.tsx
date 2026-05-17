@@ -1,36 +1,17 @@
 import Link from 'next/link';
 import './About.css';
+import type { HomeAbout } from '../../../../lib/api/home-page';
 
-const stats = [
-  { value: '50+', label: 'Stores Built' },
-  { value: '5+',  label: 'Years Experience' },
-  { value: '98%', label: 'Client Retention' },
-];
-
-const reasons = [
-  { icon: '🎯', text: 'Client satisfaction is our #1 goal' },
-  { icon: '🧠', text: 'Talented team of Shopify specialists' },
-  { icon: '⚡', text: 'Fast delivery without cutting corners' },
-  { icon: '🔒', text: 'Transparent pricing, no hidden fees' },
-];
-
-function About() {
+function About({ data }: { data: HomeAbout }) {
   return (
     <section className="about-section">
       <div className="container">
         <div className="about-inner">
-
-          {/* Image side */}
           <div className="about-img-col">
             <div className="about-img-wrap">
-              <img
-                src="/assets/img/about.jpeg"
-                alt="About Qualixe"
-                className="about-img"
-              />
-              {/* Stats card */}
+              <img src="/assets/img/about.jpeg" alt="About Qualixe" className="about-img" />
               <div className="about-stats-card">
-                {stats.map((s, i) => (
+                {data.stats.map((s, i) => (
                   <div key={i} className="about-stat">
                     <strong>{s.value}</strong>
                     <span>{s.label}</span>
@@ -40,22 +21,17 @@ function About() {
             </div>
           </div>
 
-          {/* Text side */}
           <div className="about-text-col">
-            <span className="about-label">About Us</span>
+            <span className="about-label">{data.label}</span>
             <h2 className="about-heading">
-              We Build E-Commerce Stores<br />
-              That Drive Real Revenue
+              {data.heading.split('\n').map((line, i) => (
+                <span key={i}>{line}{i < data.heading.split('\n').length - 1 && <br />}</span>
+              ))}
             </h2>
-            <p className="about-desc">
-              Qualixe is a dedicated Shopify development agency based in Bangladesh,
-              serving brands worldwide. We combine creative design, technical expertise,
-              and conversion-focused strategy to build online stores that don't just
-              look great — they sell.
-            </p>
+            <p className="about-desc">{data.description}</p>
 
             <ul className="about-reasons">
-              {reasons.map((r, i) => (
+              {data.reasons.map((r, i) => (
                 <li key={i}>
                   <span className="about-reasons__icon">{r.icon}</span>
                   {r.text}
@@ -63,11 +39,8 @@ function About() {
               ))}
             </ul>
 
-            <Link href="/about" className="about-cta">
-              Learn More About Us →
-            </Link>
+            <Link href={data.cta_url} className="about-cta">{data.cta_text}</Link>
           </div>
-
         </div>
       </div>
     </section>
