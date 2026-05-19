@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import './Clients.css';
 import { clientsAPI } from '../../../../lib/api/clients';
 
@@ -22,9 +23,6 @@ function ClientsGrid() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Duplicate the list so the marquee loops seamlessly
-  const track = [...clients, ...clients];
-
   return (
     <section className="clients-section">
       <div className="container">
@@ -35,40 +33,35 @@ function ClientsGrid() {
             We've helped businesses across Bangladesh and beyond build stores that sell.
           </p>
         </div>
-      </div>
-
-      {/* Full-width marquee — outside container so it bleeds edge to edge */}
-      <div className="clients-marquee-wrap">
-        {/* Fade edges */}
-        <div className="clients-fade clients-fade--left"  aria-hidden="true" />
-        <div className="clients-fade clients-fade--right" aria-hidden="true" />
 
         {loading ? (
-          /* Skeleton strip */
-          <div className="clients-skeleton-row">
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className="clients-grid">
+            {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="clients-skeleton-item" />
             ))}
           </div>
         ) : (
-          <div className="clients-track" aria-label="Our clients">
-            {track.map((c, i) => (
+          <div className="clients-grid">
+            {clients.map((c) => (
               <a
-                key={`${c.id}-${i}`}
+                key={c.id}
                 href={c.website_url || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="clients-logo"
                 aria-label={c.name}
-                tabIndex={i >= clients.length ? -1 : 0}
                 style={c.background_color ? { background: c.background_color, borderColor: c.background_color } : undefined}
               >
-                <img
-                  src={c.logo_url}
-                  alt={c.name}
-                  className="clients-logo__img"
-                  loading="lazy"
-                />
+                <div className="clients-logo-inner">
+                  <Image
+                    src={c.logo_url}
+                    alt={c.name}
+                    width={140}
+                    height={60}
+                    className="clients-logo__img"
+                    loading="lazy"
+                  />
+                </div>
               </a>
             ))}
           </div>

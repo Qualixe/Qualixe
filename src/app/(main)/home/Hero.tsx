@@ -1,4 +1,6 @@
+import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import './Hero.css';
 import type { HomeHero } from '../../../../lib/api/home-page';
 
@@ -29,21 +31,27 @@ function Hero({ data }: { data: HomeHero }) {
 
             <div className="hero-proof">
               {data.proof.map((p, i) => (
-                <>
-                  {i > 0 && <div key={`div-${i}`} className="hero-proof__divider" />}
-                  <div key={i} className="hero-proof__item">
+                <React.Fragment key={i}>
+                  {i > 0 && <div className="hero-proof__divider" />}
+                  <div className="hero-proof__item">
                     <strong>{p.value}</strong>
                     <span>{p.label}</span>
                   </div>
-                </>
+                </React.Fragment>
               ))}
             </div>
           </div>
 
           <div className="hero-visual">
             <div className="hero-img-wrap">
-              <img src="/assets/img/hero.png" alt="Qualixe Shopify development"
-                className="hero-img" loading="eager" />
+              <Image 
+                src="/assets/img/modern-hero.jpg" 
+                alt="Qualixe Shopify development experts"
+                width={600}
+                height={600}
+                className="hero-img" 
+                priority
+              />
               <div className="hero-float hero-float--top">{data.float_top}</div>
               <div className="hero-float hero-float--bottom">{data.float_bottom}</div>
             </div>

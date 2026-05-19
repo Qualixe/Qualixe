@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import './About.css';
 import type { HomeAbout } from '../../../../lib/api/home-page';
 import { FALLBACK } from './fallback';
@@ -10,7 +11,13 @@ function About({ data = FALLBACK.about }: { data?: HomeAbout }) {
         <div className="about-inner">
           <div className="about-img-col">
             <div className="about-img-wrap">
-              <img src="/assets/img/about.jpeg" alt="About Qualixe" className="about-img" />
+              <Image 
+                src="/assets/img/modern-about.jpg" 
+                alt="About Qualixe - Our team and expertise" 
+                width={600}
+                height={500}
+                className="about-img" 
+              />
               <div className="about-stats-card">
                 {data.stats.map((s, i) => (
                   <div key={i} className="about-stat">

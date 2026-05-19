@@ -169,8 +169,10 @@
   width: 100%;
   height: auto;
   display: block;
-  filter: drop-shadow(0 24px 48px rgba(12, 60, 195, 0.15));
-  animation: hero-float 4s ease-in-out infinite;
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(12, 60, 195, 0.12), 0 12px 24px rgba(0, 0, 0, 0.05);
+  animation: hero-float 6s ease-in-out infinite;
+  object-fit: cover;
 }
 
 @keyframes hero-float {
