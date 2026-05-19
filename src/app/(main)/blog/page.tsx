@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import PageBanner from '@/components/PageBanner';
 import { blogAPI, BlogPost } from '../../../../lib/api/blog';
 import './blog.css';
 
@@ -68,13 +69,10 @@ export default function BlogPage() {
 
   return (
     <>
-      {/* Banner */}
-      <div className="blog-banner">
-        <div className="container">
-          <h1>Our Blog</h1>
-          <p>Insights, tutorials, and updates from the Qualixe team</p>
-        </div>
-      </div>
+      <PageBanner
+        heading="Our Blog"
+        subtitle="Insights, tutorials, and updates from the Qualixe team"
+      />
 
       {/* Search and Filter */}
       <div className="blog-filters">
