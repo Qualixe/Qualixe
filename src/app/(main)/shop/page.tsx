@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useCart } from '@/context/CartContext';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, Check, Eye, Download, Star, Zap, Shield, Clock, Gift, Crown } from 'lucide-react';
+import { ShoppingCart, Eye, Download, Star, Zap, Shield, Clock, Gift, Crown } from 'lucide-react';
 import Link from 'next/link';
 import './shop.css';
 
@@ -18,6 +17,7 @@ interface Product {
   preview_url?: string;
   demo_url?: string;
   file_path?: string;
+  buy_link?: string;
   features: string[];
   active: boolean;
 }
@@ -93,8 +93,6 @@ function FreeClaimModal({ product, onClose }: { product: Product; onClose: () =>
 
 /* ── Main page ────────────────────────────────────────── */
 export default function ShopPage() {
-  const { addItem, items, openCart, drawerEnabled } = useCart();
-  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<string | null>(null);
@@ -108,13 +106,7 @@ export default function ShopPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const isInCart = useCallback((id: string) => items.some(i => i.id === id), [items]);
   const isFree = (p: Product) => Number(p.price) === 0;
-
-  function handleAddToCart(p: Product) {
-    addItem({ id: p.id, name: p.name, price: p.price, priceLabel: p.price.toFixed(2), description: p.tagline });
-    if (!drawerEnabled) router.push('/cart');
-  }
 
   function handleFreeClick(p: Product) {
     if (p.id) setClaimProduct(p);
@@ -235,10 +227,9 @@ export default function ShopPage() {
               <ProductGrid
                 products={loading ? [] : freeProducts}
                 loading={loading}
-                isFree={isFree} isInCart={isInCart}
-                onFreeClick={handleFreeClick} onAddToCart={handleAddToCart}
-                onPreview={setLightbox} drawerEnabled={drawerEnabled}
-                openCart={openCart} router={router}
+                isFree={isFree}
+                onFreeClick={handleFreeClick}
+                onPreview={setLightbox}
               />
             </div>
           </section>
@@ -262,10 +253,9 @@ export default function ShopPage() {
               <ProductGrid
                 products={loading ? [] : paidProducts}
                 loading={false}
-                isFree={isFree} isInCart={isInCart}
-                onFreeClick={handleFreeClick} onAddToCart={handleAddToCart}
-                onPreview={setLightbox} drawerEnabled={drawerEnabled}
-                openCart={openCart} router={router}
+                isFree={isFree}
+                onFreeClick={handleFreeClick}
+                onPreview={setLightbox}
               />
             </div>
           </section>
@@ -449,20 +439,14 @@ export default function ShopPage() {
 
 /* ── Product grid ─────────────────────────────────────── */
 function ProductGrid({
-  products, loading, isFree, isInCart,
-  onFreeClick, onAddToCart, onPreview,
-  drawerEnabled, openCart, router,
+  products, loading, isFree,
+  onFreeClick, onPreview,
 }: {
   products: Product[];
   loading: boolean;
   isFree: (p: Product) => boolean;
-  isInCart: (id: string) => boolean;
   onFreeClick: (p: Product) => void;
-  onAddToCart: (p: Product) => void;
   onPreview: (url: string) => void;
-  drawerEnabled: boolean;
-  openCart: () => void;
-  router: ReturnType<typeof useRouter>;
 }) {
   if (loading) {
     return (
@@ -500,7 +484,6 @@ function ProductGrid({
     <div className="shop-grid">
       {products.map(product => {
         const free = isFree(product);
-        const inCart = isInCart(product.id);
         return (
           <article key={product.id} className="product-card">
             {product.badge && (
@@ -599,22 +582,16 @@ function ProductGrid({
                     >
                       <Download size={16} /> Get Free
                     </button>
-                  ) : inCart ? (
-                    <button
-                      className="product-card__btn product-card__btn--added"
-                      onClick={() => drawerEnabled ? openCart() : router.push('/cart')}
-                      aria-label="View cart"
-                    >
-                      <Check size={16} /> In Cart
-                    </button>
                   ) : (
-                    <button
+                    <a
+                      href={product.buy_link || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="product-card__btn"
-                      onClick={() => onAddToCart(product)}
-                      aria-label={`Add ${product.name} to cart`}
+                      aria-label={`Buy ${product.name}`}
                     >
-                      <ShoppingCart size={16} /> Add to Cart
-                    </button>
+                      <ShoppingCart size={16} /> Purchase
+                    </a>
                   )}
                 </div>
               </div>

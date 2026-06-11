@@ -18,6 +18,7 @@ export interface Product {
   badge_color?: string;
   preview_url?: string;
   demo_url?: string;
+  buy_link?: string;
   features: string[];
   file_path: string;
   file_name: string;
@@ -30,7 +31,7 @@ export interface Product {
 const EMPTY: Omit<Product, 'id' | 'created_at' | 'sales_count'> = {
   name: '', tagline: '', description: '',
   price: 9.99, badge: '', badge_color: '#0d6efd',
-  preview_url: '', demo_url: '', features: [''],
+  preview_url: '', demo_url: '', buy_link: '', features: [''],
   file_path: '', file_name: '', file_size: 0, active: true,
 };
 
@@ -67,7 +68,7 @@ export default function ProductsPage() {
     setForm({
       name: p.name, tagline: p.tagline, description: p.description,
       price: p.price, badge: p.badge ?? '', badge_color: p.badge_color ?? '#0d6efd',
-      preview_url: p.preview_url ?? '', demo_url: p.demo_url ?? '',
+      preview_url: p.preview_url ?? '', demo_url: p.demo_url ?? '', buy_link: p.buy_link ?? '',
       features: p.features?.length ? p.features : [''],
       file_path: p.file_path, file_name: p.file_name, file_size: p.file_size,
       active: p.active,
@@ -85,7 +86,8 @@ export default function ProductsPage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.file_path) { toast.error('Please enter a ZIP file URL'); return; }
+    if (form.price === 0 && !form.file_path) { toast.error('Please enter a ZIP file URL'); return; }
+    if (form.price > 0 && !form.buy_link) { toast.error('Please enter a Lemon Squeezy buy link'); return; }
     setSaving(true);
 
     const payload = {
@@ -94,6 +96,7 @@ export default function ProductsPage() {
       badge: form.badge || null, badge_color: form.badge_color,
       preview_url: form.preview_url || null,
       demo_url: form.demo_url || null,
+      buy_link: form.buy_link || null,
       features: form.features.filter(f => f.trim()),
       file_path: form.file_path, file_name: form.file_name, file_size: form.file_size,
       active: form.active,
@@ -388,6 +391,41 @@ export default function ProductsPage() {
                       <small className="text-muted">Share a live preview link with buyers</small>
                     </div>
 
+                    {/* ZIP URL (free) or Buy Link (paid) */}
+                    {form.price === 0 ? (
+                      <div className="col-12">
+                        <label className="form-label fw-semibold">ZIP File URL *</label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="bi bi-file-zip"></i></span>
+                          <input
+                            className="form-control"
+                            placeholder="https://example.com/files/template.zip"
+                            value={form.file_path}
+                            onChange={e => setForm(f => ({ ...f, file_path: e.target.value, file_name: e.target.value.split('/').pop() || '', file_size: 0 }))}
+                            type="url"
+                            required
+                          />
+                        </div>
+                        <small className="text-muted">Paste the direct download URL of your ZIP file</small>
+                      </div>
+                    ) : (
+                      <div className="col-12">
+                        <label className="form-label fw-semibold">Lemon Squeezy Buy Link *</label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="bi bi-bag-check"></i></span>
+                          <input
+                            className="form-control"
+                            placeholder="https://yourstore.lemonsqueezy.com/buy/..."
+                            value={form.buy_link}
+                            onChange={e => setForm(f => ({ ...f, buy_link: e.target.value }))}
+                            type="url"
+                            required
+                          />
+                        </div>
+                        <small className="text-muted">Customers will be sent here to complete purchase</small>
+                      </div>
+                    )}
+
                     {/* Features */}
                     <div className="col-12">
                       <label className="form-label fw-semibold">Features</label>
@@ -426,22 +464,6 @@ export default function ProductsPage() {
                       </div>
                     </div>
 
-                    {/* ZIP File URL */}
-                    <div className="col-12">
-                      <label className="form-label fw-semibold">ZIP File URL *</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="bi bi-file-zip"></i></span>
-                        <input
-                          className="form-control"
-                          placeholder="https://example.com/files/template.zip"
-                          value={form.file_path}
-                          onChange={e => setForm(f => ({ ...f, file_path: e.target.value, file_name: e.target.value.split('/').pop() || '', file_size: 0 }))}
-                          type="url"
-                          required
-                        />
-                      </div>
-                      <small className="text-muted">Paste the direct download URL of your ZIP file</small>
-                    </div>
 
                     {/* Active */}
                     <div className="col-12">

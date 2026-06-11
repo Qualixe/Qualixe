@@ -12,7 +12,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('products')
-    .select('id, name, tagline, description, price, badge, badge_color, preview_url, demo_url, features, active, file_path')
+    .select('id, name, tagline, description, price, badge, badge_color, preview_url, demo_url, features, active, file_path, buy_link')
     .eq('active', true)
     .order('created_at', { ascending: false });
 
