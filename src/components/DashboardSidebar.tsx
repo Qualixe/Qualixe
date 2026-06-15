@@ -10,6 +10,7 @@ export default function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<{ role: string; status: string; full_name: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,8 +19,12 @@ export default function DashboardSidebar() {
 
   const loadUser = async () => {
     try {
-      const currentUser = await authAPI.getCurrentUser();
+      const [currentUser, userProfile] = await Promise.all([
+        authAPI.getCurrentUser(),
+        authAPI.getUserProfile(),
+      ]);
       setUser(currentUser);
+      setProfile(userProfile);
     } catch (error) {
       console.error('Error loading user:', error);
     } finally {
@@ -49,10 +54,14 @@ export default function DashboardSidebar() {
     return fullName.slice(0, 2).toUpperCase();
   };
 
-  // Get display name
   const getDisplayName = () => {
     if (!user) return 'Loading...';
-    return user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin User';
+    return profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin User';
+  };
+
+  const getRoleLabel = () => {
+    if (!profile) return 'administrator';
+    return profile.role.charAt(0).toUpperCase() + profile.role.slice(1);
   };
 
   return (
@@ -192,7 +201,7 @@ export default function DashboardSidebar() {
         </div>
         <div className="user-info">
           <div className="user-name">{getDisplayName()}</div>
-          <div className="user-role">administrator</div>
+          <div className="user-role">{loading ? '...' : getRoleLabel()}</div>
         </div>
       </div>
     </div>

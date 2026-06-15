@@ -46,21 +46,38 @@ export const authAPI = {
 
   // Check if the currently logged-in user is an admin.
   // Checks user_profiles.role first, falls back to NEXT_PUBLIC_ADMIN_EMAILS env var.
+  async getUserProfile(): Promise<{ role: string; status: string; full_name: string } | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('role, status, full_name')
+        .eq('id', user.id)
+        .single();
+
+      if (error || !data) return null;
+      return data;
+    } catch {
+      return null;
+    }
+  },
+
   async isAdmin(): Promise<boolean> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
 
-      // 1. Try user_profiles table first
       const { data, error } = await supabase
         .from('user_profiles')
-        .select('role')
+        .select('role, status')
         .eq('id', user.id)
         .single();
 
-      if (!error && data?.role === 'admin') return true;
+      if (!error && data?.role === 'admin' && data?.status !== 'suspended' && data?.status !== 'inactive') return true;
 
-      // 2. Fallback: check NEXT_PUBLIC_ADMIN_EMAILS env var
+      // Fallback: check NEXT_PUBLIC_ADMIN_EMAILS env var
       const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
         .split(',')
         .map(e => e.trim().toLowerCase())

@@ -58,40 +58,14 @@ export async function createUser(userData: {
   phone?: string;
   department?: string;
 }) {
-  try {
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: userData.email,
-      password: userData.password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: userData.full_name,
-      },
-    });
-
-    if (authError) throw authError;
-
-    // Update user profile with additional data
-    if (authData.user) {
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .update({
-          full_name: userData.full_name,
-          role: userData.role || 'user',
-          status: userData.status || 'active',
-          phone: userData.phone,
-          department: userData.department,
-        })
-        .eq('id', authData.user.id);
-
-      if (profileError) throw profileError;
-    }
-
-    return authData.user;
-  } catch (error) {
-    console.error('Error creating user:', error);
-    throw error;
-  }
+  const res = await fetch('/api/admin/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to create user');
+  return data.user;
 }
 
 // Update user profile
@@ -125,17 +99,10 @@ export async function updateUser(
 
 // Delete user
 export async function deleteUser(id: string) {
-  try {
-    // Delete from auth (this will cascade to user_profiles)
-    const { error: authError } = await supabase.auth.admin.deleteUser(id);
-
-    if (authError) throw authError;
-
-    return true;
-  } catch (error) {
-    console.error('Error deleting user:', error);
-    throw error;
-  }
+  const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete user');
+  return true;
 }
 
 // Update user status
@@ -207,15 +174,12 @@ export async function searchUsers(query: string) {
 
 // Reset user password (admin function)
 export async function resetUserPassword(userId: string, newPassword: string) {
-  try {
-    const { data, error } = await supabase.auth.admin.updateUserById(userId, {
-      password: newPassword,
-    });
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Error resetting password:', error);
-    throw error;
-  }
+  const res = await fetch(`/api/admin/users/${userId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: newPassword }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to reset password');
+  return data;
 }
