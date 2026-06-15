@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, Eye, Download, Star, Zap, Shield, Clock, Gift, Crown } from 'lucide-react';
+import { Eye, Download } from 'lucide-react';
 import Link from 'next/link';
+import { slugify } from '@/lib/slugify';
 import './shop.css';
 
 interface Product {
@@ -12,6 +13,7 @@ interface Product {
   tagline: string;
   description: string;
   price: number;
+  category?: string;
   badge?: string;
   badge_color?: string;
   preview_url?: string;
@@ -97,6 +99,8 @@ export default function ShopPage() {
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [claimProduct, setClaimProduct] = useState<Product | null>(null);
+  const [typeFilter, setTypeFilter] = useState<'All' | 'Free' | 'Premium'>('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
 
   useEffect(() => {
     fetch('/api/products')
@@ -113,12 +117,40 @@ export default function ShopPage() {
     else if (p.file_path) window.open(p.file_path, '_blank');
   }
 
-  const freeProducts = products.filter(isFree);
-  const paidProducts = products.filter(p => !isFree(p));
+  /* derive category label: use category field, else tagline, else 'Other' */
+  const getCategory = (p: Product) => p.category || p.tagline || 'Other';
+
+  /* unique categories from all products */
+  const allCategories = ['All', ...Array.from(new Set(products.map(getCategory)))];
+
+  /* filtered list */
+  const visibleProducts = products.filter(p => {
+    const typeOk =
+      typeFilter === 'All' ||
+      (typeFilter === 'Free' && isFree(p)) ||
+      (typeFilter === 'Premium' && !isFree(p));
+    const catOk = categoryFilter === 'All' || getCategory(p) === categoryFilter;
+    return typeOk && catOk;
+  });
+
+  /* count per category for pills */
+  const countForCategory = (cat: string) =>
+    cat === 'All'
+      ? products.filter(p =>
+          typeFilter === 'All' ? true :
+          typeFilter === 'Free' ? isFree(p) : !isFree(p)
+        ).length
+      : products.filter(p => {
+          const typeOk =
+            typeFilter === 'All' ||
+            (typeFilter === 'Free' && isFree(p)) ||
+            (typeFilter === 'Premium' && !isFree(p));
+          return typeOk && getCategory(p) === cat;
+        }).length;
 
   return (
     <>
-      {/* JSON-LD — auto-populates with real products from DB */}
+      {/* JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -126,7 +158,7 @@ export default function ShopPage() {
             '@context': 'https://schema.org',
             '@type': 'ItemList',
             name: 'Free & Premium HTML Templates by Qualixe',
-            description: 'Download free and premium production-ready HTML templates for e-commerce, business, and portfolio websites.',
+            description: 'Download free and premium production-ready HTML templates.',
             url: 'https://qualixe.com/shop',
             itemListElement: products.map((p, i) => ({
               '@type': 'ListItem',
@@ -149,259 +181,187 @@ export default function ShopPage() {
 
       <main className="shop-page">
 
-        {/* ── Hero ──────────────────────────────────────── */}
-        <section className="shop-hero" aria-label="HTML Templates hero">
+        {/* ── Page heading ──────────────────────────────── */}
+        <section className="shop-heading-section">
           <div className="container">
-            <span className="shop-hero__tag">Free &amp; Premium HTML Templates</span>
-            <h1 className="shop-hero__title">
-              Professional HTML Templates<br />
-              <span className="shop-hero__title-accent">Built to Convert</span>
-            </h1>
-            <p className="shop-hero__sub">
-              Production-ready HTML templates for e-commerce, business &amp; portfolio sites.
-              Clean code, fully responsive, SEO-optimized — launch in minutes.
+            <h1 className="shop-main-title">HTML Templates</h1>
+            <p className="shop-main-sub">
+              Discover our collection of responsive, production-ready HTML templates.
+              All templates are built with clean code, fully responsive, perfect for modern websites and apps.
             </p>
-            <div className="shop-hero__ctas">
-              <a href="#free-templates" className="shop-hero__cta shop-hero__cta--primary">
-                <Gift size={18} /> Get Free Templates
-              </a>
-              {/* Shows automatically when paid products exist */}
-              {paidProducts.length > 0 && (
-                <a href="#premium-templates" className="shop-hero__cta shop-hero__cta--secondary">
-                  <Crown size={18} /> Browse Premium
-                </a>
-              )}
-              {paidProducts.length === 0 && (
-                <a href="#free-templates" className="shop-hero__cta shop-hero__cta--secondary">
-                  Browse All Templates
-                </a>
-              )}
-            </div>
-            <div className="shop-hero__stats">
-              <div className="shop-hero__stat"><strong>500+</strong><span>Downloads</span></div>
-              <div className="shop-hero__stat-divider" />
-              <div className="shop-hero__stat"><strong>Free</strong><span>To Start</span></div>
-              <div className="shop-hero__stat-divider" />
-              <div className="shop-hero__stat"><strong>4.9★</strong><span>Avg Rating</span></div>
-            </div>
           </div>
         </section>
 
-        {/* ── Value bar ─────────────────────────────────── */}
-        <section className="shop-value-bar" aria-label="Why choose our templates">
+        {/* ── Filter panel ──────────────────────────────── */}
+        <section className="shop-filter-section">
           <div className="container">
-            <div className="shop-value-grid">
-              {[
-                { icon: <Zap size={20} />,    title: 'Instant Download',  desc: 'Get your template immediately after claiming' },
-                { icon: <Shield size={20} />, title: 'Clean Code',        desc: 'Semantic HTML5, CSS3, no bloat' },
-                { icon: <Star size={20} />,   title: 'SEO Optimized',     desc: 'Built with search rankings in mind' },
-                { icon: <Clock size={20} />,  title: 'Save 40+ Hours',    desc: 'Skip the build, focus on your business' },
-              ].map(v => (
-                <div key={v.title} className="shop-value-item">
-                  <div className="shop-value-icon">{v.icon}</div>
-                  <div>
-                    <strong>{v.title}</strong>
-                    <span>{v.desc}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Free templates ────────────────────────────── */}
-        {(loading || freeProducts.length > 0) && (
-          <section className="shop-products shop-products--free" id="free-templates" aria-label="Free HTML templates">
-            <div className="container">
-              <div className="shop-section-head">
-                <div>
-                  <span className="shop-section-tag shop-section-tag--free">
-                    <Gift size={14} /> 100% Free
-                  </span>
-                  <h2 className="shop-section-title">Free HTML Templates</h2>
-                  <p className="shop-section-sub">
-                    Professional templates at zero cost. Enter your email and download instantly.
-                  </p>
-                </div>
-              </div>
-              <ProductGrid
-                products={loading ? [] : freeProducts}
-                loading={loading}
-                isFree={isFree}
-                onFreeClick={handleFreeClick}
-                onPreview={setLightbox}
-              />
-            </div>
-          </section>
-        )}
-
-        {/* ── Premium templates — renders automatically when paid products are added in dashboard ── */}
-        {(loading || paidProducts.length > 0) && (
-          <section className="shop-products shop-products--premium" id="premium-templates" aria-label="Premium HTML templates">
-            <div className="container">
-              <div className="shop-section-head">
-                <div>
-                  <span className="shop-section-tag shop-section-tag--premium">
-                    <Crown size={14} /> Premium
-                  </span>
-                  <h2 className="shop-section-title">Premium Templates</h2>
-                  <p className="shop-section-sub">
-                    Advanced multi-page templates with dark mode, Figma files, and priority support.
-                  </p>
-                </div>
-              </div>
-              <ProductGrid
-                products={loading ? [] : paidProducts}
-                loading={false}
-                isFree={isFree}
-                onFreeClick={handleFreeClick}
-                onPreview={setLightbox}
-              />
-            </div>
-          </section>
-        )}
-
-        {/* ── Social proof ──────────────────────────────── */}
-        <section className="shop-social-proof" aria-label="Customer testimonials">
-          <div className="container">
-            <div className="text-center mb-5">
-              <span className="shop-section-tag">Testimonials</span>
-              <h2 className="shop-section-title mt-2">What Developers Say</h2>
-            </div>
-            <div className="shop-reviews-grid">
-              {[
-                {
-                  name: 'Arif Rahman', role: 'Freelance Developer',
-                  text: 'Saved me hours of work. The code is clean, well-commented, and easy to customize. Highly recommend!',
-                  stars: 5,
-                },
-                {
-                  name: 'Priya Sharma', role: 'UI/UX Designer',
-                  text: "The design quality is on par with premium templates. I can't believe it's free. Already used it for 3 client projects.",
-                  stars: 5,
-                },
-                {
-                  name: 'James Okafor', role: 'E-commerce Entrepreneur',
-                  text: 'Launched my store in a weekend using this template. The SEO structure is already built in — huge time saver.',
-                  stars: 5,
-                },
-              ].map(r => (
-                <div key={r.name} className="shop-review-card">
-                  <div className="shop-review-stars">
-                    {Array.from({ length: r.stars }).map((_, i) => (
-                      <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
-                    ))}
-                  </div>
-                  <p className="shop-review-text">"{r.text}"</p>
-                  <div className="shop-review-author">
-                    <div className="shop-review-avatar">{r.name.charAt(0)}</div>
-                    <div>
-                      <strong>{r.name}</strong>
-                      <span>{r.role}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── FAQ ───────────────────────────────────────── */}
-        <section className="shop-faq" aria-label="Frequently asked questions">
-          <div className="container">
-            <div className="shop-faq-inner">
-              <div className="shop-faq-left">
-                <h2>Frequently Asked Questions</h2>
-                <p>Everything you need to know about our HTML templates.</p>
-                <Link href="/contact" className="shop-faq-cta">
-                  Still have questions? Contact us →
-                </Link>
-              </div>
-              <div className="shop-faq-right">
-                {[
-                  {
-                    q: 'Are the free templates really free?',
-                    a: 'Yes, 100% free. Just enter your name and email to get instant download access. No credit card required, no hidden fees.',
-                  },
-                  {
-                    q: 'Can I use these templates for client projects?',
-                    a: 'Absolutely. All templates — free and premium — come with a commercial license. Use them on unlimited personal and client projects without attribution.',
-                  },
-                  {
-                    q: 'How does buying a premium template work?',
-                    a: "Add the template to your cart, enter your email at checkout, and pay securely. You'll receive an instant download link — no account needed, no subscription.",
-                  },
-                  {
-                    q: 'Are the templates SEO-friendly?',
-                    a: 'Yes. All templates use semantic HTML5, proper heading hierarchy, meta tag placeholders, fast-loading assets, and structured data support.',
-                  },
-                  {
-                    q: 'Do the templates work on mobile?',
-                    a: 'Every template is fully responsive and tested across all major devices and screen sizes — mobile, tablet, and desktop.',
-                  },
-                  {
-                    q: 'What technologies are used?',
-                    a: 'Our templates use HTML5, CSS3, and vanilla JavaScript. No heavy frameworks — just clean, fast, maintainable code.',
-                  },
-                  {
-                    q: 'Do you offer customization services?',
-                    a: 'Yes! Our team can customize any template to match your brand. Contact us for a free quote.',
-                  },
-                ].map((faq, i) => (
-                  <FaqItem key={i} q={faq.q} a={faq.a} />
+            <div className="shop-filter-panel">
+              {/* Left: type toggles */}
+              <div className="shop-type-filters">
+                {(['All', 'Free', 'Premium'] as const).map(t => (
+                  <button
+                    key={t}
+                    className={`shop-type-btn${typeFilter === t ? ' active' : ''}`}
+                    onClick={() => { setTypeFilter(t); setCategoryFilter('All'); }}
+                  >
+                    {t === 'Free' && <i className="bi bi-gift me-1" />}
+                    {t === 'Premium' && <i className="bi bi-gem me-1" />}
+                    {t === 'All' && <i className="bi bi-grid-3x3-gap me-1" />}
+                    {t}
+                  </button>
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* ── CTA banner ────────────────────────────────── */}
-        <section className="shop-cta-banner" aria-label="Call to action">
-          <div className="container">
-            <div className="shop-cta-inner">
-              <div className="shop-cta-text">
-                <h2>Need a Custom Website?</h2>
-                <p>
-                  Our team builds fully custom Shopify stores, e-commerce sites, and web apps.
-                  Let's turn your vision into a high-converting website.
-                </p>
-              </div>
-              <div className="shop-cta-actions">
-                <Link href="/contact" className="shop-cta-btn shop-cta-btn--primary">
-                  Get a Free Quote
-                </Link>
-                <Link href="/portfolio" className="shop-cta-btn shop-cta-btn--secondary">
-                  View Our Work
-                </Link>
+              {/* Right: category pills */}
+              <div className="shop-cat-filters">
+                {allCategories.map(cat => {
+                  const count = countForCategory(cat);
+                  if (cat !== 'All' && count === 0) return null;
+                  return (
+                    <button
+                      key={cat}
+                      className={`shop-cat-btn${categoryFilter === cat ? ' active' : ''}`}
+                      onClick={() => setCategoryFilter(cat)}
+                    >
+                      {cat}
+                      <span className="shop-cat-count">{count}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── Trust bar ─────────────────────────────────── */}
-        <section className="shop-trust" aria-label="Trust signals">
+        {/* ── Product grid ──────────────────────────────── */}
+        <section className="shop-products-section">
           <div className="container">
-            <div className="shop-trust__grid">
-              {[
-                { icon: '🔒', text: 'Secure Download' },
-                { icon: '⚡', text: 'Instant Access' },
-                { icon: '♾️', text: 'Lifetime License' },
-                { icon: '💬', text: 'Free Support' },
-                { icon: '🔄', text: 'Regular Updates' },
-              ].map(t => (
-                <div key={t.text} className="trust-item">
-                  <span>{t.icon}</span><span>{t.text}</span>
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <div className="shop-grid">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="shop-card shop-card--skeleton">
+                    <div className="shop-card__thumb skeleton-block" />
+                    <div className="shop-card__info">
+                      <div className="skeleton-line skeleton-line--lg" />
+                      <div className="skeleton-line skeleton-line--sm mt-2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : visibleProducts.length === 0 ? (
+              <div className="shop-empty">
+                <p>No templates match the selected filters.</p>
+                <button className="shop-reset-btn" onClick={() => { setTypeFilter('All'); setCategoryFilter('All'); }}>
+                  Reset Filters
+                </button>
+              </div>
+            ) : (
+              <div className="shop-grid">
+                {visibleProducts.map(product => {
+                  const free = isFree(product);
+                  return (
+                    <article key={product.id} className="shop-card">
+                      {/* Thumbnail */}
+                      <div className="shop-card__thumb">
+                        {product.preview_url ? (
+                          <img
+                            src={product.preview_url}
+                            alt={`${product.name} preview`}
+                            className="shop-card__img"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="shop-card__placeholder">
+                            <div className="ph-bar"><span /><span /><span /></div>
+                            <div className="ph-lines">
+                              <div className="ph-line ph-line--w" />
+                              <div className="ph-line ph-line--m" />
+                              <div className="ph-line ph-line--s" />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Badge */}
+                        {product.badge && (
+                          <span className="shop-card__badge" style={{ background: product.badge_color ?? '#0c3cc3' }}>
+                            {product.badge}
+                          </span>
+                        )}
+                        {free && !product.badge && (
+                          <span className="shop-card__badge shop-card__badge--free">FREE</span>
+                        )}
+
+                        {/* Eye preview button */}
+                        {product.preview_url && (
+                          <button
+                            className="shop-card__eye"
+                            onClick={() => setLightbox(product.preview_url!)}
+                            aria-label={`Preview ${product.name}`}
+                          >
+                            <Eye size={14} />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Info row */}
+                      <div className="shop-card__info">
+                        <div className="shop-card__meta">
+                          <Link href={`/shop/${slugify(product.name)}`} className="shop-card__name-link">
+                            <h3 className="shop-card__name">{product.name}</h3>
+                          </Link>
+                          <div className="shop-card__price">
+                            {free
+                              ? <span className="shop-card__price--free">Free</span>
+                              : <span className="shop-card__price--paid">${product.price.toFixed(2)}</span>
+                            }
+                          </div>
+                        </div>
+                        <p className="shop-card__tagline">{product.tagline}</p>
+
+                        {/* Actions */}
+                        <div className="shop-card__actions">
+                          {product.demo_url && (
+                            <a
+                              href={product.demo_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shop-card__btn shop-card__btn--demo"
+                            >
+                              <Eye size={13} /> Demo
+                            </a>
+                          )}
+                          {free ? (
+                            <button
+                              className="shop-card__btn shop-card__btn--get"
+                              onClick={() => handleFreeClick(product)}
+                            >
+                              <Download size={14} /> Get Free
+                            </button>
+                          ) : (
+                            <a
+                              href={product.buy_link || '#'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shop-card__btn shop-card__btn--buy"
+                            >
+                              Purchase
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
         {/* ── Lightbox ──────────────────────────────────── */}
         {lightbox && (
-          <div className="shop-lightbox" onClick={() => setLightbox(null)} role="dialog" aria-modal="true" aria-label="Template preview">
+          <div className="shop-lightbox" onClick={() => setLightbox(null)} role="dialog" aria-modal="true">
             <div className="shop-lightbox__content" onClick={e => e.stopPropagation()}>
-              <button className="shop-lightbox__close" onClick={() => setLightbox(null)} aria-label="Close preview">&#x2715;</button>
+              <button className="shop-lightbox__close" onClick={() => setLightbox(null)} aria-label="Close">&#x2715;</button>
               <div className="shop-lightbox__header">
                 <h3>{products.find(p => p.preview_url === lightbox)?.name ?? 'Preview'}</h3>
                 <span className="shop-lightbox__tag">HTML Template</span>
@@ -434,194 +394,5 @@ export default function ShopPage() {
 
       </main>
     </>
-  );
-}
-
-/* ── Product grid ─────────────────────────────────────── */
-function ProductGrid({
-  products, loading, isFree,
-  onFreeClick, onPreview,
-}: {
-  products: Product[];
-  loading: boolean;
-  isFree: (p: Product) => boolean;
-  onFreeClick: (p: Product) => void;
-  onPreview: (url: string) => void;
-}) {
-  if (loading) {
-    return (
-      <div className="shop-grid">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="product-card product-card--skeleton">
-            <div className="product-card__preview skeleton-block" />
-            <div className="product-card__body">
-              <div className="skeleton-line skeleton-line--sm mb-2" />
-              <div className="skeleton-line skeleton-line--lg mb-2" />
-              <div className="skeleton-line skeleton-line--md mb-4" />
-              <div className="skeleton-line skeleton-line--sm" />
-              <div className="skeleton-line skeleton-line--sm" />
-              <div className="skeleton-line skeleton-line--sm mb-4" />
-              <div className="product-card__footer">
-                <div className="skeleton-line skeleton-line--price" />
-                <div className="skeleton-btn" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (products.length === 0) {
-    return (
-      <div className="text-center py-5 text-muted">
-        <p>No templates available yet. Check back soon!</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="shop-grid">
-      {products.map(product => {
-        const free = isFree(product);
-        return (
-          <article key={product.id} className="product-card">
-            {product.badge && (
-              <span className="product-card__badge" style={{ background: product.badge_color ?? '#0d6efd' }}>
-                {product.badge}
-              </span>
-            )}
-            {free && !product.badge && (
-              <span className="product-card__badge product-card__badge--free">FREE</span>
-            )}
-            {product.preview_url && (
-              <button
-                className="product-card__eye-btn"
-                onClick={() => onPreview(product.preview_url!)}
-                title="Preview template"
-                aria-label={`Preview ${product.name}`}
-              >
-                <Eye size={15} />
-              </button>
-            )}
-
-            {/* Preview */}
-            <div
-              className="product-card__preview"
-              style={{ cursor: product.preview_url ? 'pointer' : 'default' }}
-              onClick={() => product.preview_url && onPreview(product.preview_url)}
-              role={product.preview_url ? 'button' : undefined}
-              aria-label={product.preview_url ? `Preview ${product.name}` : undefined}
-            >
-              {product.preview_url ? (
-                <img
-                  src={product.preview_url}
-                  alt={`${product.name} template preview`}
-                  className="product-card__preview-img"
-                  loading="lazy"
-                  width={640} height={480}
-                />
-              ) : (
-                <div className="product-card__preview-inner">
-                  <div className="preview-bar"><span /><span /><span /></div>
-                  <div className="preview-lines">
-                    <div className="preview-line preview-line--wide" />
-                    <div className="preview-line preview-line--mid" />
-                    <div className="preview-line preview-line--short" />
-                    <div className="preview-blocks">
-                      <div className="preview-block" /><div className="preview-block" /><div className="preview-block" />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Body */}
-            <div className="product-card__body">
-              <p className="product-card__tagline">{product.tagline}</p>
-              <h3 className="product-card__name">{product.name}</h3>
-              <p className="product-card__desc">{product.description}</p>
-
-              {product.features?.length > 0 && (
-                <ul className="product-card__features" aria-label="Template features">
-                  {product.features.map((f, i) => (
-                    <li key={i}>
-                      <i className="bi bi-check-circle-fill feature-check" aria-hidden="true" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <div className="product-card__footer">
-                <div className="product-card__price">
-                  {free ? (
-                    <span className="price-amount price-amount--free">Free</span>
-                  ) : (
-                    <>
-                      <span className="price-amount">${product.price.toFixed(2)}</span>
-                      <span className="price-note">one-time</span>
-                    </>
-                  )}
-                </div>
-                <div className="product-card__actions">
-                  {product.demo_url && (
-                    <a
-                      href={product.demo_url} target="_blank" rel="noopener noreferrer"
-                      className="product-card__btn product-card__btn--demo"
-                      aria-label={`Live demo of ${product.name}`}
-                    >
-                      <Eye size={15} /> Demo
-                    </a>
-                  )}
-                  {free ? (
-                    <button
-                      className="product-card__btn product-card__btn--free"
-                      onClick={() => onFreeClick(product)}
-                      aria-label={`Download ${product.name} for free`}
-                    >
-                      <Download size={16} /> Get Free
-                    </button>
-                  ) : (
-                    <a
-                      href={product.buy_link || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="product-card__btn"
-                      aria-label={`Buy ${product.name}`}
-                    >
-                      <ShoppingCart size={16} /> Purchase
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          </article>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ── FAQ accordion ────────────────────────────────────── */
-function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="shop-faq-item" itemScope itemType="https://schema.org/Question">
-      <button
-        className={`shop-faq-q ${open ? 'open' : ''}`}
-        onClick={() => setOpen(o => !o)}
-        aria-expanded={open}
-      >
-        <span itemProp="name">{q}</span>
-        <i className={`bi bi-chevron-${open ? 'up' : 'down'}`} aria-hidden="true" />
-      </button>
-      <div
-        className={`shop-faq-a ${open ? 'open' : ''}`}
-        itemScope itemType="https://schema.org/Answer"
-      >
-        <p itemProp="text">{a}</p>
-      </div>
-    </div>
   );
 }

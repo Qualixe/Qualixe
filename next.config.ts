@@ -7,7 +7,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '110mb',
     },
   },
-  allowedDevOrigins: ['pair-tourist-burlington-ict.trycloudflare.com'],
+  allowedDevOrigins: ['pair-tourist-burlington-ict.trycloudflare.com','192.168.0.185'],
+
   images: {
     // Serve WebP/AVIF automatically — massive size reduction
     formats: ['image/avif', 'image/webp'],
