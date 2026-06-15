@@ -263,86 +263,50 @@ export default function ShopPage() {
                   return (
                     <article key={product.id} className="shop-card">
                       {/* Thumbnail */}
-                      <div className="shop-card__thumb">
-                        {product.preview_url ? (
-                          <img
-                            src={product.preview_url}
-                            alt={`${product.name} preview`}
-                            className="shop-card__img"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="shop-card__placeholder">
-                            <div className="ph-bar"><span /><span /><span /></div>
-                            <div className="ph-lines">
-                              <div className="ph-line ph-line--w" />
-                              <div className="ph-line ph-line--m" />
-                              <div className="ph-line ph-line--s" />
+                      <Link href={`/shop/${slugify(product.name)}`} className="shop-card__thumb-link">
+                        <div className="shop-card__thumb">
+                          {product.preview_url ? (
+                            <img
+                              src={product.preview_url}
+                              alt={`${product.name} preview`}
+                              className="shop-card__img"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="shop-card__placeholder">
+                              <div className="ph-bar"><span /><span /><span /></div>
+                              <div className="ph-lines">
+                                <div className="ph-line ph-line--w" />
+                                <div className="ph-line ph-line--m" />
+                                <div className="ph-line ph-line--s" />
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
+                          {product.badge && (
+                            <span className="shop-card__badge" style={{ background: product.badge_color ?? '#0c3cc3' }}>
+                              {product.badge}
+                            </span>
+                          )}
+                        </div>
+                      </Link>
 
-                        {/* Badge */}
-                        {product.badge && (
-                          <span className="shop-card__badge" style={{ background: product.badge_color ?? '#0c3cc3' }}>
-                            {product.badge}
-                          </span>
-                        )}
-                        {free && !product.badge && (
-                          <span className="shop-card__badge shop-card__badge--free">FREE</span>
-                        )}
-
-                        {/* Eye preview button */}
-                        {product.preview_url && (
-                          <button
-                            className="shop-card__eye"
-                            onClick={() => setLightbox(product.preview_url!)}
-                            aria-label={`Preview ${product.name}`}
-                          >
-                            <Eye size={14} />
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Info row */}
+                      {/* Info */}
                       <div className="shop-card__info">
-                        <div className="shop-card__meta">
+                        <div className="shop-card__row">
                           <Link href={`/shop/${slugify(product.name)}`} className="shop-card__name-link">
                             <h3 className="shop-card__name">{product.name}</h3>
                           </Link>
-                          <div className="shop-card__price">
-                            {free
-                              ? <span className="shop-card__price--free">Free</span>
-                              : <span className="shop-card__price--paid">${product.price.toFixed(2)}</span>
-                            }
-                          </div>
+                          <span className={free ? 'shop-card__price--free' : 'shop-card__price--paid'}>
+                            {free ? 'Free' : `$${product.price.toFixed(2)}`}
+                          </span>
                         </div>
-                        <p className="shop-card__tagline">{product.tagline}</p>
-                        {(product.download_count ?? 0) > 0 && (
-                          <p className="shop-card__downloads">
-                            <i className="bi bi-download" />
-                            {(product.download_count!).toLocaleString()} downloads
-                          </p>
-                        )}
-
-                        {/* Actions */}
-                        <div className="shop-card__actions">
-                          {free ? (
-                            <button
-                              className="shop-card__btn shop-card__btn--get"
-                              onClick={() => handleFreeClick(product)}
-                            >
-                              <Download size={14} /> Get Free
-                            </button>
-                          ) : (
-                            <a
-                              href={product.buy_link || '#'}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="shop-card__btn shop-card__btn--buy"
-                            >
-                              Purchase
-                            </a>
+                        <div className="shop-card__row shop-card__row--sub">
+                          <span className="shop-card__tagline">{product.tagline}</span>
+                          {(product.download_count ?? 0) > 0 && (
+                            <span className="shop-card__downloads">
+                              <Download size={11} />
+                              {product.download_count!.toLocaleString()}
+                            </span>
                           )}
                         </div>
                       </div>
