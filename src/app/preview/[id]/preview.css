@@ -1,0 +1,339 @@
+/* ── Bootstrap icons (needed outside main layout) ── */
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Rubik', 'Segoe UI', system-ui, sans-serif;
+  background: #f0f2f5;
+}
+
+/* ── Full-screen wrapper ── */
+.preview-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════
+   TOP BAR
+══════════════════════════════════════ */
+.preview-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 20px;
+  background: #1a1a2e;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+  gap: 16px;
+  z-index: 100;
+}
+
+/* Left — theme label */
+.preview-topbar-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-theme-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 6px 14px;
+  max-width: 260px;
+  overflow: hidden;
+}
+
+.preview-palette-icon {
+  color: #7c8cff;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.preview-theme-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-theme-cat {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Center — device toggles */
+.preview-topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.preview-device-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-size: 17px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preview-device-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
+}
+
+.preview-device-btn.active {
+  background: #0c3cc3;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(12, 60, 195, 0.5);
+}
+
+/* Right — action buttons */
+.preview-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.preview-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.8);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preview-open-btn:hover {
+  background: rgba(255,255,255,0.14);
+  color: #ffffff;
+}
+
+.preview-back-btn-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: #0cbfa3;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.preview-back-btn-top:hover {
+  background: #0aa88f;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(12, 191, 163, 0.4);
+}
+
+.preview-back-btn-top i {
+  font-size: 13px;
+}
+
+/* ══════════════════════════════════════
+   IFRAME STAGE
+══════════════════════════════════════ */
+.preview-stage {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: auto;
+  background: #e8eaf0;
+  padding: 0;
+  transition: background 0.3s ease;
+}
+
+/* Desktop: no padding, full width */
+.preview-frame-wrapper.desktop {
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Tablet / Mobile: centered with device chrome feel */
+.preview-frame-wrapper.tablet,
+.preview-frame-wrapper.mobile {
+  margin: 24px auto;
+  height: calc(100% - 48px);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.3);
+  position: relative;
+}
+
+.preview-frame-wrapper {
+  position: relative;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: #fff;
+}
+
+/* Desktop iframe fills stage height */
+.preview-frame-wrapper.desktop .preview-iframe {
+  height: 100%;
+}
+
+/* ── Iframe loading overlay ── */
+.preview-iframe-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  border-radius: inherit;
+}
+
+/* ══════════════════════════════════════
+   LOADING / ERROR STATES
+══════════════════════════════════════ */
+.preview-loading,
+.preview-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 16px;
+  background: #f0f2f5;
+  text-align: center;
+  padding: 20px;
+}
+
+.preview-error i {
+  font-size: 48px;
+  color: #f59e0b;
+}
+
+.preview-error h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.preview-error p {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.preview-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(12, 60, 195, 0.15);
+  border-top-color: #0c3cc3;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.preview-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #0c3cc3;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  text-decoration: none;
+}
+
+.preview-back-btn:hover {
+  background: #031e69;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 640px) {
+  .preview-topbar {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .preview-theme-label {
+    max-width: 140px;
+    padding: 5px 10px;
+  }
+
+  .preview-theme-cat {
+    display: none;
+  }
+
+  .preview-open-btn {
+    display: none;
+  }
+
+  .preview-back-btn-top {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .preview-device-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+}

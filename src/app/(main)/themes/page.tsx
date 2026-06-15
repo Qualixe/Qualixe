@@ -183,8 +183,8 @@ const ThemesPage = () => {
               <img src={selectedTheme.image_url} alt={selectedTheme.name} className="modal-image" />
             </div>
             <div className="modal-footer">
-              <button 
-                className="modal-btn modal-btn-primary" 
+              <button
+                className="modal-btn modal-btn-primary"
                 onClick={() => selectedTheme.demo_url ? window.open(selectedTheme.demo_url, '_blank') : null}
                 disabled={!selectedTheme.demo_url}
                 style={{ opacity: selectedTheme.demo_url ? 1 : 0.5, cursor: selectedTheme.demo_url ? 'pointer' : 'not-allowed' }}

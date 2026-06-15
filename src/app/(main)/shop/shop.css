@@ -307,8 +307,16 @@
 .shop-card__tagline {
   font-size: 13px;
   color: var(--theme-color, #0c3cc3);
-  margin: 0 0 14px;
+  margin: 0 0 6px;
+}
+.shop-card__downloads {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
   font-weight: 500;
+  color: #6b7280;
+  margin: 0 0 14px;
 }
 
 /* Actions */

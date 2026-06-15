@@ -22,6 +22,7 @@ interface Product {
   buy_link?: string;
   features: string[];
   active: boolean;
+  download_count?: number;
 }
 
 /* ── Free claim modal ─────────────────────────────────── */
@@ -317,19 +318,15 @@ export default function ShopPage() {
                           </div>
                         </div>
                         <p className="shop-card__tagline">{product.tagline}</p>
+                        {(product.download_count ?? 0) > 0 && (
+                          <p className="shop-card__downloads">
+                            <i className="bi bi-download" />
+                            {(product.download_count!).toLocaleString()} downloads
+                          </p>
+                        )}
 
                         {/* Actions */}
                         <div className="shop-card__actions">
-                          {product.demo_url && (
-                            <a
-                              href={product.demo_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="shop-card__btn shop-card__btn--demo"
-                            >
-                              <Eye size={13} /> Demo
-                            </a>
-                          )}
                           {free ? (
                             <button
                               className="shop-card__btn shop-card__btn--get"
@@ -371,13 +368,12 @@ export default function ShopPage() {
               </div>
               <div className="shop-lightbox__footer">
                 {products.find(p => p.preview_url === lightbox)?.demo_url && (
-                  <a
-                    href={products.find(p => p.preview_url === lightbox)!.demo_url}
-                    target="_blank" rel="noopener noreferrer"
+                  <Link
+                    href={(() => { const p = products.find(q => q.preview_url === lightbox)!; return `/preview/${p.id}?url=${encodeURIComponent(p.demo_url!)}&name=${encodeURIComponent(p.name)}`; })()}
                     className="shop-lightbox__btn shop-lightbox__btn--primary"
                   >
                     <Eye size={16} /> View Live Demo
-                  </a>
+                  </Link>
                 )}
                 <button className="shop-lightbox__btn shop-lightbox__btn--secondary" onClick={() => setLightbox(null)}>
                   Close

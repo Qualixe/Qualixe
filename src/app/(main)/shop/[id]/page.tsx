@@ -179,14 +179,12 @@ export default function ProductDetailPage() {
             </div>
 
             {product.demo_url && (
-              <a
-                href={product.demo_url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href={`/preview/${product.id}?url=${encodeURIComponent(product.demo_url)}&name=${encodeURIComponent(product.name)}`}
                 className="pd-demo-link"
               >
                 <ExternalLink size={14} /> View Live Demo
-              </a>
+              </Link>
             )}
           </div>
 
@@ -246,14 +244,12 @@ export default function ProductDetailPage() {
             {/* CTA buttons */}
             <div className="pd-ctas">
               {product.demo_url && (
-                <a
-                  href={product.demo_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href={`/preview/${product.id}?url=${encodeURIComponent(product.demo_url)}&name=${encodeURIComponent(product.name)}`}
                   className="pd-btn pd-btn--demo"
                 >
                   <Eye size={16} /> Live Preview
-                </a>
+                </Link>
               )}
               {free ? (
                 <button className="pd-btn pd-btn--primary" onClick={() => setClaimOpen(true)}>

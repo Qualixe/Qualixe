@@ -15,7 +15,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('products')
-    .select('id, name, tagline, description, price, badge, badge_color, preview_url, demo_url, features, active, file_path, buy_link')
+    .select('id, name, tagline, description, price, badge, badge_color, preview_url, demo_url, features, active, file_path, buy_link, download_count')
     .eq('active', true);
 
   if (error || !data) {
