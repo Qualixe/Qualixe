@@ -47,14 +47,17 @@ export async function GET(req: NextRequest) {
 
   const filePath: string = product.file_path;
 
-  // ── External URL (http/https) — redirect directly to it ──────────────
-  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
-    // Increment download count before redirecting
-    await supabase
+  // Increment both the token usage count and the product's download_count
+  await Promise.all([
+    supabase
       .from('download_tokens')
       .update({ download_count: record.download_count + 1 })
-      .eq('token', token);
+      .eq('token', token),
+    supabase.rpc('increment_download_count', { product_id: record.product_id }),
+  ]);
 
+  // ── External URL (http/https) — redirect directly to it ──────────────
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
     return NextResponse.redirect(filePath, { status: 302 });
   }
 
@@ -68,12 +71,6 @@ export async function GET(req: NextRequest) {
     console.error('Storage error:', storageErr?.message, '| path:', filePath);
     return NextResponse.json({ error: `Storage error: ${storageErr?.message ?? 'unknown'}` }, { status: 404 });
   }
-
-  // Increment download count
-  await supabase
-    .from('download_tokens')
-    .update({ download_count: record.download_count + 1 })
-    .eq('token', token);
 
   const fileBuffer = Buffer.from(await fileData.arrayBuffer());
   const fileName = product.file_name || 'download.zip';

@@ -106,17 +106,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: tokenError.message }, { status: 500 });
     }
 
-    // Increment sales_count and download_count (best-effort)
-    try {
-      await supabase.rpc('increment_sales_count', { product_id: product.id });
-    } catch (e) {
-      console.warn('Could not increment sales_count:', e);
-    }
-    try {
-      await supabase.rpc('increment_download_count', { product_id: product.id });
-    } catch (e) {
-      console.warn('Could not increment download_count:', e);
-    }
+    // Increment sales_count (best-effort)
+    const { error: salesErr } = await supabase.rpc('increment_sales_count', { product_id: product.id });
+    if (salesErr) console.warn('Could not increment sales_count:', salesErr.message);
 
     return NextResponse.json({ token });
   } catch (err) {
