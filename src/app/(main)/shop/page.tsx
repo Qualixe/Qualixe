@@ -23,6 +23,7 @@ interface Product {
   features: string[];
   active: boolean;
   download_count?: number;
+  base_download_count?: number;
 }
 
 /* ── Free claim modal ─────────────────────────────────── */
@@ -113,10 +114,6 @@ export default function ShopPage() {
 
   const isFree = (p: Product) => Number(p.price) === 0;
 
-  function handleFreeClick(p: Product) {
-    if (p.id) setClaimProduct(p);
-    else if (p.file_path) window.open(p.file_path, '_blank');
-  }
 
   /* derive category label: use category field, else tagline, else 'Other' */
   const getCategory = (p: Product) => p.category || p.tagline || 'Other';
@@ -302,10 +299,10 @@ export default function ShopPage() {
                         </div>
                         <div className="shop-card__row shop-card__row--sub">
                           <span className="shop-card__tagline">{product.tagline}</span>
-                          {(product.download_count ?? 0) > 0 && (
+                          {((product.download_count ?? 0) + (product.base_download_count ?? 0)) > 0 && (
                             <span className="shop-card__downloads">
                               <Download size={11} />
-                              {product.download_count!.toLocaleString()}
+                              {((product.download_count ?? 0) + (product.base_download_count ?? 0)).toLocaleString()}
                             </span>
                           )}
                         </div>

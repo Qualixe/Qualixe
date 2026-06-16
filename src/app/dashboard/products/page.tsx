@@ -26,6 +26,7 @@ export interface Product {
   active: boolean;
   sales_count: number;
   download_count: number;
+  base_download_count: number;
   created_at: string;
 }
 
@@ -33,7 +34,7 @@ const EMPTY: Omit<Product, 'id' | 'created_at' | 'sales_count'> = {
   name: '', tagline: '', description: '',
   price: 9.99, badge: '', badge_color: '#0d6efd',
   preview_url: '', demo_url: '', buy_link: '', features: [''],
-  file_path: '', file_name: '', file_size: 0, active: true, download_count: 0,
+  file_path: '', file_name: '', file_size: 0, active: true, download_count: 0, base_download_count: 0,
 };
 
 export default function ProductsPage() {
@@ -71,6 +72,7 @@ export default function ProductsPage() {
       price: p.price, badge: p.badge ?? '', badge_color: p.badge_color ?? '#0d6efd',
       preview_url: p.preview_url ?? '', demo_url: p.demo_url ?? '', buy_link: p.buy_link ?? '',
       download_count: p.download_count ?? 0,
+      base_download_count: p.base_download_count ?? 0,
       features: p.features?.length ? p.features : [''],
       file_path: p.file_path, file_name: p.file_name, file_size: p.file_size,
       active: p.active,
@@ -101,7 +103,7 @@ export default function ProductsPage() {
       buy_link: form.buy_link || null,
       features: form.features.filter(f => f.trim()),
       file_path: form.file_path, file_name: form.file_name, file_size: form.file_size,
-      active: form.active, download_count: Number(form.download_count) || 0,
+      active: form.active, base_download_count: Number(form.base_download_count) || 0,
     };
 
     const { error } = editing
@@ -449,15 +451,31 @@ export default function ProductsPage() {
                       </div>
                     </div>
 
-                    {/* Download Count */}
+                    {/* Download Counts */}
                     <div className="col-md-4">
-                      <label className="form-label fw-semibold">Download Count</label>
+                      <label className="form-label fw-semibold">
+                        Real Downloads
+                        <span className="badge bg-success ms-2" style={{ fontSize: 10 }}>Auto</span>
+                      </label>
                       <div className="input-group">
                         <span className="input-group-text"><i className="bi bi-download"></i></span>
-                        <input type="number" className="form-control" min="0" placeholder="0"
-                          value={form.download_count}
-                          onChange={e => setForm(f => ({ ...f, download_count: Number(e.target.value) || 0 }))} />
+                        <input type="number" className="form-control bg-light" readOnly
+                          value={form.download_count} />
                       </div>
+                      <small className="text-muted">Actual downloads — auto-tracked</small>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-semibold">
+                        Base Count
+                        <span className="badge bg-secondary ms-2" style={{ fontSize: 10 }}>Manual</span>
+                      </label>
+                      <div className="input-group">
+                        <span className="input-group-text"><i className="bi bi-pencil"></i></span>
+                        <input type="number" className="form-control" min="0" placeholder="0"
+                          value={form.base_download_count}
+                          onChange={e => setForm(f => ({ ...f, base_download_count: Number(e.target.value) || 0 }))} />
+                      </div>
+                      <small className="text-muted">Added to real count on shop page</small>
                     </div>
 
                     {/* Badge */}
