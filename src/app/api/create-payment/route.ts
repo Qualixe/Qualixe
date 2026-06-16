@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const UDDOKTA_API_KEY = process.env.UDDOKTA_API_KEY!;
-const UDDOKTA_API_URL = process.env.UDDOKTA_API_URL!;
-
-// Prefer NEXT_PUBLIC_BASE_URL, fall back to VERCEL_URL (auto-set by Vercel on every deployment)
-const BASE_URL =
+const LS_API_KEY   = process.env.LEMONSQUEEZY_API_KEY!;
+const LS_STORE_ID  = process.env.LEMONSQUEEZY_STORE_ID!;
+const BASE_URL     =
   process.env.NEXT_PUBLIC_BASE_URL ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null);
 
@@ -18,97 +16,81 @@ function getServiceClient() {
 
 export async function POST(req: NextRequest) {
   try {
-    // Guard: catch missing env vars early with a clear message
-    if (!UDDOKTA_API_KEY) {
-      console.error('create-payment: UDDOKTA_API_KEY is not set');
-      return NextResponse.json({ error: 'Payment gateway not configured (API key missing)' }, { status: 500 });
-    }
-    if (!UDDOKTA_API_URL) {
-      console.error('create-payment: UDDOKTA_API_URL is not set');
-      return NextResponse.json({ error: 'Payment gateway not configured (API URL missing)' }, { status: 500 });
-    }
-    if (!BASE_URL) {
-      console.error('create-payment: NEXT_PUBLIC_BASE_URL and VERCEL_URL are both missing');
-      return NextResponse.json({ error: 'Server base URL not configured' }, { status: 500 });
-    }
+    if (!LS_API_KEY)  return NextResponse.json({ error: 'LEMONSQUEEZY_API_KEY not configured' }, { status: 500 });
+    if (!LS_STORE_ID) return NextResponse.json({ error: 'LEMONSQUEEZY_STORE_ID not configured' }, { status: 500 });
+    if (!BASE_URL)    return NextResponse.json({ error: 'NEXT_PUBLIC_BASE_URL not configured' }, { status: 500 });
 
     const { name, email, productId } = await req.json();
-
     if (!name || !email || !productId) {
       return NextResponse.json({ error: 'name, email and productId are required' }, { status: 400 });
     }
 
-    // Fetch the real product from DB so price/name can't be tampered client-side
     const supabase = getServiceClient();
     const { data: product, error } = await supabase
       .from('products')
-      .select('id, name, price, active')
+      .select('id, name, price, active, lemon_squeezy_variant_id')
       .eq('id', productId)
       .single();
 
-    if (error || !product) {
-      console.error('create-payment: product lookup failed', error);
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    if (error || !product) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    if (!product.active)  return NextResponse.json({ error: 'Product is not available' }, { status: 400 });
+    if (product.price === 0) return NextResponse.json({ error: 'Use /api/claim-free for free products' }, { status: 400 });
+
+    if (!product.lemon_squeezy_variant_id) {
+      return NextResponse.json({ error: 'This product has no Lemon Squeezy variant configured' }, { status: 400 });
     }
 
-    if (!product.active) {
-      return NextResponse.json({ error: 'Product is not available' }, { status: 400 });
-    }
-
-    const payload = {
-      full_name: name,
-      email,
-      amount: product.price,
-      metadata: {
-        product_id: product.id,
-        product_name: product.name,
-        customer_email: email,
-        customer_name: name,
+    const body = {
+      data: {
+        type: 'checkouts',
+        attributes: {
+          checkout_data: {
+            email,
+            name,
+            custom: {
+              product_id:      product.id,
+              product_name:    product.name,
+              customer_email:  email,
+              customer_name:   name,
+            },
+          },
+          product_options: {
+            // {order_id} is substituted by Lemon Squeezy on redirect
+            redirect_url: `${BASE_URL}/shop/success?order_id={order_id}`,
+          },
+        },
+        relationships: {
+          store:   { data: { type: 'stores',   id: String(LS_STORE_ID) } },
+          variant: { data: { type: 'variants', id: String(product.lemon_squeezy_variant_id) } },
+        },
       },
-      redirect_url: `${BASE_URL}/shop/success`,
-      cancel_url: `${BASE_URL}/shop/cancel`,
-      webhook_url: `${BASE_URL}/api/uddokta-webhook`,
     };
 
-    console.log('create-payment: calling Uddokta Pay', { url: UDDOKTA_API_URL, base: BASE_URL, productId });
-
-    const response = await fetch(UDDOKTA_API_URL, {
+    const res = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'RT-UDDOKTAPAY-API-KEY': UDDOKTA_API_KEY,
+        'Authorization':  `Bearer ${LS_API_KEY}`,
+        'Content-Type':   'application/vnd.api+json',
+        'Accept':         'application/vnd.api+json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
 
-    // Read raw text first — gateway sometimes returns HTML on errors
-    const rawText = await response.text();
-    console.log('Uddokta raw response:', response.status, rawText.slice(0, 500));
-
-    // Try to parse as JSON
-    let data: any = null;
-    try {
-      data = JSON.parse(rawText);
-    } catch {
-      // Gateway returned HTML (e.g. 404/500 page) — surface the status
-      console.error('Uddokta non-JSON response:', response.status, rawText.slice(0, 300));
-      return NextResponse.json(
-        { error: `Payment gateway returned HTTP ${response.status}. Check UDDOKTA_API_URL is correct. Raw: ${rawText.slice(0, 120)}` },
-        { status: 502 }
-      );
+    const raw = await res.text();
+    let data: any;
+    try { data = JSON.parse(raw); } catch {
+      console.error('LS non-JSON response:', res.status, raw.slice(0, 300));
+      return NextResponse.json({ error: `Lemon Squeezy returned HTTP ${res.status}` }, { status: 502 });
     }
 
-    if (!response.ok || !data.payment_url) {
-      console.error('Uddokta Pay error:', { status: response.status, data });
-      return NextResponse.json(
-        { error: `Payment gateway error: ${data?.message || data?.error || JSON.stringify(data)}` },
-        { status: 502 }
-      );
+    if (!res.ok || !data?.data?.attributes?.url) {
+      console.error('LS checkout error:', res.status, data);
+      return NextResponse.json({ error: `Lemon Squeezy error: ${JSON.stringify(data?.errors ?? data)}` }, { status: 502 });
     }
 
-    return NextResponse.json({ payment_url: data.payment_url });
+    return NextResponse.json({ checkout_url: data.data.attributes.url });
   } catch (err: any) {
-    console.error('create-payment unhandled error:', err?.message ?? err);
-    return NextResponse.json({ error: `Internal server error: ${err?.message ?? 'unknown'}` }, { status: 500 });
+    console.error('create-payment error:', err?.message ?? err);
+    return NextResponse.json({ error: `Internal error: ${err?.message ?? 'unknown'}` }, { status: 500 });
   }
 }

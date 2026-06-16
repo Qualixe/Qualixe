@@ -19,6 +19,7 @@ export interface Product {
   preview_url?: string;
   demo_url?: string;
   buy_link?: string;
+  lemon_squeezy_variant_id?: string;
   features: string[];
   file_path: string;
   file_name: string;
@@ -33,7 +34,8 @@ export interface Product {
 const EMPTY: Omit<Product, 'id' | 'created_at' | 'sales_count'> = {
   name: '', tagline: '', description: '',
   price: 9.99, badge: '', badge_color: '#0d6efd',
-  preview_url: '', demo_url: '', buy_link: '', features: [''],
+  preview_url: '', demo_url: '', buy_link: '', lemon_squeezy_variant_id: '',
+  features: [''],
   file_path: '', file_name: '', file_size: 0, active: true, download_count: 0, base_download_count: 0,
 };
 
@@ -71,6 +73,7 @@ export default function ProductsPage() {
       name: p.name, tagline: p.tagline, description: p.description,
       price: p.price, badge: p.badge ?? '', badge_color: p.badge_color ?? '#0d6efd',
       preview_url: p.preview_url ?? '', demo_url: p.demo_url ?? '', buy_link: p.buy_link ?? '',
+      lemon_squeezy_variant_id: p.lemon_squeezy_variant_id ?? '',
       download_count: p.download_count ?? 0,
       base_download_count: p.base_download_count ?? 0,
       features: p.features?.length ? p.features : [''],
@@ -91,7 +94,7 @@ export default function ProductsPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (form.price === 0 && !form.file_path) { toast.error('Please enter a ZIP file URL'); return; }
-    if (form.price > 0 && !form.buy_link) { toast.error('Please enter a Lemon Squeezy buy link'); return; }
+    if (form.price > 0 && !form.lemon_squeezy_variant_id) { toast.error('Please enter the Lemon Squeezy Variant ID for this paid product'); return; }
     setSaving(true);
 
     const payload = {
@@ -101,6 +104,7 @@ export default function ProductsPage() {
       preview_url: form.preview_url || null,
       demo_url: form.demo_url || null,
       buy_link: form.buy_link || null,
+      lemon_squeezy_variant_id: form.lemon_squeezy_variant_id || null,
       features: form.features.filter(f => f.trim()),
       file_path: form.file_path, file_name: form.file_name, file_size: form.file_size,
       active: form.active, base_download_count: Number(form.base_download_count) || 0,
@@ -427,6 +431,28 @@ export default function ProductsPage() {
                           />
                         </div>
                         <small className="text-muted">Customers will be sent here to complete purchase</small>
+                      </div>
+                    )}
+
+                    {/* Lemon Squeezy Variant ID (paid only) */}
+                    {form.price > 0 && (
+                      <div className="col-12">
+                        <label className="form-label fw-semibold">
+                          Lemon Squeezy Variant ID
+                          <span className="badge bg-warning text-dark ms-2" style={{ fontSize: 10 }}>Required for checkout</span>
+                        </label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="bi bi-upc-scan"></i></span>
+                          <input
+                            className="form-control"
+                            placeholder="e.g. 123456"
+                            value={form.lemon_squeezy_variant_id}
+                            onChange={e => setForm(f => ({ ...f, lemon_squeezy_variant_id: e.target.value }))}
+                          />
+                        </div>
+                        <small className="text-muted">
+                          Found in your Lemon Squeezy dashboard → Store → Products → [Product] → Variants → Copy ID
+                        </small>
                       </div>
                     )}
 

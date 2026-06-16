@@ -7,20 +7,20 @@ import Link from 'next/link';
 function SuccessContent() {
   const params = useSearchParams();
 
+  // Free flow: ?token=  |  Paid flow: ?order_id= (from Lemon Squeezy redirect)
   const directToken = params.get('token');
-  const invoiceId = params.get('invoice_id');
+  const orderId     = params.get('order_id');
 
-  const [token, setToken] = useState<string | null>(directToken);
-  const [checking, setChecking] = useState(!directToken && !!invoiceId);
+  const [token,    setToken]    = useState<string | null>(directToken);
+  const [checking, setChecking] = useState(!directToken && !!orderId);
   const [attempts, setAttempts] = useState(0);
   const [timedOut, setTimedOut] = useState(false);
 
-  const MAX_ATTEMPTS = 30;   // 30 × 3s = 90 seconds
+  const MAX_ATTEMPTS = 20;   // 20 × 3s = 60 seconds of polling
   const INTERVAL_MS  = 3000;
 
   useEffect(() => {
-    // Free download — token already in URL, nothing to do
-    if (directToken || !invoiceId) return;
+    if (directToken || !orderId) return;
 
     let count = 0;
 
@@ -29,15 +29,8 @@ function SuccessContent() {
       setAttempts(count);
 
       try {
-        // Call our verify-payment route — it checks Paymently directly
-        // and creates the order + token if payment is COMPLETED.
-        // This works even if the webhook never fired.
-        const res = await fetch('/api/verify-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ invoice_id: invoiceId }),
-        });
-
+        // Phase 1: lightweight DB check — did the webhook already create the token?
+        const res = await fetch(`/api/get-download-token?order_id=${encodeURIComponent(orderId)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.token) {
@@ -46,7 +39,24 @@ function SuccessContent() {
             clearInterval(poll);
             return;
           }
-          // data.pending === true means Paymently hasn't confirmed yet — keep polling
+        }
+
+        // Phase 2: after 10 polls (~30s), call verify-payment to hit LS API directly
+        if (count === 10) {
+          const vRes = await fetch('/api/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: orderId }),
+          });
+          if (vRes.ok) {
+            const vData = await vRes.json();
+            if (vData.token) {
+              setToken(vData.token);
+              setChecking(false);
+              clearInterval(poll);
+              return;
+            }
+          }
         }
       } catch {
         // network hiccup — keep polling
@@ -60,11 +70,11 @@ function SuccessContent() {
     }, INTERVAL_MS);
 
     return () => clearInterval(poll);
-  }, [directToken, invoiceId]);
+  }, [directToken, orderId]);
 
-  const isFree    = !!directToken && !invoiceId;
-  const elapsed   = Math.round((attempts * INTERVAL_MS) / 1000);
-  const progress  = Math.min((attempts / MAX_ATTEMPTS) * 100, 95);
+  const isFree   = !!directToken && !orderId;
+  const elapsed  = Math.round((attempts * INTERVAL_MS) / 1000);
+  const progress = Math.min((attempts / MAX_ATTEMPTS) * 100, 95);
 
   return (
     <main className="container py-5 text-center" style={{ maxWidth: 540 }}>
@@ -79,10 +89,10 @@ function SuccessContent() {
 
         {/* Heading */}
         <h1 className="h3 fw-bold mb-2">
-          {isFree         ? 'Your download is ready!'
-           : token        ? 'Payment Confirmed!'
-           : timedOut     ? 'Still verifying…'
-           :                'Payment Received!'}
+          {isFree     ? 'Your download is ready!'
+          : token      ? 'Payment Confirmed!'
+          : timedOut   ? 'Still processing…'
+          :              'Payment Received!'}
         </h1>
 
         <p className="text-muted mb-4">
@@ -91,8 +101,8 @@ function SuccessContent() {
             : token
             ? 'Your download link is ready below.'
             : timedOut
-            ? 'Verification is taking longer than usual. Use the button below to check again, or contact support.'
-            : "Your payment was received. We're confirming it now — this usually takes under a minute."}
+            ? 'This is taking longer than usual. Check your email from Lemon Squeezy — it contains your receipt and download link. You can also click below to try again.'
+            : "We're confirming your payment — this usually takes a few seconds."}
         </p>
 
         {/* Polling progress */}
@@ -104,7 +114,7 @@ function SuccessContent() {
             </div>
             <div className="progress" style={{ height: 4, borderRadius: 4 }}>
               <div
-                className="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                className="progress-bar progress-bar-striped progress-bar-animated bg-success"
                 style={{ width: `${progress}%`, transition: 'width 3s linear' }}
               />
             </div>
@@ -126,53 +136,32 @@ function SuccessContent() {
         )}
 
         {token && (
-          <Link
-            href={`/profile?email=${encodeURIComponent(params.get('email') ?? '')}`}
-            className="btn btn-outline-primary w-100 fw-semibold mb-2"
-          >
+          <Link href="/account/downloads" className="btn btn-outline-primary w-100 fw-semibold mb-2">
             <i className="bi bi-person-circle me-2" />
-            View in My Profile
+            View My Downloads
           </Link>
         )}
 
-        {/* Timeout — manual retry */}
+        {/* Timeout */}
         {timedOut && !token && (
           <div className="mb-3">
             <div className="alert alert-warning text-start" role="alert">
-              <strong>Taking longer than expected.</strong>
+              <strong>Check your email</strong>
               <p className="mb-2 mt-1 small">
-                Your payment was received but Paymently is still confirming it.
-                Click <strong>Check Again</strong> — it usually resolves within a few minutes.
+                Lemon Squeezy sends a purchase receipt with a download link directly to your inbox.
+                If you don't see it, check your spam folder.
               </p>
               <div className="d-flex gap-2 flex-wrap">
                 <button
                   className="btn btn-warning btn-sm fw-semibold"
-                  onClick={async () => {
-                    setTimedOut(false);
-                    setChecking(true);
-                    setAttempts(0);
-                    // Immediate single check before restarting the interval
-                    try {
-                      const res = await fetch('/api/verify-payment', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ invoice_id: invoiceId }),
-                      });
-                      if (res.ok) {
-                        const data = await res.json();
-                        if (data.token) { setToken(data.token); setChecking(false); return; }
-                      }
-                    } catch {}
-                    // If still not ready, restart the polling loop via key change
-                    window.location.reload();
-                  }}
+                  onClick={() => window.location.reload()}
                 >
                   <i className="bi bi-arrow-clockwise me-1" />
                   Check Again
                 </button>
-                {invoiceId && (
+                {orderId && (
                   <a
-                    href={`mailto:support@qualixe.com?subject=Download%20not%20received&body=Invoice%20ID%3A%20${encodeURIComponent(invoiceId)}`}
+                    href={`mailto:support@qualixe.com?subject=Download%20not%20received&body=Order%20ID%3A%20${encodeURIComponent(orderId)}`}
                     className="btn btn-outline-secondary btn-sm"
                   >
                     <i className="bi bi-envelope me-1" />
@@ -181,9 +170,9 @@ function SuccessContent() {
                 )}
               </div>
             </div>
-            {invoiceId && (
+            {orderId && (
               <p className="text-muted small mt-2">
-                Your Invoice ID: <code className="user-select-all">{invoiceId}</code>
+                Your Order ID: <code className="user-select-all">{orderId}</code>
               </p>
             )}
           </div>
