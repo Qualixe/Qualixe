@@ -262,7 +262,7 @@ export default function ProductDetailPage() {
                   rel="noopener noreferrer"
                   className="pd-btn pd-btn--primary"
                 >
-                  <ShoppingCart size={16} /> Buy Now
+                  <ShoppingCart size={16} /> Purchase
                 </a>
               )}
             </div>
