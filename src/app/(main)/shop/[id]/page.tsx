@@ -26,71 +26,14 @@ interface Product {
   active: boolean;
 }
 
-function FreeClaimModal({ product, onClose }: { product: Product; onClose: () => void }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/claim-free', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, productId: product.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to claim');
-      router.push(`/shop/success?token=${data.token}`);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
-      setLoading(false);
-    }
-  };
-
-  return (
-    <>
-      <div className="pd-modal-backdrop" onClick={onClose} />
-      <div className="pd-modal" role="dialog" aria-modal="true">
-        <button className="pd-modal__close" onClick={onClose}>✕</button>
-        <div className="pd-modal__icon">🎁</div>
-        <h2 className="pd-modal__title">Get Your Free Template</h2>
-        <p className="pd-modal__sub">Instant access to <strong>{product.name}</strong>.</p>
-        <form className="pd-modal__form" onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Full Name</label>
-            <input type="text" className="form-control" placeholder="Your name"
-              value={name} onChange={e => setName(e.target.value)} required />
-          </div>
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Email Address</label>
-            <input type="email" className="form-control" placeholder="you@example.com"
-              value={email} onChange={e => setEmail(e.target.value)} required />
-          </div>
-          {error && <div className="alert alert-danger py-2 small">{error}</div>}
-          <button type="submit" className="btn btn-success w-100 fw-bold py-2" disabled={loading}>
-            {loading
-              ? <><span className="spinner-border spinner-border-sm me-2" />Processing...</>
-              : <><Download size={16} className="me-2" />Download Free Template</>}
-          </button>
-          <p className="text-center text-muted mt-2" style={{ fontSize: 12 }}>No spam. Unsubscribe anytime.</p>
-        </form>
-      </div>
-    </>
-  );
-}
-
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'features'>('overview');
-  const [claimOpen, setClaimOpen] = useState(false);
+  const [claimLoading, setClaimLoading] = useState(false);
   const [imgZoom, setImgZoom] = useState(false);
 
   const isFree = (p: Product) => Number(p.price) === 0;
@@ -106,6 +49,25 @@ export default function ProductDetailPage() {
       setRelated((all as Product[]).filter((p: Product) => p.id !== id).slice(0, 3));
     }).catch(() => {}).finally(() => setLoading(false));
   }, [id]);
+
+  /* No email needed for free products — claim and go straight to the success page */
+  const handleFreeDownload = async () => {
+    if (!product) return;
+    setClaimLoading(true);
+    try {
+      const res  = await fetch('/api/claim-free', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to claim');
+      router.push(`/shop/success?token=${data.token}`);
+    } catch (err: any) {
+      alert(err.message || 'Could not start download. Please try again.');
+      setClaimLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -252,8 +214,11 @@ export default function ProductDetailPage() {
                 </Link>
               )}
               {free ? (
-                <button className="pd-btn pd-btn--primary" onClick={() => setClaimOpen(true)}>
-                  <Download size={16} /> Free Download
+                <button className="pd-btn pd-btn--primary" onClick={handleFreeDownload} disabled={claimLoading}>
+                  {claimLoading
+                    ? <><span className="spinner-border spinner-border-sm" style={{ width: 14, height: 14 }} /> Preparing…</>
+                    : <><Download size={16} /> Free Download</>
+                  }
                 </button>
               ) : (
                 <a
@@ -357,10 +322,6 @@ export default function ProductDetailPage() {
           </Link>
         </div>
       </div>
-
-      {claimOpen && product && (
-        <FreeClaimModal product={product} onClose={() => setClaimOpen(false)} />
-      )}
 
       {imgZoom && (
         <div className="pd-lightbox" onClick={() => setImgZoom(false)}>

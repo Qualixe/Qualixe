@@ -13,10 +13,10 @@ function getServiceClient() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, productId } = await req.json();
+    const { productId } = await req.json();
 
-    if (!name || !email || !productId) {
-      return NextResponse.json({ error: 'name, email and productId are required' }, { status: 400 });
+    if (!productId) {
+      return NextResponse.json({ error: 'productId is required' }, { status: 400 });
     }
 
     const supabase = getServiceClient();
@@ -39,40 +39,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Product is not free' }, { status: 400 });
     }
 
-    const invoiceId = `free_${productId}_${email.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-
-    // Idempotency — return existing token if already claimed
-    const { data: existingOrder } = await supabase
-      .from('orders')
-      .select('id')
-      .eq('payment_id', invoiceId)
-      .single();
-
-    if (existingOrder) {
-      const { data: existingToken } = await supabase
-        .from('download_tokens')
-        .select('token, download_count, download_limit')
-        .eq('order_id', existingOrder.id)
-        .single();
-      if (existingToken) {
-        // Reset if limit was previously hit so user can re-download
-        if (existingToken.download_count >= existingToken.download_limit) {
-          await supabase
-            .from('download_tokens')
-            .update({ download_count: 0, download_limit: DOWNLOAD_LIMIT })
-            .eq('token', existingToken.token);
-        }
-        return NextResponse.json({ token: existingToken.token });
-      }
-    }
+    // No email collected — each claim gets its own anonymous order + token.
+    const invoiceId = `free_${productId}_${crypto.randomUUID()}`;
 
     // Create order
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
         payment_id: invoiceId,
-        customer_email: email,
-        customer_name: name,
+        customer_email: 'anonymous@qualixe.com',
+        customer_name: 'Anonymous',
         product_id: product.id,
         product_name: product.name,
         amount: 0,
@@ -94,7 +70,7 @@ export async function POST(req: NextRequest) {
     const { error: tokenError } = await supabase.from('download_tokens').insert({
       token,
       order_id: order.id,
-      customer_email: email,
+      customer_email: 'anonymous@qualixe.com',
       product_id: product.id,
       expires_at: expiresAt,
       download_limit: DOWNLOAD_LIMIT,
