@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
-
+//new update  
 const BASE_URL = 'https://www.qualixe.com';
 
 // Uses the file's last git commit date as its lastmod — falls back to now if git history is unavailable (e.g. shallow clone).
