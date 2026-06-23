@@ -3,6 +3,8 @@ import { getDigitalMarketingPage } from '../../../../../lib/api/digital-marketin
 import DigitalMarketingClient from './DigitalMarketingClient';
 import { FALLBACK } from './fallback';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Digital Marketing Services – SEO, Paid Ads & Social Media | Qualixe',
   description: 'Data-driven SEO, Google Ads, Meta Ads, social media marketing, and email campaigns that drive real traffic and revenue for your business.',

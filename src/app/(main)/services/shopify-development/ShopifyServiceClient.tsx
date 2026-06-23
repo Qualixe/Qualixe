@@ -50,7 +50,7 @@ export default function ShopifyServiceClient({ page }: { page: ShopifyServicePag
               {hero.highlights && hero.highlights.length > 0 && (
                 <ul className="service-hero-highlights">
                   {hero.highlights.map((item, i) => (
-                    <li key={i}><i className="bi bi-check-circle-fill"></i> {item}</li>
+                    <li key={i}><i className="bi bi-check-lg"></i>{item}</li>
                   ))}
                 </ul>
               )}

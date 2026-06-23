@@ -84,24 +84,26 @@
   list-style: none;
   padding: 0;
   margin: 0 0 32px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   max-width: 600px;
 }
 
 .service-hero-highlights li {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 0.95rem;
   font-weight: 600;
   color: #222;
 }
 
 .service-hero-highlights li i {
+  flex-shrink: 0;
   color: #0c3cc3;
-  font-size: 1.05rem;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .service-hero-btns{
@@ -565,10 +567,6 @@
 
   .service-hero-image img {
     height: 220px;
-  }
-
-  .service-hero-highlights {
-    grid-template-columns: 1fr;
   }
 
   .service-cards-section,
