@@ -80,10 +80,34 @@
   line-height: 1.7;
   margin-bottom: 32px;
 }
+.service-hero-highlights {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 20px;
+  max-width: 600px;
+}
+
+.service-hero-highlights li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.service-hero-highlights li i {
+  color: #0c3cc3;
+  font-size: 1.05rem;
+}
+
 .service-hero-btns{
   display: flex;
   gap:10px;
-  
+
 }
 .service-hero-cta {
   display: inline-flex;
@@ -541,6 +565,10 @@
 
   .service-hero-image img {
     height: 220px;
+  }
+
+  .service-hero-highlights {
+    grid-template-columns: 1fr;
   }
 
   .service-cards-section,

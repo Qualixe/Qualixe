@@ -4,6 +4,7 @@ export interface HeroContent {
   badge: string;
   heading: string;
   subheading: string;
+  highlights: string[];
   cta_text: string;
   cta_url: string;
 }

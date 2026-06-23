@@ -47,6 +47,13 @@ export default function ShopifyServiceClient({ page }: { page: ShopifyServicePag
               <span className="service-hero-badge">{hero.badge}</span>
               <h1>{hero.heading}</h1>
               <p>{hero.subheading}</p>
+              {hero.highlights?.length > 0 && (
+                <ul className="service-hero-highlights">
+                  {hero.highlights.map((item, i) => (
+                    <li key={i}><i className="bi bi-check-circle-fill"></i> {item}</li>
+                  ))}
+                </ul>
+              )}
               <div className="service-hero-btns">
                 <Link href={hero.cta_url} className="service-hero-cta">
                   {hero.cta_text} <i className="bi bi-arrow-right"></i>
