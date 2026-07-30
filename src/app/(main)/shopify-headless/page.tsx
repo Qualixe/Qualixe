@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import Image from 'next/image';
 import SpeedAuditForm from './SpeedAuditForm';
 import Faq from './Faq';
@@ -86,12 +85,17 @@ export default function ShopifyHeadlessPage() {
                 storefronts that convert better.
               </p>
               <div className="sh-hero-btns">
-                <a href="#demo" className="sh-btn-primary">
-                  See Live Demo <i className="bi bi-arrow-down" aria-hidden="true" />
+                <a
+                  href="https://fashion.qualixe.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sh-btn-primary"
+                >
+                  See Live Demo <i className="bi bi-box-arrow-up-right" aria-hidden="true" />
                 </a>
-                <Link href="/contact" className="sh-btn-secondary">
+                <a href="#sh-lead-heading" className="sh-btn-secondary">
                   Get a Free Speed Audit <i className="bi bi-arrow-right" aria-hidden="true" />
-                </Link>
+                </a>
               </div>
             </div>
             <div className="sh-hero-visual">

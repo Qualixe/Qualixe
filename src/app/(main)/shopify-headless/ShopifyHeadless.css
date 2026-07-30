@@ -541,6 +541,10 @@
   padding: 80px 0;
 }
 
+#sh-lead-heading {
+  scroll-margin-top: 90px;
+}
+
 .sh-lead-grid {
   display: flex;
   flex-direction: column;
