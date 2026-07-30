@@ -38,8 +38,7 @@ export default function Footer() {
                 className="footer-brand__logo"
               />
               <p className="footer-brand__desc">
-                Bangladesh's leading Shopify development agency. We build high-converting
-                e-commerce stores for brands worldwide.
+                Shopify Headless & Custom Storefront experts, trusted by ecommerce brands worldwide. We build high-converting stores that load fast and convert bette
               </p>
               <div className="footer-social">
                 <a href="https://www.facebook.com/qualixe" target="_blank" rel="noopener noreferrer"

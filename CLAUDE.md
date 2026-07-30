@@ -57,7 +57,7 @@ When touching this flow, keep `orders`/`download_tokens` writes on the service-r
 
 ## Environment variables
 
-Required at runtime (no `.env.example` is checked in): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_ADMIN_EMAILS`, `NEXT_PUBLIC_BASE_URL`, `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_STORE_ID`, `LEMONSQUEEZY_WEBHOOK_SECRET`, `NEXT_PUBLIC_GTM_ID`.
+Required at runtime (no `.env.example` is checked in): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_ADMIN_EMAILS`, `NEXT_PUBLIC_BASE_URL`, `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_STORE_ID`, `LEMONSQUEEZY_WEBHOOK_SECRET`, `NEXT_PUBLIC_GTM_ID`, `RESEND_API_KEY` (optional — email notifications for the `/shopify-headless` lead form fall back to a console warning and skip sending if unset), `RESEND_FROM_EMAIL` (optional, defaults to Resend's shared sandbox sender).
 
 ## Database
 

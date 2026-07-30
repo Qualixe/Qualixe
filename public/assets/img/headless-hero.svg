@@ -1,0 +1,91 @@
+<svg width="700" height="640" viewBox="0 0 700 640" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="backdrop" cx="50%" cy="55%" r="60%">
+      <stop offset="0%" stop-color="#dbe4fd"/>
+      <stop offset="100%" stop-color="#dbe4fd" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5776ec"/>
+      <stop offset="100%" stop-color="#3a58d6"/>
+    </linearGradient>
+    <linearGradient id="cubeLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c3aad"/>
+      <stop offset="100%" stop-color="#122a82"/>
+    </linearGradient>
+    <linearGradient id="cubeRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f2b8f"/>
+      <stop offset="100%" stop-color="#0a1e66"/>
+    </linearGradient>
+    <linearGradient id="cardShadowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0c3cc3" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#0c3cc3" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="350" cy="440" rx="290" ry="180" fill="url(#backdrop)"/>
+
+  <ellipse cx="350" cy="487" rx="175" ry="32" fill="#c7d3f7" opacity="0.7"/>
+
+  <line x1="350" y1="250" x2="350" y2="302" stroke="#5776ec" stroke-width="2.5" stroke-dasharray="5 6" stroke-linecap="round"/>
+
+  <polygon points="350,255 337,283 348,283 342,308 366,275 352,275 358,255"
+    fill="#ffb020" stroke="#e0941a" stroke-width="1"/>
+
+  <polygon points="350,300 440,345 350,390 260,345" fill="url(#cubeTop)"/>
+  <polygon points="260,345 350,390 350,480 260,435" fill="url(#cubeLeft)"/>
+  <polygon points="350,390 440,345 440,435 350,480" fill="url(#cubeRight)"/>
+
+  <g opacity="0.35" stroke="#dbe4fd" stroke-width="1.2">
+    <line x1="305" y1="322" x2="305" y2="367"/>
+    <line x1="395" y1="322" x2="395" y2="367"/>
+    <line x1="283" y1="333" x2="418" y2="333"/>
+    <line x1="283" y1="356" x2="418" y2="356"/>
+  </g>
+
+  <g>
+    <path d="M330 332 h40 a4 4 0 0 1 4 4 v6 h-48 v-6 a4 4 0 0 1 4 -4 z" fill="#eef2ff" opacity="0.9"/>
+    <path d="M328 342 h44 l-4 26 a5 5 0 0 1 -5 4 h-30 a5 5 0 0 1 -5 -4 z" fill="#eef2ff" opacity="0.9"/>
+    <path d="M336 332 v-6 a14 14 0 0 1 28 0 v6" fill="none" stroke="#eef2ff" stroke-width="3" opacity="0.9"/>
+  </g>
+
+  <rect x="222" y="90" width="256" height="176" rx="16" fill="url(#cardShadowGrad)"/>
+  <rect x="230" y="80" width="240" height="170" rx="14" fill="#ffffff" stroke="#e3e8fb" stroke-width="1.5"/>
+
+  <circle cx="248" cy="98" r="4" fill="#ffb020"/>
+  <circle cx="262" cy="98" r="4" fill="#4dd68c"/>
+  <circle cx="276" cy="98" r="4" fill="#5776ec"/>
+  <rect x="230" y="112" width="240" height="1" fill="#e3e8fb"/>
+
+  <rect x="248" y="130" width="70" height="70" rx="8" fill="#eef2ff"/>
+  <path d="M270 155 l8 10 l14 -18" fill="none" stroke="#5776ec" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="330" y="134" width="118" height="10" rx="5" fill="#1c2a5e" opacity="0.85"/>
+  <rect x="330" y="152" width="90" height="8" rx="4" fill="#c7ceef"/>
+  <rect x="330" y="167" width="100" height="8" rx="4" fill="#c7ceef"/>
+  <rect x="330" y="190" width="86" height="26" rx="13" fill="#0c3cc3"/>
+  <rect x="342" y="200" width="60" height="6" rx="3" fill="#ffffff"/>
+
+  <rect x="30" y="122" width="150" height="46" rx="23" fill="#ffffff" stroke="#e3e8fb" stroke-width="1.5"/>
+  <g transform="translate(48,133)">
+    <path d="M12 2 L2 13 h7 l-2 9 L20 9 h-7 z" fill="#ffb020"/>
+  </g>
+  <text x="72" y="150" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#12266b">Instant load</text>
+
+  <rect x="490" y="404" width="170" height="46" rx="23" fill="#ffffff" stroke="#e3e8fb" stroke-width="1.5"/>
+  <circle cx="516" cy="427" r="10" fill="#e9fbf1"/>
+  <path d="M511 427 l4 4 l7 -8" fill="none" stroke="#2fae66" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="534" y="432" font-family="Arial, sans-serif" font-size="13.5" font-weight="700" fill="#12266b">API connected</text>
+
+  <rect x="46" y="330" width="60" height="60" rx="16" fill="#0c3cc3"/>
+  <g transform="translate(60,344)" stroke="#ffffff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="16,0 32,8 16,16 0,8" />
+    <polyline points="0,16 16,24 32,16" />
+    <polyline points="0,24 16,32 32,24" />
+  </g>
+
+  <rect x="590" y="300" width="56" height="56" rx="16" fill="#ffffff" stroke="#e3e8fb" stroke-width="1.5"/>
+  <g transform="translate(604,314)" stroke="#0c3cc3" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="0" y="0" width="28" height="28" rx="5"/>
+    <path d="M6 14 h16 M6 20 h10"/>
+  </g>
+</svg>
