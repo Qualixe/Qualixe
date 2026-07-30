@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 // GET /api/file-action?action=sign&name=filename.zip&expires=3600
 // GET /api/file-action?action=delete&name=filename.zip
 export async function GET(req: NextRequest) {
+  const supabase = getServiceClient();
   const { searchParams } = new URL(req.url);
   const action = searchParams.get('action');
   const name = searchParams.get('name');
