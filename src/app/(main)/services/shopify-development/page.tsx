@@ -3,6 +3,8 @@ import { getShopifyServicePage } from '../../../../../lib/api/shopify-service';
 import ShopifyServiceClient from './ShopifyServiceClient';
 import { FALLBACK } from './fallback';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Shopify Custom Theme Development Services | Qualixe',
   description:

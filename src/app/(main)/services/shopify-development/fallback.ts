@@ -5,7 +5,14 @@ export const FALLBACK: ShopifyServicePage = {
     badge: 'Shopify Development',
     heading: 'Shopify Custom Theme Development Services for High-Converting Stores',
     subheading:
-      "Whether you're launching a new online store or upgrading your existing one, Qualixe delivers Shopify custom theme development tailored to your needs. Our themes are designed around your brand, audience, and goals—combining creative design with high performance to turn visitors into customers.",
+      "Build a Shopify store that stands out, performs faster, and converts more visitors into customers. At Qualixe, we create custom Shopify themes tailored to your brand, business goals, and customer journey. From pixel-perfect design implementation to advanced Shopify Liquid development, we deliver scalable, SEO-friendly, and high-converting Shopify experiences.",
+    highlights: [
+      'Fully Custom Shopify Themes',
+      'Mobile-First & Responsive Design',
+      'Shopify 2.0 Compatible Development',
+      'SEO & Performance Optimized',
+      'Conversion-Focused User Experience',
+    ],
     cta_text: 'Get a Free Quote',
     cta_url: '/contact',
   },

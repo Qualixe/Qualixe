@@ -3,6 +3,8 @@ import { getUiUxPage } from '../../../../../lib/api/uiux-service';
 import UiUxDesignClient from './UiUxDesignClient';
 import { FALLBACK } from './fallback';
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'UI/UX Design Services – Web & App Design | Qualixe',
   description: 'Professional UI/UX design for websites and mobile apps. From wireframes to pixel-perfect handoff — we design experiences people love to use.',

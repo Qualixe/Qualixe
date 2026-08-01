@@ -132,6 +132,13 @@ export default function ShopifyServiceEditor() {
           <Field label="Badge text" value={hero.badge} onChange={v => setPage(p => p && ({ ...p, hero: { ...p.hero, badge: v } }))} />
           <Field label="Heading (H1)" value={hero.heading} onChange={v => setPage(p => p && ({ ...p, hero: { ...p.hero, heading: v } }))} textarea />
           <Field label="Subheading paragraph" value={hero.subheading} onChange={v => setPage(p => p && ({ ...p, hero: { ...p.hero, subheading: v } }))} textarea />
+          <Field
+            label="Highlights"
+            value={(hero.highlights ?? []).join('\n')}
+            onChange={v => setPage(p => p && ({ ...p, hero: { ...p.hero, highlights: v.split('\n').filter(Boolean) } }))}
+            textarea
+            hint="One highlight per line — shown as a checklist under the subheading."
+          />
           <div className="row g-3">
             <div className="col-md-6">
               <Field label="CTA button text" value={hero.cta_text} onChange={v => setPage(p => p && ({ ...p, hero: { ...p.hero, cta_text: v } }))} />
