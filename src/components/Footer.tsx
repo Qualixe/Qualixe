@@ -34,14 +34,12 @@ export default function Footer() {
                 width={140} height={48}
                 className="footer-brand__logo"
               />
-<<<<<<< HEAD
+
+              <p className="footer-brand__desc">
+                Shopify Headless & Custom Storefront experts, trusted by ecommerce brands worldwide. We build high-converting stores that load fast and convert better.
+              </p>
 
               <h4 className="footer-col__heading">Follow us</h4>
-=======
-              <p className="footer-brand__desc">
-                Shopify Headless & Custom Storefront experts, trusted by ecommerce brands worldwide. We build high-converting stores that load fast and convert bette
-              </p>
->>>>>>> 5b20770c4f18b6a03014d64855eacdc25e637d1d
               <div className="footer-social">
                 <a href="https://www.linkedin.com/company/qualixe" target="_blank" rel="noopener noreferrer"
                   className="footer-social__link" aria-label="LinkedIn">
