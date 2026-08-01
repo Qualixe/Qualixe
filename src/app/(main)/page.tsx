@@ -5,7 +5,8 @@ import Portfolio from './home/Portfolio';
 import ClientsGrid from './home/Clients';
 import type { Metadata } from 'next';
 import { getHomePage } from '../../../lib/api/home-page';
-import { FALLBACK } from './home/fallback';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Qualixe – Shopify Development & E-Commerce Solutions',
@@ -53,8 +54,7 @@ const organizationSchema = {
 };
 
 export default async function HomePage() {
-  const data = await getHomePage();
-  const page = data ?? FALLBACK;
+  const page = await getHomePage();
 
   return (
     <>

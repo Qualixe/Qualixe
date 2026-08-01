@@ -1,4 +1,5 @@
 import { supabase } from '../supabaseClient';
+import { FALLBACK } from '../../src/app/(main)/home/fallback';
 
 export interface HomeHero {
   badge: string;
@@ -46,18 +47,21 @@ export interface HomePage {
   services: HomeServices;
 }
 
-export async function getHomePage(): Promise<HomePage | null> {
+export async function getHomePage(): Promise<HomePage> {
   const { data, error } = await supabase
     .from('home_page')
     .select('section, content');
 
-  if (error || !data || data.length === 0) return null;
+  if (error || !data) return FALLBACK;
 
   const map: Record<string, any> = {};
   data.forEach((row) => { map[row.section] = row.content; });
 
-  if (!map.hero || !map.about || !map.services) return null;
-  return map as HomePage;
+  return {
+    hero: map.hero ?? FALLBACK.hero,
+    about: map.about ?? FALLBACK.about,
+    services: map.services ?? FALLBACK.services,
+  };
 }
 
 export async function upsertHomeSection(section: string, content: object): Promise<void> {

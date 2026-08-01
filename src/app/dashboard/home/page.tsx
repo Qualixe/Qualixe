@@ -60,7 +60,7 @@ export default function HomeEditor() {
 
   useEffect(() => {
     getHomePage()
-      .then(data => { if (data) setPage(data); })
+      .then(data => setPage(data))
       .catch(() => toast.error('Failed to load page content'))
       .finally(() => setLoading(false));
   }, []);

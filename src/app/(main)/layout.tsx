@@ -7,7 +7,6 @@ import "../globals.css";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Ribon from "@/components/Ribon";
 import WhatsAppChat from "@/components/WhatsAppChat";
 import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
@@ -63,7 +62,6 @@ export default function RootLayout({
           <Header />
           {children}
           <WhatsAppChat />
-          <Ribon />
           <Footer />
         </CartProvider>
 
