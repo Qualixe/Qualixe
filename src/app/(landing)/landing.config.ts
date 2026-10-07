@@ -33,7 +33,7 @@ export const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfy
 // ── Tracking ────────────────────────────────────────────────────────────────
 // Leave a value empty to keep that tag switched off (nothing is loaded for it).
 export const META_PIXEL_ID = ''; // TODO: e.g. '123456789012345'
-export const GA4_MEASUREMENT_ID = ''; // TODO: e.g. 'G-XXXXXXX'
+export const GA4_MEASUREMENT_ID = 'G-NS5MM8T1NJ';
 export const GOOGLE_ADS_ID = ''; // TODO: e.g. 'AW-XXXXXXX'
 export const GOOGLE_ADS_CONVERSION_LABEL = ''; // TODO: the LABEL part of AW-XXXXXXX/LABEL
 
