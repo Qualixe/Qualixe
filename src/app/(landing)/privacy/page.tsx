@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ChevronDown } from 'lucide-react';
 
+import TocScrollSpy from './TocScrollSpy';
 import LandingFooter from '../_components/LandingFooter';
 import LandingHeader from '../_components/LandingHeader';
 import {
@@ -98,6 +99,7 @@ export default function PrivacyPolicyPage() {
           <nav className="lp-legal__toc" aria-label="On this page">
             <p>On this page</p>
             <Toc />
+            <TocScrollSpy />
           </nav>
 
           <article className="lp-legal__content">

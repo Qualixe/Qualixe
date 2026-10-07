@@ -1207,8 +1207,18 @@ body {
   }
 
   .lp-legal__toc a {
+    /* overlaps the list's 2px rail so the active item can colour it */
+    margin-left: -2px;
     padding: 6px 0 6px 14px;
+    border-left: 2px solid transparent;
     font-size: 0.875rem;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .lp-legal__toc a[aria-current] {
+    border-left-color: var(--lp-blue);
+    color: var(--lp-blue);
+    font-weight: 600;
   }
 
   .lp-legal__contents {
