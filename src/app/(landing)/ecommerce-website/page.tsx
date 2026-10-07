@@ -18,15 +18,15 @@ import {
   X,
 } from 'lucide-react';
 
+import LandingFooter from '../_components/LandingFooter';
+import LandingHeader from '../_components/LandingHeader';
 import QuoteForm from '../_components/QuoteForm';
 import WhatsAppIcon from '../_components/WhatsAppIcon';
 import {
   DELIVERY_WEEKS,
   LANDING_PATH,
   PORTFOLIO_PROJECTS,
-  PRIVACY_POLICY_PATH,
   STARTING_PRICE,
-  WHATSAPP_DISPLAY,
   whatsappUrl,
 } from '../landing.config';
 
@@ -214,20 +214,7 @@ function WhatsAppButton({
 export default function EcommerceLandingPage() {
   return (
     <>
-      {/* Sticky header */}
-      <header className="lp-header">
-        <div className="lp-container lp-header__inner">
-          <a href="#top" className="lp-header__logo" aria-label="Qualixe">
-            <Image src="/assets/img/logo.png" alt="Qualixe" width={123} height={32} priority />
-          </a>
-          <nav className="lp-header__actions" aria-label="Quick actions">
-            <a href="#quote-form" className="lp-btn lp-btn--primary lp-btn--sm">
-              Quote নিন
-            </a>
-            <WhatsAppButton location="header" label="WhatsApp" className="lp-btn--sm" />
-          </nav>
-        </div>
-      </header>
+      <LandingHeader />
 
       <main id="top">
         {/* 1. Hero */}
@@ -458,40 +445,8 @@ export default function EcommerceLandingPage() {
         </section>
       </main>
 
-      {/* 12. Footer */}
-      <footer className="lp-footer">
-        <div className="lp-container lp-footer__inner">
-          <p>
-            <strong>Qualixe:</strong> Build Smart. Scale Faster.
-          </p>
-          <ul>
-            <li>
-              <a href="https://www.qualixe.com">qualixe.com</a>
-            </li>
-            <li>
-              WhatsApp:{' '}
-              <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer" data-wa="footer">
-                {WHATSAPP_DISPLAY}
-              </a>
-            </li>
-            <li>
-              <a href={PRIVACY_POLICY_PATH}>Privacy Policy</a>
-            </li>
-          </ul>
-        </div>
-      </footer>
-
-      {/* Floating WhatsApp button */}
-      <a
-        href={whatsappUrl()}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-wa="floating"
-        className="lp-wa-float"
-        aria-label="WhatsApp করুন"
-      >
-        <WhatsAppIcon size={30} />
-      </a>
+      {/* 12. Footer + floating WhatsApp button */}
+      <LandingFooter />
     </>
   );
 }

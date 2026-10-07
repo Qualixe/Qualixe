@@ -111,7 +111,7 @@ export default function Footer() {
             <div className="footer-bottom__links">
               <Link href="/contact">Terms</Link>
               <span>&</span>
-              <Link href="/contact">Privacy</Link>
+              <Link href="/privacy">Privacy Policy</Link>
             </div>
           </div>
         </div>

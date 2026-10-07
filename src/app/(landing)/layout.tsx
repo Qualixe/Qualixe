@@ -38,7 +38,12 @@ export default function LandingLayout({
 }>) {
   return (
     <div lang="bn" className={`lp ${inter.variable} ${hindSiliguri.variable}`}>
-      <script dangerouslySetInnerHTML={{ __html: "document.documentElement.lang='bn'" }} />
+      <script
+        dangerouslySetInnerHTML={{
+          // the privacy policy is the one English page in this group
+          __html: "document.documentElement.lang=location.pathname.indexOf('/privacy')===0?'en':'bn'",
+        }}
+      />
       <TrackingScripts />
       {children}
       <WhatsAppClickTracker />

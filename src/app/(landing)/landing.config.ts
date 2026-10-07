@@ -4,7 +4,15 @@
 
 export const LANDING_PATH = '/ecommerce-website';
 export const THANK_YOU_PATH = '/thank-you';
-export const PRIVACY_POLICY_PATH = '/privacy-policy'; // TODO: this page does not exist yet
+export const PRIVACY_POLICY_PATH = '/privacy';
+
+// ── Privacy policy ──────────────────────────────────────────────────────────
+// Shown on /privacy. Values still in [brackets] are printed as-is; once
+// replaced with real ones, the email and WhatsApp number become links.
+export const PRIVACY_LAST_UPDATED = '7-Oct-2026'; // TODO: e.g. '7 October 2026'
+export const PRIVACY_EMAIL = 'qualixe.info@gmail.com'; // TODO
+export const PRIVACY_WHATSAPP = '+8801318552266'; // TODO: e.g. '+880 1318-552266'
+export const PRIVACY_ADDRESS = 'House:06, Road: 3, Block:A, Mirpur 11, Dhaka'; // TODO
 
 // ── WhatsApp ────────────────────────────────────────────────────────────────
 // Same number the main site's chat widget uses (src/components/WhatsAppChat.tsx).
@@ -30,7 +38,7 @@ export const GOOGLE_ADS_ID = ''; // TODO: e.g. 'AW-XXXXXXX'
 export const GOOGLE_ADS_CONVERSION_LABEL = ''; // TODO: the LABEL part of AW-XXXXXXX/LABEL
 
 // ── Pricing & timeline copy ─────────────────────────────────────────────────
-export const STARTING_PRICE = '৳XX,XXX'; // TODO
+export const STARTING_PRICE = '৳10,000'; // TODO
 export const DELIVERY_WEEKS = '1–5'; // TODO: e.g. '২–৪'
 
 // `tier` is what the Google Sheet uses for the Hot/Cold tag ("low" = Cold), so
