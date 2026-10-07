@@ -30,6 +30,7 @@ const STATIC_PAGE_FILES: { url: string; file: string }[] = [
   { url: `${BASE_URL}/blog`, file: 'src/app/(main)/blog/page.tsx' },
   { url: `${BASE_URL}/shop`, file: 'src/app/(main)/shop/page.tsx' },
   { url: `${BASE_URL}/shopify-headless`, file: 'src/app/(main)/shopify-headless/page.tsx' },
+  { url: `${BASE_URL}/ecommerce-website`, file: 'src/app/(landing)/ecommerce-website/page.tsx' },
   { url: `${BASE_URL}/contact`, file: 'src/app/(main)/contact/page.tsx' },
 ];
 

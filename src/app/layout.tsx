@@ -27,7 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: the (landing) layout switches lang to "bn" before hydration
+    <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         {children}
       </body>
