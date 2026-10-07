@@ -260,7 +260,7 @@ export default function EcommerceLandingPage() {
             </div>
             <div className="lp-hero__media">
               <Image
-                src="/images/hero-mockup.png"
+                src="/images/hero-img.png"
                 alt="Laptop আর phone-এ একটি e-commerce website"
                 width={1200}
                 height={900}
@@ -298,7 +298,7 @@ export default function EcommerceLandingPage() {
         <section className="lp-section">
           <div className="lp-container">
             <div className="lp-heading">
-              <h2>আমরা যা করি</h2>
+              <h2>Our Services</h2>
             </div>
             <ul className="lp-services">
               {SERVICES.map(({ icon: Icon, title, text }) => (
@@ -354,43 +354,25 @@ export default function EcommerceLandingPage() {
         </section>
 
         {/* 5. Portfolio */}
+        {/* 7. Process */}
         <section className="lp-section">
           <div className="lp-container">
             <div className="lp-heading">
-              <h2>আমাদের সাম্প্রতিক কাজ</h2>
+              <h2>Our Work Progress</h2>
             </div>
-            <ul className="lp-portfolio">
-              {PORTFOLIO_PROJECTS.map((project) => (
-                <li key={project.url} className="lp-card lp-card--hover lp-project">
-                  <div className="lp-project__image">
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      width={1200}
-                      height={800}
-                      sizes="(min-width: 720px) 420px, 100vw"
-                    />
-                  </div>
-                  <div className="lp-project__body">
-                    <h3>{project.title}</h3>
-                    <ul className="lp-tags">
-                      {project.tags.map((tag) => (
-                        <li key={tag}>{tag}</li>
-                      ))}
-                    </ul>
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="lp-btn lp-btn--outline"
-                    >
-                      Live Demo দেখুন
-                      <ExternalLink size={16} aria-hidden="true" />
-                    </a>
+            <ol className="lp-steps">
+              {STEPS.map((step, index) => (
+                <li key={step.title} className="lp-step">
+                  <span className="lp-step__num" aria-hidden="true">
+                    {index + 1}
+                  </span>
+                  <div>
+                    <h3>{step.title}</h3>
+                    <p>{step.text}</p>
                   </div>
                 </li>
               ))}
-            </ul>
+            </ol>
           </div>
         </section>
 
@@ -417,47 +399,15 @@ export default function EcommerceLandingPage() {
         </section>
 
         {/* 7. Process */}
-        <section className="lp-section">
-          <div className="lp-container">
-            <div className="lp-heading">
-              <h2>কীভাবে কাজ করি</h2>
-            </div>
-            <ol className="lp-steps">
-              {STEPS.map((step, index) => (
-                <li key={step.title} className="lp-step">
-                  <span className="lp-step__num" aria-hidden="true">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <h3>{step.title}</h3>
-                    <p>{step.text}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
 
         {/* 8. Pricing hint */}
-        <section className="lp-section lp-section--alt">
-          <div className="lp-container">
-            <div className="lp-card lp-pricing">
-              <h2>খরচ কেমন?</h2>
-              <p>
-                E-commerce website package শুরু <strong>{STARTING_PRICE}</strong> থেকে। আসল খরচ নির্ভর
-                করে platform, product-এর সংখ্যা আর feature-এর উপর। Form পূরণ করলে আপনার project
-                অনুযায়ী সঠিক quote জানিয়ে দেবো।
-              </p>
-              <QuoteButton />
-            </div>
-          </div>
-        </section>
+        
 
         {/* 9. Quote form */}
         <section className="lp-section" id="quote-form">
           <div className="lp-container">
             <div className="lp-heading">
-              <h2>আপনার Project-এর Quote নিন</h2>
+              <h2>Get Your Project Quote</h2>
               <p>নিচের তথ্যগুলো দিন, ২৪ ঘণ্টার মধ্যে আমাদের team WhatsApp-এ যোগাযোগ করবে।</p>
             </div>
             <div className="lp-quote">
@@ -479,7 +429,7 @@ export default function EcommerceLandingPage() {
         <section className="lp-section lp-section--alt">
           <div className="lp-container lp-container--narrow">
             <div className="lp-heading">
-              <h2>সাধারণ প্রশ্ন</h2>
+              <h2>FAQ</h2>
             </div>
             <div className="lp-faq">
               {FAQS.map((faq) => (

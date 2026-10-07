@@ -13,9 +13,10 @@ body {
 
 .lp {
   --lp-navy: #0b1b3f;
-  --lp-blue: #2563eb;
-  --lp-blue-dark: #1d4ed8;
-  --lp-blue-soft: #eaf1ff;
+  /* brand blue — same as the main site's primary CTA (home/Hero.css) */
+  --lp-blue: #0c3cc3;
+  --lp-blue-dark: #031e69;
+  --lp-blue-soft: #eef2ff;
   --lp-green: #1da851;
   --lp-green-dark: #178a43;
   --lp-red: #dc2626;
@@ -74,7 +75,7 @@ body {
 }
 
 .lp :focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.45);
+  outline: 3px solid rgba(12, 60, 195, 0.45);
   outline-offset: 2px;
 }
 
@@ -97,9 +98,9 @@ body {
   justify-content: center;
   gap: 8px;
   min-height: 50px;
-  padding: 12px 22px;
+  padding: 12px 28px;
   border: 1.5px solid transparent;
-  border-radius: var(--lp-radius-sm);
+  border-radius: 50px;
   font: inherit;
   font-size: 16px;
   font-weight: 600;
@@ -122,7 +123,7 @@ body {
 .lp-btn--primary {
   background: var(--lp-blue);
   color: #fff;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+  box-shadow: 0 8px 20px rgba(12, 60, 195, 0.28);
 }
 
 .lp-btn--primary:hover {
@@ -152,8 +153,8 @@ body {
 .lp-btn--sm {
   min-height: 38px;
   padding: 6px 12px;
-  border-radius: 10px;
   font-size: 14px;
+  white-space: nowrap;
   box-shadow: none !important;
 }
 
@@ -222,7 +223,7 @@ body {
 }
 
 .lp h2 {
-  font-size: clamp(1.5rem, 1.1rem + 1.9vw, 2.25rem);
+  font-size: clamp(1.5rem, 1.1rem + 1.9vw, 2rem);
   font-weight: 700;
   line-height: 1.35;
   letter-spacing: -0.01em;
@@ -367,6 +368,7 @@ body {
 
 .lp-problem p {
   font-weight: 500;
+  font-size:15px;
 }
 
 .lp p.lp-highlight {
@@ -401,6 +403,7 @@ body {
 .lp-step p {
   margin-top: 6px;
   color: var(--lp-muted);
+  font-size:14px;
 }
 
 /* ── 4. Platforms ────────────────────────────────────────────────────────── */
@@ -689,7 +692,7 @@ body {
 .lp-field textarea:focus {
   outline: none;
   border-color: var(--lp-blue);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 0 0 4px rgba(12, 60, 195, 0.14);
 }
 
 .lp-field [aria-invalid='true'] {
@@ -758,7 +761,7 @@ body {
 }
 
 .lp-choice input:focus-visible + span {
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 4px rgba(12, 60, 195, 0.2);
 }
 
 .lp-field__error {

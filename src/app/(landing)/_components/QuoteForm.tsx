@@ -23,10 +23,10 @@ const SERVICES_NEEDED = [
   'Website + Marketing দুটোই',
 ];
 
-const PLATFORMS = ['WordPress (WooCommerce)', 'Shopify', 'Custom', 'নিশ্চিত না, পরামর্শ চাই'];
+const PLATFORMS = ['WordPress (WooCommerce)', 'Shopify', 'Custom(React JS)', 'নিশ্চিত না, পরামর্শ চাই'];
 const PRODUCT_COUNTS = ['১–৫০', '৫০–২০০', '২০০+'];
 // Keep "শুধু জানতে চাই" in sync with COLD_TIMELINE in google-apps-script/leads.gs.
-const TIMELINES = ['এই মাসেই', '১–৩ মাসের মধ্যে', 'শুধু জানতে চাই'];
+const TIMELINES = ['যত দ্রুত সম্ভব', 'এই মাসেই', '১–৩ মাসের মধ্যে', 'শুধু জানতে চাই'];
 
 const BD_PHONE = /^(?:\+?88)?01[3-9]\d{8}$/;
 const SUBMIT_TIMEOUT_MS = 20000;
@@ -37,7 +37,6 @@ const CHOOSE_MSG = 'একটি বেছে নিন';
 const initialValues = {
   name: '',
   whatsapp: '',
-  business_name: '',
   business_link: '',
   business_type: '',
   service_needed: '',
@@ -56,7 +55,6 @@ type Errors = Partial<Record<Field, string>>;
 const FIELD_ORDER: Field[] = [
   'name',
   'whatsapp',
-  'business_name',
   'business_link',
   'business_type',
   'service_needed',
@@ -76,8 +74,6 @@ function validate(values: Values): Errors {
 
   if (!values.whatsapp.trim()) errors.whatsapp = REQUIRED_MSG;
   else if (!BD_PHONE.test(normalizePhone(values.whatsapp))) errors.whatsapp = 'সঠিক WhatsApp নম্বর দিন';
-
-  if (!values.business_name.trim()) errors.business_name = REQUIRED_MSG;
 
   const link = values.business_link.trim();
   if (!link) errors.business_link = REQUIRED_MSG;
@@ -134,7 +130,6 @@ export default function QuoteForm() {
     const payload = {
       name: values.name.trim(),
       whatsapp: normalizePhone(values.whatsapp),
-      business_name: values.business_name.trim(),
       business_link: values.business_link.trim(),
       business_type: values.business_type,
       service_needed: values.service_needed,
@@ -189,7 +184,6 @@ export default function QuoteForm() {
     [
       'আসসালামু আলাইকুম, আমি e-commerce website নিয়ে জানতে চাই।',
       values.name.trim() && `নাম: ${values.name.trim()}`,
-      values.business_name.trim() && `Business: ${values.business_name.trim()}`,
       values.business_link.trim() && `Link: ${values.business_link.trim()}`,
       values.service_needed && `দরকার: ${values.service_needed}`,
     ]
@@ -274,22 +268,6 @@ export default function QuoteForm() {
       </div>
 
       <div className="lp-field">
-        <label htmlFor="qf-business_name">
-          Business-এর নাম <span aria-hidden="true">*</span>
-        </label>
-        <input
-          id="qf-business_name"
-          name="business_name"
-          type="text"
-          autoComplete="organization"
-          value={values.business_name}
-          onChange={handleChange}
-          {...errorProps('business_name')}
-        />
-        {renderError('business_name')}
-      </div>
-
-      <div className="lp-field">
         <label htmlFor="qf-business_link">
           Facebook page বা website link <span aria-hidden="true">*</span>
         </label>
@@ -309,7 +287,7 @@ export default function QuoteForm() {
         {renderError('business_link')}
       </div>
 
-      <div className="lp-field lp-field--full">
+      <div className="lp-field">
         <label htmlFor="qf-business_type">
           Business-এর ধরন <span aria-hidden="true">*</span>
         </label>

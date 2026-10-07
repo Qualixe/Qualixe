@@ -31,14 +31,15 @@ export const GOOGLE_ADS_CONVERSION_LABEL = ''; // TODO: the LABEL part of AW-XXX
 
 // ── Pricing & timeline copy ─────────────────────────────────────────────────
 export const STARTING_PRICE = '৳XX,XXX'; // TODO
-export const DELIVERY_WEEKS = 'X–Y'; // TODO: e.g. '২–৪'
+export const DELIVERY_WEEKS = '1–5'; // TODO: e.g. '২–৪'
 
 // `tier` is what the Google Sheet uses for the Hot/Cold tag ("low" = Cold), so
 // the labels can be reworded freely without touching the Apps Script.
 export const BUDGET_OPTIONS = [
-  { tier: 'low', label: '৳XX,XXX-এর কম' }, // TODO
-  { tier: 'mid', label: '৳XX,XXX – ৳XX,XXX' }, // TODO
-  { tier: 'high', label: '৳XX,XXX+' }, // TODO
+  { tier: 'low', label: '৳10k–20k' },
+  { tier: 'mid', label: '৳20k–30k' },
+  { tier: 'high', label: '৳30k–50k' },
+  { tier: 'premium', label: '৳50k+' },
 ] as const;
 
 // ── Portfolio ───────────────────────────────────────────────────────────────

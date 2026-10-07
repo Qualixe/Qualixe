@@ -33,7 +33,6 @@ var FIELDS = [
   'submitted_at',
   'name',
   'whatsapp',
-  'business_name',
   'business_link',
   'business_type',
   'service_needed',
