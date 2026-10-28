@@ -30,6 +30,9 @@ export default function RootLayout({
     // suppressHydrationWarning: the (landing) layout switches lang to "bn" before hydration
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        {/* Impact.com site ownership check. Impact expects a `value` attribute (not
+            `content`), so this can't go through `metadata`; React hoists it into <head>. */}
+        <meta name="impact-site-verification" {...{ value: '683c3601-b90b-413a-a04e-0ddcdf368e72' }} />
         {children}
       </body>
     </html>
