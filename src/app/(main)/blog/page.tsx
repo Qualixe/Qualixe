@@ -69,10 +69,7 @@ export default function BlogPage() {
 
   return (
     <>
-      <PageBanner
-        heading="Our Blog"
-        subtitle="Insights, tutorials, and updates from the Qualixe team"
-      />
+     
 
       {/* Search and Filter */}
       <div className="blog-filters">
