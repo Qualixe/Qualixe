@@ -2,208 +2,132 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { authAPI } from '../../lib/auth';
-import { toast } from 'react-toastify';
+import { DASH_NAV, activeNavHref } from './dashboardNav';
+
+type Profile = { role: string; status: string; full_name: string } | null;
+type User = { email?: string; user_metadata?: { full_name?: string } } | null;
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<{ role: string; status: string; full_name: string } | null>(null);
+  const [user, setUser] = useState<User>(null);
+  const [profile, setProfile] = useState<Profile>(null);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    loadUser();
+    Promise.all([authAPI.getCurrentUser(), authAPI.getUserProfile()])
+      .then(([u, p]) => { setUser(u as User); setProfile(p as Profile); })
+      .catch((err) => console.error('Error loading user:', err))
+      .finally(() => setLoading(false));
   }, []);
 
-  const loadUser = async () => {
-    try {
-      const [currentUser, userProfile] = await Promise.all([
-        authAPI.getCurrentUser(),
-        authAPI.getUserProfile(),
-      ]);
-      setUser(currentUser);
-      setProfile(userProfile);
-    } catch (error) {
-      console.error('Error loading user:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Close the mobile drawer on navigation
+  const [lastPath, setLastPath] = useState(pathname);
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
+    setOpen(false);
+  }
 
-  const isActive = (path: string) => pathname === path;
+  // Lock page scroll + Escape to close while the drawer is open
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => { document.body.style.overflow = prev; document.removeEventListener('keydown', onKey); };
+  }, [open]);
+
+  const active = activeNavHref(pathname);
 
   const handleLogout = async () => {
     try {
       await authAPI.signOut();
-      toast.success('Logged out successfully');
+    } finally {
       router.push('/login');
-    } catch (error: any) {
-      toast.error(error.message || 'Logout failed');
     }
   };
 
-  // Get user initials for avatar
-  const getUserInitials = () => {
-    if (!user) return 'AD';
-    const fullName = user.user_metadata?.full_name || user.email || '';
-    if (fullName.includes(' ')) {
-      return fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-    }
-    return fullName.slice(0, 2).toUpperCase();
-  };
-
-  const getDisplayName = () => {
-    if (!user) return 'Loading...';
-    return profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin User';
-  };
-
-  const getRoleLabel = () => {
-    if (!profile) return 'administrator';
-    return profile.role.charAt(0).toUpperCase() + profile.role.slice(1);
-  };
+  const name = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin';
+  const initials = name.split(/\s+/).map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'AD';
+  const role = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'Administrator';
 
   return (
-    <div className="sidebar">
-      <div className="sidebar-brand">
-        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-          <img src="/assets/img/logo.png" alt="Qualixe Logo" style={{ width: '120px', height: 'auto' }} />
-        </div>
-        <div className="shopify-tag mt-2"><i className="bi bi-shop me-1"></i>shopify theme dev</div>
-      </div>
+    <>
+      {/* Mobile menu button (shown < 992px) */}
+      <button
+        type="button"
+        className="dash-burger"
+        onClick={() => setOpen(true)}
+        aria-label="Open navigation"
+        aria-expanded={open}
+        aria-controls="dash-sidebar"
+      >
+        <i className="bi bi-list" aria-hidden="true" />
+      </button>
 
-      <div className="nav-sidebar">
-        <div className="nav-item">
-          <Link href="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
-            <i className="bi bi-speedometer2"></i> <span>Dashboard</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/home" className={`nav-link ${isActive('/dashboard/home') ? 'active' : ''}`}>
-            <i className="bi bi-house"></i> <span>Home Page</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/portfolio" className={`nav-link ${isActive('/dashboard/portfolio') ? 'active' : ''}`}>
-            <i className="bi bi-briefcase"></i> <span>Portfolio</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/services/shopify" className={`nav-link ${isActive('/dashboard/services/shopify') ? 'active' : ''}`}>
-            <i className="bi bi-shop"></i> <span>Shopify Page</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/services/digital-marketing" className={`nav-link ${isActive('/dashboard/services/digital-marketing') ? 'active' : ''}`}>
-            <i className="bi bi-megaphone"></i> <span>Marketing Page</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/services/uiux" className={`nav-link ${isActive('/dashboard/services/uiux') ? 'active' : ''}`}>
-            <i className="bi bi-palette2"></i> <span>UI/UX Page</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/brands" className={`nav-link ${isActive('/dashboard/brands') ? 'active' : ''}`}>
-            <i className="bi bi-award"></i> <span>Brands</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/clients" className={`nav-link ${isActive('/dashboard/clients') ? 'active' : ''}`}>
-            <i className="bi bi-people"></i> <span>Clients</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/team" className={`nav-link ${isActive('/dashboard/team') ? 'active' : ''}`}>
-            <i className="bi bi-person-badge"></i> <span>Team</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/themes" className={`nav-link ${isActive('/dashboard/themes') ? 'active' : ''}`}>
-            <i className="bi bi-palette"></i> <span>Themes</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/contacts" className={`nav-link ${isActive('/dashboard/contacts') ? 'active' : ''}`}>
-            <i className="bi bi-envelope"></i> <span>Messages</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/blog" className={`nav-link ${isActive('/dashboard/blog') ? 'active' : ''}`}>
-            <i className="bi bi-file-earmark-text"></i> <span>Blog</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/blog/comments" className={`nav-link ${isActive('/dashboard/blog/comments') ? 'active' : ''}`}>
-            <i className="bi bi-chat-dots"></i> <span>Comments</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/analytics" className={`nav-link ${isActive('/dashboard/analytics') ? 'active' : ''}`}>
-            <i className="bi bi-graph-up"></i> <span>Analytics</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/products" className={`nav-link ${isActive('/dashboard/products') ? 'active' : ''}`}>
-            <i className="bi bi-box-seam"></i> <span>Products</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/files" className={`nav-link ${isActive('/dashboard/files') ? 'active' : ''}`}>
-            <i className="bi bi-file-zip"></i> <span>Files</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/orders" className={`nav-link ${isActive('/dashboard/orders') ? 'active' : ''}`}>
-            <i className="bi bi-receipt"></i> <span>Orders</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/media" className={`nav-link ${isActive('/dashboard/media') ? 'active' : ''}`}>
-            <i className="bi bi-images"></i> <span>Media</span>
-          </Link>
-        </div>
-        <div className="nav-item">
-          <Link href="/dashboard/users" className={`nav-link ${isActive('/dashboard/users') ? 'active' : ''}`}>
-            <i className="bi bi-person-gear"></i> <span>Users</span>
-          </Link>
-        </div>
-      </div>
+      <div className={`dash-overlay${open ? ' is-open' : ''}`} onClick={() => setOpen(false)} aria-hidden="true" />
 
-      <div className="nav-sidebar" style={{ marginTop: 'auto', paddingTop: 0, paddingBottom: '0.5rem' }}>
-        <div className="nav-item">
-          <Link href="/dashboard/settings" className={`nav-link ${isActive('/dashboard/settings') ? 'active' : ''}`}>
-            <i className="bi bi-gear"></i> <span>Settings</span>
+      <aside id="dash-sidebar" className={`sidebar${open ? ' is-open' : ''}`} aria-label="Dashboard navigation">
+        <div className="sidebar-brand">
+          <Link href="/dashboard" className="sidebar-logo" aria-label="Dashboard home">
+            <Image src="/assets/img/logo.png" alt="Qualixe" width={118} height={40} priority style={{ height: 'auto' }} />
           </Link>
-        </div>
-        <div className="nav-item">
-          <button onClick={handleLogout} className="nav-link" style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none' }}>
-            <i className="bi bi-box-arrow-right"></i> <span>Logout</span>
+          <span className="sidebar-badge">Admin</span>
+          <button type="button" className="sidebar-close" onClick={() => setOpen(false)} aria-label="Close navigation">
+            <i className="bi bi-x-lg" aria-hidden="true" />
           </button>
         </div>
-      </div>
 
-      <div className="sidebar-user">
-        <div className="user-avatar" style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          backgroundColor: '#0c3cc3',
-          color: 'white',
-          fontWeight: 'bold',
-          fontSize: '14px'
-        }}>
-          {loading ? '...' : getUserInitials()}
+        <Link href="/" target="_blank" className="sidebar-site">
+          <span className="sidebar-site__icon" aria-hidden="true"><i className="bi bi-globe2" /></span>
+          <span>
+            <strong>View website</strong>
+            <small>qualixe.com</small>
+          </span>
+          <i className="bi bi-box-arrow-up-right sidebar-site__go" aria-hidden="true" />
+        </Link>
+
+        <nav className="nav-sidebar">
+          {DASH_NAV.map((group) => (
+            <div key={group.title} className="nav-group">
+              <span className="nav-group__title">{group.title}</span>
+              <ul>
+                {group.items.map((item) => {
+                  const isActive = item.href === active;
+                  return (
+                    <li key={item.href} className="nav-item">
+                      <Link
+                        href={item.href}
+                        className={`nav-link${isActive ? ' active' : ''}`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        <i className={`bi ${item.icon}`} aria-hidden="true" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </nav>
+
+        <div className="sidebar-user">
+          <span className="sidebar-user__avatar" aria-hidden="true">{loading ? '…' : initials}</span>
+          <div className="sidebar-user__info">
+            <span className="user-name">{loading ? 'Loading…' : name}</span>
+            <span className="user-role">{loading ? '' : role}</span>
+          </div>
+          <button type="button" className="sidebar-logout" onClick={handleLogout} aria-label="Log out" title="Log out">
+            <i className="bi bi-box-arrow-right" aria-hidden="true" />
+          </button>
         </div>
-        <div className="user-info">
-          <div className="user-name">{getDisplayName()}</div>
-          <div className="user-role">{loading ? '...' : getRoleLabel()}</div>
-        </div>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 }

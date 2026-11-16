@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
+import { SERVICE_CATALOG, HEADLESS_SERVICE } from '@/lib/services';
 import './SearchIcon.css';
 
 interface SearchResult {
@@ -14,11 +15,13 @@ interface SearchResult {
   image?: string;
 }
 
-const SERVICES: SearchResult[] = [
-  { type: 'service', title: 'Shopify Development', excerpt: 'Custom Shopify stores built to convert', url: '/services/shopify-development' },
-  { type: 'service', title: 'Digital Marketing',   excerpt: 'SEO, paid ads, and social media campaigns', url: '/services/digital-marketing' },
-  { type: 'service', title: 'UI/UX Design',         excerpt: 'Beautiful, intuitive digital experiences', url: '/services/uiux-design' },
-];
+// Tags are included in the excerpt so searches like "node" or "laravel" match
+const SERVICES: SearchResult[] = [...SERVICE_CATALOG, HEADLESS_SERVICE].map((s) => ({
+  type: 'service',
+  title: s.name,
+  excerpt: `${s.short} · ${s.tags.join(', ')}`,
+  url: s.href,
+}));
 
 export default function SearchIcon() {
   const router = useRouter();

@@ -1,400 +1,302 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+/* eslint-disable @next/next/no-img-element -- featured/author images come from arbitrary CMS URLs */
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { blogAPI, blogCommentsAPI, blogLikesAPI, BlogPost, BlogComment } from '../../../../../lib/api/blog';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import './post.css';
+import { notFound } from 'next/navigation';
+import { blogAPI, type BlogPost } from '../../../../../lib/api/blog';
+import ClosingCta from '../../home/sections/ClosingCta';
+import { ArticleProgress, ArticleToc, PostActions, ViewCounter } from './ArticleClient';
+import '../../home/sections/home.css';
+import '../blog.css';
+import './article.css';
 
-export default function BlogPostPage() {
-  const params = useParams();
-  const slug = params.slug as string;
+export const revalidate = 60;
 
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [comments, setComments] = useState<BlogComment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [liked, setLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
+const SITE = 'https://www.qualixe.com';
 
-  // Comment form
-  const [commentForm, setCommentForm] = useState({
-    author_name: '',
-    author_email: '',
-    content: ''
+async function getPost(slug: string): Promise<BlogPost | null> {
+  try {
+    const post = (await blogAPI.getBySlug(slug)) as BlogPost | null;
+    return post && post.published ? post : null;
+  } catch {
+    return null;
+  }
+}
+
+function readMinutes(html?: string) {
+  if (!html) return 1;
+  const words = html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 220));
+}
+
+function formatDate(iso?: string) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+function stripTags(html: string) {
+  return html.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').trim();
+}
+
+/** Give every H2/H3 an id (for the table of contents) and collect them */
+function withHeadingIds(html: string) {
+  const toc: { id: string; text: string; level: 2 | 3 }[] = [];
+  const used = new Set<string>();
+  const out = html.replace(/<h([23])([^>]*)>([\s\S]*?)<\/h\1>/gi, (match, lvl: string, attrs: string, inner: string) => {
+    const text = stripTags(inner);
+    if (!text) return match;
+    const existing = attrs.match(/\sid=["']([^"']+)["']/i)?.[1];
+    let id = existing || text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 60) || `section-${toc.length + 1}`;
+    if (!existing) {
+      let n = 2;
+      const base = id;
+      while (used.has(id)) id = `${base}-${n++}`;
+    }
+    used.add(id);
+    toc.push({ id, text, level: Number(lvl) as 2 | 3 });
+    return existing ? match : `<h${lvl}${attrs} id="${id}">${inner}</h${lvl}>`;
   });
-  const [submittingComment, setSubmittingComment] = useState(false);
+  return { html: out, toc };
+}
 
-  useEffect(() => {
-    if (slug) {
-      loadPost();
-    }
-  }, [slug]);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPost(slug);
+  if (!post) return { title: 'Article not found | Qualixe Blog', robots: { index: false } };
 
-  const loadPost = async () => {
-    try {
-      const postData = await blogAPI.getBySlug(slug);
-      setPost(postData);
-      setLikesCount(postData.likes || 0);
+  const title = post.meta_title || `${post.title} | Qualixe Blog`;
+  const description =
+    post.meta_description || post.excerpt || stripTags(post.content || '').slice(0, 155) || `Read ${post.title} on the Qualixe blog.`;
+  const url = `${SITE}/blog/${post.slug}`;
+  const image = post.featured_image || `${SITE}/assets/img/web-logo.png`;
 
-      // Load comments
-      const commentsData = await blogCommentsAPI.getByPostId(postData.id);
-      setComments(commentsData || []);
-
-      // Check if user has liked
-      const userIp = await getUserIp();
-      const hasLiked = await blogLikesAPI.hasLiked(postData.id, userIp);
-      setLiked(hasLiked);
-
-      // Increment views and update displayed count
-      await blogAPI.incrementViews(postData.id);
-      setPost(prev => prev ? { ...prev, views: (prev.views || 0) + 1 } : prev);
-    } catch (error) {
-      console.error('Error loading post:', error);
-      toast.error('Failed to load blog post');
-    } finally {
-      setLoading(false);
-    }
+  return {
+    title,
+    description,
+    keywords: post.meta_keywords || post.tags?.join(', ') || undefined,
+    alternates: { canonical: url },
+    authors: [{ name: post.author_name || 'Qualixe Team' }],
+    openGraph: {
+      title: post.title,
+      description,
+      url,
+      type: 'article',
+      siteName: 'Qualixe',
+      publishedTime: post.published_at || post.created_at,
+      modifiedTime: post.updated_at || undefined,
+      authors: [post.author_name || 'Qualixe Team'],
+      section: post.category || undefined,
+      tags: post.tags || undefined,
+      images: [{ url: image, width: 1200, height: 630, alt: post.title }],
+    },
+    twitter: { card: 'summary_large_image', title: post.title, description, images: [image] },
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
   };
+}
 
-  const getUserIp = async () => {
-    try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      return data.ip;
-    } catch (error) {
-      return 'unknown';
-    }
-  };
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = await getPost(slug);
+  if (!post) notFound();
 
-  const handleLike = async () => {
-    if (!post) return;
+  const { html, toc } = withHeadingIds(post.content || '');
+  const mins = readMinutes(post.content);
+  const published = post.published_at || post.created_at;
+  const url = `${SITE}/blog/${post.slug}`;
+  const author = post.author_name || 'Qualixe Team';
 
-    try {
-      const userIp = await getUserIp();
-
-      if (liked) {
-        await blogLikesAPI.unlike(post.id, userIp);
-        setLiked(false);
-        setLikesCount(prev => Math.max(prev - 1, 0));
-        toast.success('Like removed');
-      } else {
-        await blogLikesAPI.like(post.id, userIp);
-        setLiked(true);
-        setLikesCount(prev => prev + 1);
-        toast.success('Post liked!');
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update like');
-    }
-  };
-
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!post) return;
-
-    if (!commentForm.author_name || !commentForm.author_email || !commentForm.content) {
-      toast.error('Please fill in all fields');
-      return;
-    }
-
-    setSubmittingComment(true);
-
-    try {
-      await blogCommentsAPI.create({
-        post_id: post.id,
-        ...commentForm,
-        approved: false
-      });
-
-      toast.success('Comment submitted! It will appear after approval.');
-      setCommentForm({ author_name: '', author_email: '', content: '' });
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to submit comment');
-    } finally {
-      setSubmittingComment(false);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  if (loading) {
-    return (
-      <div className="post-skeleton">
-        {/* Featured image skeleton */}
-        <div className="post-skeleton__image" />
-
-        <div className="container">
-          <div className="content-wrapper">
-            {/* Title */}
-            <div className="post-skeleton__line post-skeleton__line--title" />
-            <div className="post-skeleton__line post-skeleton__line--title-short" />
-
-            {/* Meta row */}
-            <div className="post-skeleton__meta">
-              <div className="post-skeleton__line post-skeleton__line--meta" />
-              <div className="post-skeleton__line post-skeleton__line--meta" />
-              <div className="post-skeleton__line post-skeleton__line--meta-sm" />
-            </div>
-
-            {/* Body paragraphs */}
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="post-skeleton__para">
-                <div className="post-skeleton__line post-skeleton__line--full" />
-                <div className="post-skeleton__line post-skeleton__line--full" />
-                <div className="post-skeleton__line post-skeleton__line--full" />
-                <div className="post-skeleton__line post-skeleton__line--three-quarter" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+  // Related: same category first, then most recent
+  let related: BlogPost[] = [];
+  try {
+    const all = ((await blogAPI.getAllPublished()) ?? []) as BlogPost[];
+    const others = all.filter((p) => p.id !== post.id);
+    const sameCat = others.filter((p) => post.category && p.category?.toLowerCase() === post.category.toLowerCase());
+    related = [...sameCat, ...others.filter((p) => !sameCat.includes(p))].slice(0, 3);
+  } catch {
+    related = [];
   }
 
-  if (!post) {
-    return (
-      <div className="error-container">
-        <h1>Post Not Found</h1>
-        <p>The blog post you're looking for doesn't exist.</p>
-        <Link href="/blog" className="btn-primary">Back to Blog</Link>
-      </div>
-    );
-  }
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        '@id': `${url}#article`,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+        headline: post.title,
+        description: post.meta_description || post.excerpt || undefined,
+        image: post.featured_image ? [post.featured_image] : undefined,
+        datePublished: published,
+        dateModified: post.updated_at || published,
+        wordCount: stripTags(post.content || '').split(/\s+/).filter(Boolean).length,
+        articleSection: post.category || undefined,
+        keywords: post.tags?.join(', ') || undefined,
+        author: { '@type': author === 'Qualixe Team' ? 'Organization' : 'Person', name: author },
+        publisher: { '@type': 'Organization', name: 'Qualixe', url: SITE, logo: { '@type': 'ImageObject', url: `${SITE}/assets/img/logo.png` } },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE}/blog` },
+          { '@type': 'ListItem', position: 3, name: post.title, item: url },
+        ],
+      },
+    ],
+  };
 
   return (
-    <>
-      <ToastContainer position="top-right" />
-      
-      {/* SEO Meta Tags */}
-      <head>
-        <title>{post.meta_title || post.title} | Qualixe Blog</title>
-        <meta name="description" content={post.meta_description || post.excerpt || ''} />
-        <meta name="keywords" content={post.meta_keywords || post.tags?.join(', ') || ''} />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.excerpt || ''} />
-        <meta property="og:image" content={post.featured_image || ''} />
-        <meta property="og:type" content="article" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.title} />
-        <meta name="twitter:description" content={post.excerpt || ''} />
-        <meta name="twitter:image" content={post.featured_image || ''} />
-        <link rel="canonical" href={`https://qualixe.com/blog/${post.slug}`} />
-      </head>
+    <main className="ar-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ArticleProgress />
+      <ViewCounter postId={post.id} />
 
-      {/* Article Header */}
-      <article className="blog-post">
-      {/*  <div className="post-header">
-          <div className="container">
-            <div className="breadcrumb">
+      {/* ── Hero ─────────────────────────────────────── */}
+      <header className="ar-hero">
+        <div className="ar-hero__bg" aria-hidden="true">
+          <div className="hx-hero__grid" />
+          <div className="hx-hero__aurora hx-hero__aurora--1" />
+          <div className="hx-hero__aurora hx-hero__aurora--2" />
+          <div className="hx-hero__noise" />
+        </div>
+        <div className="container">
+          <div className="ar-hero__inner">
+            <nav className="ar-crumbs" aria-label="Breadcrumb">
               <Link href="/">Home</Link>
-              <span>/</span>
+              <i className="bi bi-chevron-right" aria-hidden="true" />
               <Link href="/blog">Blog</Link>
-              <span>/</span>
-              <span>{post.title}</span>
-            </div>
+              {post.category && (
+                <>
+                  <i className="bi bi-chevron-right" aria-hidden="true" />
+                  <Link href={`/blog?q=${encodeURIComponent(post.category)}`}>{post.category}</Link>
+                </>
+              )}
+            </nav>
 
-            {post.category && (
-              <span className="post-category">{post.category}</span>
+            {post.category && <span className="ar-cat">{post.category}</span>}
+            <h1 className="ar-title">{post.title}</h1>
+            {post.excerpt && <p className="ar-excerpt">{post.excerpt}</p>}
+
+            <div className="ar-meta">
+              <span className="ar-author">
+                {post.author_avatar ? (
+                  <img src={post.author_avatar} alt="" className="ar-author__img" />
+                ) : (
+                  <span className="ar-author__avatar" aria-hidden="true">{author.charAt(0).toUpperCase()}</span>
+                )}
+                <span>
+                  <strong>{author}</strong>
+                  <small>Author</small>
+                </span>
+              </span>
+              <span className="ar-meta__sep" aria-hidden="true" />
+              <span className="ar-meta__item"><i className="bi bi-calendar3" aria-hidden="true" /> <time dateTime={published}>{formatDate(published)}</time></span>
+              <span className="ar-meta__item"><i className="bi bi-clock" aria-hidden="true" /> {mins} min read</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Featured image ───────────────────────────── */}
+      {post.featured_image && (
+        <div className="container">
+          <figure className="ar-cover">
+            <img src={post.featured_image} alt={post.title} fetchPriority="high" />
+          </figure>
+        </div>
+      )}
+
+      {/* ── Body ─────────────────────────────────────── */}
+      <div className={`container ar-body${post.featured_image ? '' : ' ar-body--nocover'}`}>
+        <div className={`ar-layout${toc.length >= 2 ? '' : ' ar-layout--notoc'}`}>
+          <aside className="ar-rail" aria-label="Share this article">
+            <PostActions postId={post.id} initialLikes={post.likes || 0} url={url} title={post.title} variant="rail" />
+          </aside>
+
+          <article className="ar-article">
+            <div className="ar-prose" dangerouslySetInnerHTML={{ __html: html }} />
+
+            {post.tags && post.tags.length > 0 && (
+              <div className="ar-tags">
+                <i className="bi bi-tags" aria-hidden="true" />
+                {post.tags.map((t) => (
+                  <Link key={t} href={`/blog?q=${encodeURIComponent(t)}`} className="ar-tag">#{t}</Link>
+                ))}
+              </div>
             )}
 
-            <h1>{post.title}</h1>
-
-            <div className="post-meta">
-              <div className="author-info">
-                <i className="bi bi-person-circle"></i>
-                <span>{post.author_name || 'Qualixe Team'}</span>
-              </div>
-              <div className="post-date">
-                <i className="bi bi-calendar"></i>
-                <span>{formatDate(post.published_at || post.created_at)}</span>
-              </div>
-              <div className="post-stats">
-                <span><i className="bi bi-eye"></i> {post.views}</span>
-                
-              </div>
-            </div>
-          </div>
-        </div>
-      */}
-
-        {/* Featured Image */}
-        {post.featured_image && (
-          <div className="post-featured-image">
-            <img src={post.featured_image} alt={post.title} />
-          </div>
-        )}
-         <div className='post-title'>
-          <div className='content-wrapper'>
-            <h1>{post.title}</h1>
-
-            <div className="post-meta">
-              <div className="author-info">
-                {post.author_avatar ? (
-                  <img
-                    src={post.author_avatar}
-                    alt={post.author_name || 'Author'}
-                    style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
-                  />
-                ) : (
-                  <i className="bi bi-person-circle"></i>
-                )}
-                <span>{post.author_name || 'Qualixe Team'}</span>
-              </div>
-              <div className="post-date">
-                <i className="bi bi-calendar"></i>
-                <span>{formatDate(post.published_at || post.created_at)}</span>
-              </div>
-              <div className="post-stats">
-                <span><i className="bi bi-eye"></i> {post.views}</span>
-              </div>
-            </div>
-            </div>
+            <div className="ar-actions">
+              <span className="ar-actions__label">Found this useful?</span>
+              <PostActions postId={post.id} initialLikes={post.likes || 0} url={url} title={post.title} variant="bar" />
             </div>
 
-        {/* Post Content */}
-        <div className="post-content">
-          <div className="container">
-            <div className="content-wrapper">
-              <div 
-                className="post-body"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
-
-              {/* Tags */}
-              {post.tags && post.tags.length > 0 && (
-                <div className="post-tags">
-                  <i className="bi bi-tags"></i>
-                  {post.tags.map(tag => (
-                    <span key={tag} className="tag">{tag}</span>
-                  ))}
-                </div>
+            <div className="ar-authorbox">
+              {post.author_avatar ? (
+                <img src={post.author_avatar} alt="" className="ar-authorbox__img" />
+              ) : (
+                <span className="ar-authorbox__avatar" aria-hidden="true">{author.charAt(0).toUpperCase()}</span>
               )}
-
-              {/* Like Button */}
-              <div className="post-actions">
-                <button 
-                  className={`like-button ${liked ? 'liked' : ''}`}
-                  onClick={handleLike}
-                >
-                  <i className={`bi bi-heart${liked ? '-fill' : ''}`}></i>
-                  <span>{likesCount} {likesCount === 1 ? 'Like' : 'Likes'}</span>
-                </button>
-
-                <div className="share-buttons">
-                  <span>Share:</span>
-                  <a 
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(window.location.href)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="share-btn twitter"
-                  >
-                    <i className="bi bi-twitter"></i>
-                  </a>
-                  <a 
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="share-btn facebook"
-                  >
-                    <i className="bi bi-facebook"></i>
-                  </a>
-                  <a 
-                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="share-btn linkedin"
-                  >
-                    <i className="bi bi-linkedin"></i>
-                  </a>
-                </div>
+              <div>
+                <span className="ar-authorbox__label">Written by</span>
+                <strong className="ar-authorbox__name">{author}</strong>
+                <p>Part of the Qualixe team building Shopify stores, custom apps and web applications for brands in Bangladesh and worldwide.</p>
               </div>
-
-              
-              {/* <div className="comments-section">
-                <h3>Comments ({comments.length})</h3>
-
-              \
-                <form className="comment-form" onSubmit={handleCommentSubmit}>
-                  <h4>Leave a Comment</h4>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <input
-                        type="text"
-                        placeholder="Your Name *"
-                        value={commentForm.author_name}
-                        onChange={(e) => setCommentForm({ ...commentForm, author_name: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <input
-                        type="email"
-                        placeholder="Your Email *"
-                        value={commentForm.author_email}
-                        onChange={(e) => setCommentForm({ ...commentForm, author_email: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <textarea
-                      placeholder="Your Comment *"
-                      rows={5}
-                      value={commentForm.content}
-                      onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })}
-                      required
-                    ></textarea>
-                  </div>
-                  <button type="submit" className="btn-submit" disabled={submittingComment}>
-                    {submittingComment ? 'Submitting...' : 'Post Comment'}
-                  </button>
-                  <p className="form-note">Your comment will be reviewed before being published.</p>
-                </form>
-
-              
-                <div className="comments-list">
-                  {comments.length === 0 ? (
-                    <p className="no-comments">No comments yet. Be the first to comment!</p>
-                  ) : (
-                    comments.map(comment => (
-                      <div key={comment.id} className="comment">
-                        <div className="comment-avatar">
-                          <i className="bi bi-person-circle"></i>
-                        </div>
-                        <div className="comment-content">
-                          <div className="comment-header">
-                            <strong>{comment.author_name}</strong>
-                            <span className="comment-date">{formatDate(comment.created_at)}</span>
-                          </div>
-                          <p>{comment.content}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div> */}
             </div>
-          </div>
-        </div>
-      </article>
 
-      {/* Back to Blog */}
-      <div className="back-to-blog">
-        <div className="container">
-          <Link href="/blog" className="btn-back">
-            <i className="bi bi-arrow-left"></i> Back to Blog
-          </Link>
+            <aside className="ar-cta">
+              <div className="ar-cta__glow" aria-hidden="true" />
+              <div>
+                <strong>Need help putting this into practice?</strong>
+                <p>Our team builds and grows Shopify stores every day. Tell us what you&apos;re working on.</p>
+              </div>
+              <Link href="/contact" className="ar-cta__btn">
+                Talk to us <i className="bi bi-arrow-right" aria-hidden="true" />
+              </Link>
+            </aside>
+          </article>
+
+          {toc.length >= 2 && (
+            <aside className="ar-toc-wrap">
+              <ArticleToc items={toc} />
+            </aside>
+          )}
         </div>
       </div>
-    </>
+
+      {/* ── Related ──────────────────────────────────── */}
+      {related.length > 0 && (
+        <section className="ar-related bl-page" aria-labelledby="ar-related-title">
+          <div className="container">
+            <div className="ar-related__head">
+              <h2 id="ar-related-title" className="ar-related__title">Keep reading</h2>
+              <Link href="/blog" className="ar-related__link">All articles <i className="bi bi-arrow-right" aria-hidden="true" /></Link>
+            </div>
+            <ul className="bl-grid">
+              {related.map((p) => (
+                <li key={p.id} className="bl-card">
+                  <div className="bl-card__media">
+                    {p.featured_image ? <img src={p.featured_image} alt="" loading="lazy" /> : <div className="bl-thumb-ph" aria-hidden="true"><i className="bi bi-journal-text" /></div>}
+                  </div>
+                  <div className="bl-card__body">
+                    <div className="bl-meta">
+                      {p.category && <span className="bl-meta__cat">{p.category}</span>}
+                      <span>{formatDate(p.published_at || p.created_at)}</span>
+                      <span>{readMinutes(p.content)} min read</span>
+                    </div>
+                    <h3 className="bl-card__title"><Link href={`/blog/${p.slug}`}>{p.title}</Link></h3>
+                    {p.excerpt && <p className="bl-card__excerpt">{p.excerpt}</p>}
+                  </div>
+                  <span className="bl-go bl-go--sm" aria-hidden="true"><i className="bi bi-arrow-up-right" /></span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      <div className="hx-home">
+        <ClosingCta />
+      </div>
+    </main>
   );
 }

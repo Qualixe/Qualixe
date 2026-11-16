@@ -1,17 +1,24 @@
-import Hero from './home/Hero';
-import About from './home/About';
-import Services from './home/Service';
-import Portfolio from './home/Portfolio';
-import ClientsGrid from './home/Clients';
 import type { Metadata } from 'next';
 import { getHomePage } from '../../../lib/api/home-page';
+import { portfolioAPI, type Portfolio } from '../../../lib/api/portfolio';
+import { clientsAPI, type Client } from '../../../lib/api/clients';
+import HomeHero from './home/sections/HomeHero';
+import LogoMarquee from './home/sections/LogoMarquee';
+import AboutManifesto from './home/sections/AboutManifesto';
+import ServicesBento from './home/sections/ServicesBento';
+import WorkShowcase from './home/sections/WorkShowcase';
+import ProcessSteps from './home/sections/ProcessSteps';
+import ClosingCta, { CapabilityMarquee } from './home/sections/ClosingCta';
+import InsightsSection from './home/sections/InsightsSection';
+import { blogAPI, type BlogPost } from '../../../lib/api/blog';
+import './home/sections/home.css';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Qualixe – Shopify Development & E-Commerce Solutions',
   description: 'Qualixe builds high-converting Shopify stores, custom e-commerce websites, free HTML templates, and digital marketing solutions for brands worldwide.',
-  keywords: ['shopify development', 'ecommerce development', 'shopify store', 'digital marketing', 'ui ux design', 'qualixe bangladesh'],
+  keywords: ['shopify development', 'ecommerce development', 'shopify store', 'shopify app development', 'laravel development', 'next.js development', 'saas development', 'digital marketing', 'qualixe bangladesh'],
   alternates: { canonical: 'https://www.qualixe.com' },
   openGraph: {
     title: 'Qualixe – Shopify Development & E-Commerce Solutions',
@@ -54,18 +61,27 @@ const organizationSchema = {
 };
 
 export default async function HomePage() {
-  const page = await getHomePage();
+  const [page, portfolio, clients, posts] = await Promise.all([
+    getHomePage(),
+    portfolioAPI.getAll().then((d) => (d ?? []) as Portfolio[]).catch(() => [] as Portfolio[]),
+    clientsAPI.getAll().then((d) => (d ?? []) as Client[]).catch(() => [] as Client[]),
+    blogAPI.getAllPublished().then((d) => ((d ?? []) as BlogPost[]).slice(0, 3)).catch(() => [] as BlogPost[]),
+  ]);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
-      <div>
-        <Hero data={page.hero} />
-        <About data={page.about} />
-        <Services data={page.services} />
-        <Portfolio />
-        <ClientsGrid />
-      </div>
+      <main className="hx-home">
+        <HomeHero data={page.hero} />
+        <LogoMarquee clients={clients} />
+        <AboutManifesto data={page.about} />
+        <ServicesBento data={page.services} />
+        <CapabilityMarquee />
+        <WorkShowcase items={portfolio.slice(0, 6)} />
+        <ProcessSteps />
+        <InsightsSection posts={posts} />
+        <ClosingCta />
+      </main>
     </>
   );
 }

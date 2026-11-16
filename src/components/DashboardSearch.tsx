@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { DASH_NAV } from './dashboardNav';
 
 interface SearchResult {
   title: string;
@@ -14,63 +15,34 @@ interface SearchResult {
 export default function DashboardSearch() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResult[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // All searchable items in the dashboard
+  // Every dashboard page (from the shared nav) + quick actions + public pages
   const searchableItems: SearchResult[] = [
-    // Navigation
-    { title: 'Dashboard', description: 'Overview and statistics', url: '/dashboard', icon: 'bi-grid-fill', category: 'Navigation' },
-    { title: 'Portfolio', description: 'Manage portfolio projects', url: '/dashboard/portfolio', icon: 'bi-briefcase', category: 'Navigation' },
-    { title: 'Brands', description: 'Manage brand partners', url: '/dashboard/brands', icon: 'bi-award', category: 'Navigation' },
-    { title: 'Clients', description: 'Manage clients', url: '/dashboard/clients', icon: 'bi-people', category: 'Navigation' },
-    { title: 'Themes', description: 'Manage themes', url: '/dashboard/themes', icon: 'bi-palette', category: 'Navigation' },
-    { title: 'Blog', description: 'Manage blog posts', url: '/dashboard/blog', icon: 'bi-file-earmark-text', category: 'Navigation' },
-    { title: 'Comments', description: 'Moderate blog comments', url: '/dashboard/blog/comments', icon: 'bi-chat-dots', category: 'Navigation' },
-    { title: 'Messages', description: 'View contact messages', url: '/dashboard/contacts', icon: 'bi-envelope', category: 'Navigation' },
-    { title: 'Analytics', description: 'Website analytics', url: '/dashboard/analytics', icon: 'bi-graph-up', category: 'Navigation' },
-    { title: 'Users', description: 'Manage users', url: '/dashboard/users', icon: 'bi-person-gear', category: 'Navigation' },
-    { title: 'Settings', description: 'Account settings', url: '/dashboard/settings', icon: 'bi-gear', category: 'Navigation' },
-    
-    // Actions
-    { title: 'Add Portfolio Item', description: 'Create new portfolio project', url: '/dashboard/portfolio', icon: 'bi-plus-circle', category: 'Actions' },
-    { title: 'Add Brand', description: 'Add new brand partner', url: '/dashboard/brands', icon: 'bi-plus-circle', category: 'Actions' },
-    { title: 'Add Client', description: 'Add new client', url: '/dashboard/clients', icon: 'bi-plus-circle', category: 'Actions' },
-    { title: 'Add Theme', description: 'Upload new theme', url: '/dashboard/themes', icon: 'bi-plus-circle', category: 'Actions' },
-    { title: 'Write Blog Post', description: 'Create new blog post', url: '/dashboard/blog', icon: 'bi-plus-circle', category: 'Actions' },
-    { title: 'Create User', description: 'Add new user', url: '/dashboard/users', icon: 'bi-plus-circle', category: 'Actions' },
-    
-    // Frontend
-    { title: 'View Website', description: 'Go to frontend', url: '/', icon: 'bi-house', category: 'Frontend' },
-    { title: 'View Blog', description: 'Public blog page', url: '/blog', icon: 'bi-newspaper', category: 'Frontend' },
-    { title: 'View Portfolio', description: 'Public portfolio page', url: '/portfolio', icon: 'bi-briefcase', category: 'Frontend' },
-    { title: 'View Themes', description: 'Public themes page', url: '/themes', icon: 'bi-palette', category: 'Frontend' },
+    ...DASH_NAV.flatMap((g) => g.items.map((i) => ({
+      title: i.label, description: i.description, url: i.href, icon: i.icon, category: g.title,
+    }))),
+    { title: 'Write Blog Post', description: 'Create a new article', url: '/dashboard/blog', icon: 'bi-plus-circle', category: 'Actions' },
+    { title: 'Add Portfolio Item', description: 'Add a new project', url: '/dashboard/portfolio', icon: 'bi-plus-circle', category: 'Actions' },
+    { title: 'Add Laravel Project', description: 'Add a new case study', url: '/dashboard/laravel-projects', icon: 'bi-plus-circle', category: 'Actions' },
+    { title: 'Add Product', description: 'Add a new template', url: '/dashboard/products', icon: 'bi-plus-circle', category: 'Actions' },
+    { title: 'View Website', description: 'Open the public site', url: '/', icon: 'bi-globe2', category: 'Website' },
+    { title: 'View Blog', description: 'Public blog page', url: '/blog', icon: 'bi-newspaper', category: 'Website' },
+    { title: 'View Portfolio', description: 'Public portfolio page', url: '/portfolio', icon: 'bi-briefcase', category: 'Website' },
   ];
 
-  // Search function
-  const performSearch = (searchQuery: string) => {
-    if (!searchQuery.trim()) {
-      setResults([]);
-      return;
-    }
-
-    const lowerQuery = searchQuery.toLowerCase();
-    const filtered = searchableItems.filter(
-      (item) =>
-        item.title.toLowerCase().includes(lowerQuery) ||
-        item.description.toLowerCase().includes(lowerQuery) ||
-        item.category.toLowerCase().includes(lowerQuery)
-    );
-
-    setResults(filtered.slice(0, 8)); // Limit to 8 results
-  };
-
-  // Handle search input
-  useEffect(() => {
-    performSearch(query);
-  }, [query]);
+  // Results are derived from the query (no extra state/effect needed)
+  const q = query.trim().toLowerCase();
+  const results = q
+    ? searchableItems
+        .filter((item) =>
+          item.title.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q) ||
+          item.category.toLowerCase().includes(q))
+        .slice(0, 8)
+    : [];
 
   // Close on click outside
   useEffect(() => {
@@ -121,12 +93,11 @@ export default function DashboardSearch() {
 
   return (
     <div ref={searchRef} style={{ position: 'relative' }}>
-      <i
-        className="bi bi-search text-secondary"
-        style={{ cursor: 'pointer', fontSize: '18px' }}
-        onClick={handleOpen}
-        title="Search (Ctrl+K)"
-      ></i>
+      <button type="button" className="dash-search-trigger" onClick={handleOpen} aria-label="Search the dashboard (Ctrl+K)">
+        <i className="bi bi-search" aria-hidden="true" />
+        <span className="dash-search-trigger__text">Search…</span>
+        <kbd className="dash-search-trigger__kbd">Ctrl K</kbd>
+      </button>
 
       {isOpen && (
         <>
@@ -194,7 +165,7 @@ export default function DashboardSearch() {
               {query && results.length === 0 && (
                 <div className="text-center py-5 text-muted">
                   <i className="bi bi-search display-4 d-block mb-3"></i>
-                  <p>No results found for "{query}"</p>
+                  <p>No results found for &ldquo;{query}&rdquo;</p>
                 </div>
               )}
 

@@ -1,163 +1,83 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import PageBanner from '@/components/PageBanner';
-import { blogAPI, BlogPost } from '../../../../lib/api/blog';
+import type { Metadata } from 'next';
+import { blogAPI, type BlogPost } from '../../../../lib/api/blog';
+import ClosingCta from '../home/sections/ClosingCta';
+import BlogExplorer from './BlogExplorer';
+import '../home/sections/home.css';
 import './blog.css';
 
-export default function BlogPage() {
-  const [allPosts, setAllPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchInput, setSearchInput] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
 
-  useEffect(() => {
-    loadPosts();
-  }, []);
+const SITE = 'https://www.qualixe.com';
+const TITLE = 'Blog – Shopify Guides & E-Commerce Tips | Qualixe';
+const DESCRIPTION =
+  'Shopify guides, e-commerce growth tips, Laravel and Next.js insights and digital marketing advice from the Qualixe team — practical notes on building stores that sell.';
 
-  const loadPosts = async () => {
-    try {
-      const data = await blogAPI.getAllPublished();
-      setAllPosts(data || []);
-    } catch (error) {
-      console.error('Error loading posts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  keywords: ['shopify blog', 'shopify guides', 'ecommerce tips', 'shopify seo', 'digital marketing blog', 'web development blog', 'qualixe blog'],
+  alternates: { canonical: `${SITE}/blog` },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: `${SITE}/blog`,
+    type: 'website',
+    siteName: 'Qualixe',
+    images: [{ url: `${SITE}/assets/img/web-logo.png`, width: 1200, height: 630, alt: 'Qualixe Blog' }],
+  },
+  twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION },
+};
 
-  const handleSearch = () => {
-    setSearchQuery(searchInput.trim());
-    setSelectedCategory('all');
-  };
+export default async function BlogPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  // ?q= comes from the header search ("/blog?q=…")
+  const { q } = await searchParams;
+  const initialQuery = typeof q === 'string' ? q.slice(0, 100) : '';
 
-  const handleCategoryFilter = (category: string) => {
-    setSelectedCategory(category);
-    setSearchQuery('');
-    setSearchInput('');
-  };
+  let posts: BlogPost[] = [];
+  try {
+    posts = ((await blogAPI.getAllPublished()) ?? []) as BlogPost[];
+  } catch {
+    posts = [];
+  }
 
-  // Derive categories from the full list — deduplicated by lowercase
-  const categories = ['all', ...Array.from(new Map(
-    allPosts
-      .map(p => p.category?.trim())
-      .filter((cat): cat is string => Boolean(cat))
-      .map(cat => [cat.toLowerCase(), cat])
-  ).values())];
-
-  // All filtering done client-side
-  const filteredPosts = allPosts.filter(post => {
-    const matchesCategory = selectedCategory === 'all' || post.category?.trim().toLowerCase() === selectedCategory.toLowerCase();
-    const q = searchQuery.toLowerCase();
-    const matchesSearch = !q ||
-      post.title?.toLowerCase().includes(q) ||
-      post.excerpt?.toLowerCase().includes(q) ||
-      post.category?.toLowerCase().includes(q) ||
-      post.tags?.some(t => t.toLowerCase().includes(q));
-    return matchesCategory && matchesSearch;
-  });
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Blog',
+        '@id': `${SITE}/blog#blog`,
+        url: `${SITE}/blog`,
+        name: 'Qualixe Blog',
+        description: DESCRIPTION,
+        publisher: { '@type': 'Organization', name: 'Qualixe', url: SITE, logo: `${SITE}/assets/img/logo.png` },
+        blogPost: posts.slice(0, 20).map((p) => ({
+          '@type': 'BlogPosting',
+          headline: p.title,
+          url: `${SITE}/blog/${p.slug}`,
+          datePublished: p.published_at || p.created_at,
+          dateModified: p.updated_at || p.published_at || p.created_at,
+          image: p.featured_image || undefined,
+          author: { '@type': 'Person', name: p.author_name || 'Qualixe Team' },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE}/blog` },
+        ],
+      },
+    ],
   };
 
   return (
-    <>
-     
+    <main className="bl-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <BlogExplorer key={initialQuery} posts={posts} initialQuery={initialQuery} />
 
-      {/* Search and Filter */}
-      <div className="blog-filters">
-        <div className="container">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="Search articles..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <button onClick={handleSearch}>
-              <i className="bi bi-search"></i>
-            </button>
-          </div>
-
-          <div className="category-filters">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                className={selectedCategory === cat ? 'active' : ''}
-                onClick={() => handleCategoryFilter(cat)}
-              >
-                {cat === 'all' ? 'All' : cat}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Same closing call-to-action as the home page */}
+      <div className="hx-home">
+        <ClosingCta />
       </div>
-
-      {/* Blog Posts Grid */}
-      <div className="blog-content">
-        <div className="container">
-          {loading ? (
-            <div className="loading-state">
-              <div className="spinner"></div>
-              <p>Loading articles...</p>
-            </div>
-          ) : filteredPosts.length === 0 ? (
-            <div className="empty-state">
-              <i className="bi bi-file-earmark-text"></i>
-              <h3>No articles found</h3>
-              <p>{searchQuery ? `No results for "${searchQuery}"` : 'Check back soon for new content!'}</p>
-            </div>
-          ) : (
-            <div className="blog-grid">
-              {filteredPosts.map(post => (
-                <article key={post.id} className="blog-card">
-                  {post.featured_image && (
-                    <Link href={`/blog/${post.slug}`}>
-                      <div className="blog-card-image">
-                        <img src={post.featured_image} alt={post.title} />
-                      </div>
-                    </Link>
-                  )}
-                  <div className="blog-card-content">
-                    {post.category && (
-                      <span className="blog-category">{post.category}</span>
-                    )}
-                    <Link href={`/blog/${post.slug}`}>
-                      <h2>{post.title}</h2>
-                    </Link>
-                    <p className="blog-excerpt">{post.excerpt}</p>
-                    <div className="blog-meta">
-                      <div className="blog-author">
-                        <i className="bi bi-person-circle"></i>
-                        <span>{post.author_name || 'Qualixe Team'}</span>
-                      </div>
-                      <div className="blog-date">
-                        <i className="bi bi-calendar"></i>
-                        <span>{formatDate(post.published_at || post.created_at)}</span>
-                      </div>
-                      <div className="blog-stats">
-                        <span><i className="bi bi-eye"></i> {post.views}</span>
-                        <span><i className="bi bi-heart"></i> {post.likes}</span>
-                      </div>
-                    </div>
-                    <Link href={`/blog/${post.slug}`} className="read-more">
-                      Read More <i className="bi bi-arrow-right"></i>
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </>
+    </main>
   );
 }

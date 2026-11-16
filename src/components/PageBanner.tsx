@@ -4,59 +4,62 @@ import './PageBanner.css';
 interface PageBannerProps {
   heading: string;
   subtitle?: string;
+  /** Small label above the heading, e.g. "About Qualixe" */
+  eyebrow?: string;
+  /** Part of the heading to render with the gradient accent (must appear in `heading`) */
+  accent?: string;
   breadcrumb?: { label: string; href?: string }[];
 }
 
-function PageBanner({ heading, subtitle, breadcrumb }: PageBannerProps) {
+function PageBanner({ heading, subtitle, eyebrow, accent, breadcrumb }: PageBannerProps) {
+  const crumbs = breadcrumb ?? [{ label: heading }];
+
+  let title: React.ReactNode = heading;
+  if (accent && heading.includes(accent)) {
+    const [before, after] = heading.split(accent);
+    title = (
+      <>
+        {before}
+        <span className="pb-accent">{accent}</span>
+        {after}
+      </>
+    );
+  }
+
   return (
-    <section className="pb-section" aria-label={heading}>
-
-      {/* Animated mesh gradient orbs */}
-      <div className="pb-orb pb-orb--1" aria-hidden="true" />
-      <div className="pb-orb pb-orb--2" aria-hidden="true" />
-      <div className="pb-orb pb-orb--3" aria-hidden="true" />
-
-      {/* Noise texture overlay */}
-      <div className="pb-noise" aria-hidden="true" />
+    <section className="pb-section" aria-labelledby="pb-heading">
+      <div className="pb-bg" aria-hidden="true">
+        <div className="pb-grid" />
+        <div className="pb-orb pb-orb--1" />
+        <div className="pb-orb pb-orb--2" />
+        <div className="pb-orb pb-orb--3" />
+        <div className="pb-noise" />
+      </div>
 
       <div className="container">
         <div className="pb-inner">
-
-          {/* Breadcrumb pill */}
           <nav className="pb-breadcrumb" aria-label="Breadcrumb">
-            <Link href="/" className="pb-breadcrumb__link">
-              <i className="bi bi-house" />
-              Home
-            </Link>
-            {breadcrumb?.map((crumb, i) => (
+            <Link href="/" className="pb-breadcrumb__link">Home</Link>
+            {crumbs.map((crumb, i) => (
               <span key={i} className="pb-breadcrumb__item">
-                <i className="bi bi-chevron-right pb-breadcrumb__sep" />
+                <i className="bi bi-chevron-right pb-breadcrumb__sep" aria-hidden="true" />
                 {crumb.href
                   ? <Link href={crumb.href} className="pb-breadcrumb__link">{crumb.label}</Link>
-                  : <span className="pb-breadcrumb__current">{crumb.label}</span>}
+                  : <span className="pb-breadcrumb__current" aria-current="page">{crumb.label}</span>}
               </span>
             ))}
-            {!breadcrumb && (
-              <span className="pb-breadcrumb__item">
-                <i className="bi bi-chevron-right pb-breadcrumb__sep" />
-                <span className="pb-breadcrumb__current">{heading}</span>
-              </span>
-            )}
           </nav>
 
-          {/* Heading */}
-          <h1 className="pb-heading">
-            {heading}
-          </h1>
-
-          {/* Subtitle */}
-          {subtitle && (
-            <p className="pb-subtitle">{subtitle}</p>
+          {eyebrow && (
+            <span className="pb-eyebrow">
+              <span className="pb-eyebrow__dot" aria-hidden="true" />
+              {eyebrow}
+            </span>
           )}
 
-          {/* Decorative line */}
-          <div className="pb-line" aria-hidden="true" />
+          <h1 id="pb-heading" className="pb-heading">{title}</h1>
 
+          {subtitle && <p className="pb-subtitle">{subtitle}</p>}
         </div>
       </div>
     </section>

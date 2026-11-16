@@ -1,122 +1,164 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowUpRight, ArrowUp } from "lucide-react";
+import { SERVICE_CATALOG, HEADLESS_SERVICE } from "@/lib/services";
 import "./Footer.css";
 
-const resources = [
-  { href: '/services',  label: 'Services' },
-  { href: '/portfolio', label: 'Portfolio' },
-  { href: '/blog',      label: 'Blog' },
-  { href: '/about',     label: 'About' },
+const columns = [
+  {
+    title: "Services",
+    links: [
+      ...[...SERVICE_CATALOG, HEADLESS_SERVICE].map((s) => ({ href: s.href, label: s.name })),
+      { href: "/services", label: "All services" },
+    ],
+  },
+  {
+    title: "Work",
+    links: [
+      { href: "/portfolio", label: "Shopify & E-commerce" },
+      { href: "/laravel-projects", label: "Laravel Applications" },
+      { href: "/themes", label: "Shopify Themes" },
+      { href: "/shop", label: "HTML Templates" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { href: "/about", label: "About" },
+      { href: "/team", label: "Team" },
+      { href: "/blog", label: "Blog" },
+      { href: "/contact", label: "Contact" },
+    ],
+  },
 ];
 
-const quickLinks = [
-  { href: '/contact',                              label: 'Get a Free Quote' },
-  { href: '/shop',                                 label: 'Templates' },
-  { href: '/services/shopify-development',         label: 'Shopify Development' },
-  { href: '/services/digital-marketing',           label: 'Digital Marketing' },
-  { href: '/services/uiux-design',                 label: 'UI/UX Design' },
+const socials = [
+  { href: "https://www.linkedin.com/company/qualixe", label: "LinkedIn", icon: "bi-linkedin" },
+  { href: "https://www.facebook.com/qualixe", label: "Facebook", icon: "bi-facebook" },
+  { href: "https://twitter.com/qualixe", label: "X", icon: "bi-twitter-x" },
+  { href: "https://wa.me/8801318552266", label: "WhatsApp", icon: "bi-whatsapp" },
 ];
+
+const MARQUEE = ["Let's talk", "Start a project", "Let's talk", "Start a project"];
+
+/** Live Dhaka time — rendered after mount to avoid hydration mismatch */
+function DhakaClock() {
+  const [time, setTime] = useState<string | null>(null);
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    const tick = () => setTime(fmt.format(new Date()));
+    tick();
+    const id = setInterval(tick, 15000);
+    return () => clearInterval(id);
+  }, []);
+  return <span className="ft-clock__time">{time ?? "--:--"}</span>;
+}
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="footer">
+    <footer className="ft">
+      {/* ── Giant CTA marquee ── */}
+      <Link href="/contact" className="ft-marquee" aria-label="Start a project with Qualixe">
+        <span className="ft-marquee__track" aria-hidden="true">
+          {[...MARQUEE, ...MARQUEE].map((w, i) => (
+            <span key={i} className={`ft-marquee__word${i % 2 ? " is-outline" : ""}`}>
+              {w}
+              <i className="bi bi-asterisk" />
+            </span>
+          ))}
+        </span>
+      </Link>
+
       <div className="container">
-        <div className="footer-main">
-          <div className="footer-grid">
+        <div className="ft-main">
+          {/* Contact block */}
+          <div className="ft-contact">
+            <h2 className="ft-contact__title">
+              Have a project in mind?<br />
+              <span>Let&apos;s build it together.</span>
+            </h2>
+            <a href="mailto:qualixe.info@gmail.com" className="ft-contact__email">
+              qualixe.info@gmail.com <ArrowUpRight size={22} />
+            </a>
+            <div className="ft-contact__row">
+              <a href="https://wa.me/8801318552266" target="_blank" rel="noopener noreferrer" className="ft-chip">
+                <i className="bi bi-whatsapp" aria-hidden="true" /> WhatsApp us
+              </a>
+              <a href="tel:+8801318552266" className="ft-chip">
+                <i className="bi bi-telephone" aria-hidden="true" /> +880 1318-552266
+              </a>
+            </div>
+          </div>
 
-            {/* Brand col */}
-            <div className="footer-brand">
-              <Image
-                src="/assets/img/logo.png"
-                alt="Qualixe"
-                width={140} height={48}
-                className="footer-brand__logo"
-              />
-
-              <p className="footer-brand__desc">
-                Shopify Headless & Custom Storefront experts, trusted by ecommerce brands worldwide. We build high-converting stores that load fast and convert better.
-              </p>
-
-              <h4 className="footer-col__heading">Follow us</h4>
-              <div className="footer-social">
-                <a href="https://www.linkedin.com/company/qualixe" target="_blank" rel="noopener noreferrer"
-                  className="footer-social__link" aria-label="LinkedIn">
-                  <i className="bi bi-linkedin" />
-                </a>
-                <a href="https://twitter.com/qualixe" target="_blank" rel="noopener noreferrer"
-                  className="footer-social__link" aria-label="X">
-                  <i className="bi bi-twitter-x" />
-                </a>
-                <a href="https://www.facebook.com/qualixe" target="_blank" rel="noopener noreferrer"
-                  className="footer-social__link" aria-label="Facebook">
-                  <i className="bi bi-facebook" />
-                </a>
-                <a href="https://wa.me/8801318552266" target="_blank" rel="noopener noreferrer"
-                  className="footer-social__link" aria-label="WhatsApp">
-                  <i className="bi bi-whatsapp" />
-                </a>
+          {/* Link columns */}
+          <nav className="ft-cols" aria-label="Footer">
+            {columns.map((col) => (
+              <div key={col.title} className="ft-col">
+                <h3 className="ft-col__title">{col.title}</h3>
+                <ul>
+                  {col.links.map((l) => (
+                    <li key={l.href}>
+                      <Link href={l.href} className="ft-col__link">{l.label}</Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            ))}
+          </nav>
+        </div>
 
-            {/* Resources */}
-            <div className="footer-col">
-              <h4 className="footer-col__heading">Resources</h4>
-              <ul className="footer-col__list">
-                {resources.map(l => (
-                  <li key={l.href}>
-                    <Link href={l.href} className="footer-col__link">{l.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Quick links */}
-            <div className="footer-col">
-              <h4 className="footer-col__heading">Quick Links</h4>
-              <ul className="footer-col__list">
-                {quickLinks.map(l => (
-                  <li key={l.href}>
-                    <Link href={l.href} className="footer-col__link">{l.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Newsletter */}
-            <div className="footer-newsletter-col">
-              <h4 className="footer-col__heading">Subscribe to our newsletter</h4>
-              <p className="footer-newsletter-col__desc">
-                Tips on Shopify growth, store-building best practices, and updates on
-                new templates — straight to your inbox.
-              </p>
-              <form className="footer-newsletter__form" onSubmit={(e) => e.preventDefault()}>
-                <input type="email" required placeholder="Enter email" className="footer-newsletter__input" />
-                <button type="submit" className="footer-newsletter__btn">Submit</button>
-              </form>
-            </div>
-
+        {/* Office + socials strip */}
+        <div className="ft-strip">
+          <div className="ft-office">
+            <span className="ft-office__label">Studio</span>
+            <address>House-06, Road-3, Mirpur-11, Dhaka, Bangladesh</address>
+          </div>
+          <div className="ft-clock" aria-label="Local time in Dhaka">
+            <span className="ft-clock__dot" aria-hidden="true" />
+            Dhaka <DhakaClock />
+          </div>
+          <div className="ft-social">
+            {socials.map((s) => (
+              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="ft-social__link">
+                <i className={`bi ${s.icon}`} aria-hidden="true" />
+              </a>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ── Bottom bar ── */}
-      <div className="footer-bottom">
-        <div className="container">
-          <div className="footer-bottom__inner">
-            <p className="footer-bottom__copy">
-              © {new Date().getFullYear()} Qualixe. All rights reserved.
-            </p>
-            <div className="footer-bottom__links">
-              <Link href="/contact">Terms</Link>
-              <span>&</span>
-              <Link href="/privacy">Privacy Policy</Link>
-            </div>
+      {/* Giant wordmark */}
+      <div className="ft-wordmark" aria-hidden="true">
+        <span>qualixe</span>
+      </div>
+
+      <div className="container">
+        <div className="ft-bottom">
+          <div className="ft-bottom__brand">
+            <Image src="/assets/img/logo.png" alt="Qualixe" width={110} height={36} className="ft-bottom__logo" />
+            <p>© {year} Qualixe. All rights reserved.</p>
+          </div>
+          <div className="ft-bottom__links">
+            <Link href="/privacy">Privacy Policy</Link>
+            <button
+              type="button"
+              className="ft-top"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              Back to top <ArrowUp size={14} />
+            </button>
           </div>
         </div>
       </div>
-
     </footer>
   );
 }

@@ -271,7 +271,7 @@ function ProfileContent() {
 export default function ProfilePage() {
   return (
     <>
-      <PageBanner heading="My Profile" />
+      <PageBanner heading="My Profile" subtitle="Manage your account details and downloads." breadcrumb={[{ label: 'Profile' }]} />
       <Suspense>
         <ProfileContent />
       </Suspense>

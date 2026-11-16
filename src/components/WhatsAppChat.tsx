@@ -1,78 +1,331 @@
 'use client';
 
-import { useState } from 'react';
+/**
+ * Website live chat widget.
+ * Visitors chat on the site; the team replies from /dashboard/live-chat.
+ * Talks only to /api/chat/* (never to the database directly). The visitor's
+ * conversation id + secret token are kept in localStorage so the chat survives
+ * page changes and return visits.
+ */
+import { useCallback, useEffect, useRef, useState } from 'react';
 import './WhatsAppChat.css';
 
-const WA_NUMBER  = '8801318552266';
-const WA_MESSAGE = 'Hi! I am interested to know more about your services. Can you please assist?';
-const FB_MESSENGER = 'https://m.me/qualixe'; // replace with your page username
+const WA_NUMBER = '8801318552266';
+const FB_MESSENGER = 'https://m.me/qualixe';
+const STORE_KEY = 'qx.livechat';
+
+const QUICK_REPLIES = [
+  'I need a Shopify store',
+  'Shopify app development',
+  'Laravel / web app project',
+  'I want a free quote',
+];
+
+type Msg = { id: string; sender: 'visitor' | 'admin'; body: string; created_at: string; pending?: boolean; failed?: boolean };
+type Session = { conversationId: string; token: string };
+
+function loadSession(): Session | null {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? (JSON.parse(raw) as Session) : null;
+  } catch {
+    return null;
+  }
+}
+function saveSession(s: Session | null) {
+  try {
+    if (s) localStorage.setItem(STORE_KEY, JSON.stringify(s));
+    else localStorage.removeItem(STORE_KEY);
+  } catch { /* storage unavailable */ }
+}
+
+const timeOf = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
 export default function WhatsAppChat() {
   const [open, setOpen] = useState(false);
+  // Restored from localStorage on first render (the UI doesn't depend on it until messages load)
+  const [session, setSession] = useState<Session | null>(() => (typeof window === 'undefined' ? null : loadSession()));
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+  const [seenAdmin, setSeenAdmin] = useState(0);
+  const [hasEmail, setHasEmail] = useState(true);
+  const [contact, setContact] = useState({ name: '', email: '' });
+  const [contactSaved, setContactSaved] = useState(false);
+  const [greetTime] = useState(() => new Date().toISOString());
 
-  const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(WA_MESSAGE)}`;
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const lastAt = useRef<string | null>(null);
+
+  /** Fetch messages (all, or only new ones) */
+  const poll = useCallback(async (full = false) => {
+    if (!session) return;
+    const url = `/api/chat/${session.conversationId}${!full && lastAt.current ? `?after=${encodeURIComponent(lastAt.current)}` : ''}`;
+    try {
+      const res = await fetch(url, { headers: { 'x-chat-token': session.token }, cache: 'no-store' });
+      if (res.status === 404) {
+        // Conversation gone (e.g. deleted by admin) — start fresh next time
+        saveSession(null);
+        setSession(null);
+        setMessages([]);
+        lastAt.current = null;
+        return;
+      }
+      if (!res.ok) return;
+      const data = (await res.json()) as { messages: Msg[]; hasEmail: boolean };
+      setHasEmail(data.hasEmail);
+      if (data.messages.length) {
+        lastAt.current = data.messages[data.messages.length - 1].created_at;
+        // History loaded on page load counts as already seen
+        if (full) setSeenAdmin(data.messages.filter((m) => m.sender === 'admin').length);
+        setMessages((prev) => {
+          const base = full ? [] : prev.filter((m) => !m.pending);
+          const ids = new Set(base.map((m) => m.id));
+          return [...base, ...data.messages.filter((m) => !ids.has(m.id))];
+        });
+      }
+    } catch { /* offline — try again next tick */ }
+  }, [session]);
+
+  // Initial load when a session exists
+  useEffect(() => {
+    if (session) poll(true);
+  }, [session, poll]);
+
+  // Poll: every 4s while open, every 25s while closed (for the unread badge)
+  useEffect(() => {
+    if (!session) return;
+    const id = setInterval(() => {
+      if (document.hidden) return;
+      poll();
+    }, open ? 4000 : 25000);
+    return () => clearInterval(id);
+  }, [session, open, poll]);
+
+  // Unread badge = team replies that arrived while the window was closed
+  const adminCount = messages.filter((m) => m.sender === 'admin').length;
+  const unread = open ? 0 : Math.max(0, adminCount - seenAdmin);
+
+  const toggleOpen = () => {
+    setSeenAdmin(adminCount); // opening or closing marks everything so far as seen
+    setOpen((o) => !o);
+  };
+
+  // Keep the newest message in view
+  useEffect(() => {
+    if (open) bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight, behavior: 'smooth' });
+  }, [messages, open]);
+
+  // Escape closes; focus the input when opening
+  useEffect(() => {
+    if (!open) return;
+    const f = setTimeout(() => inputRef.current?.focus(), 250);
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => { clearTimeout(f); document.removeEventListener('keydown', onKey); };
+  }, [open]);
+
+  const send = async (raw?: string) => {
+    const body = (raw ?? text).trim();
+    if (!body || sending) return;
+    setError('');
+    setSending(true);
+    setText('');
+    const tempId = `tmp-${Date.now()}`;
+    setMessages((prev) => [...prev, { id: tempId, sender: 'visitor', body, created_at: new Date().toISOString(), pending: true }]);
+
+    try {
+      if (!session) {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: body, pageUrl: window.location.href }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Message could not be sent');
+        const s = { conversationId: data.conversationId, token: data.token };
+        saveSession(s);
+        lastAt.current = data.messages[data.messages.length - 1]?.created_at ?? null;
+        setMessages(data.messages);
+        setHasEmail(false);
+        setSession(s);
+      } else {
+        const res = await fetch(`/api/chat/${session.conversationId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-chat-token': session.token },
+          body: JSON.stringify({ message: body }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Message could not be sent');
+        lastAt.current = data.message.created_at;
+        setMessages((prev) => [...prev.filter((m) => m.id !== tempId), data.message]);
+      }
+    } catch (err) {
+      setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m)));
+      setError(err instanceof Error ? err.message : 'Message could not be sent');
+      setText(body);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const saveContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !contact.email.trim()) return;
+    setError('');
+    try {
+      const res = await fetch(`/api/chat/${session.conversationId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-chat-token': session.token },
+        body: JSON.stringify(contact),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not save your details');
+      setHasEmail(true);
+      setContactSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save your details');
+    }
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  };
+
+  const hasVisitorMsg = messages.some((m) => m.sender === 'visitor' && !m.failed);
+  const waHref = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text.trim() || 'Hi! I am interested to know more about your services.')}`;
+  const tab = open ? 0 : -1;
 
   return (
-    <div className={`social-float ${open ? 'social-float--open' : ''}`} aria-label="Contact us">
+    <div className={`wa-widget${open ? ' is-open' : ''}`}>
+      <div className="wa-panel" role="dialog" aria-label="Live chat with Qualixe" aria-hidden={!open}>
+        <header className="wa-head">
+          <span className="wa-head__avatar" aria-hidden="true">
+            Q
+            <span className="wa-head__online" />
+          </span>
+          <div className="wa-head__info">
+            <strong>Qualixe</strong>
+            <span>Live chat · we&apos;ll reply right here</span>
+          </div>
+          <button type="button" className="wa-head__close" onClick={() => { setSeenAdmin(adminCount); setOpen(false); }} aria-label="Close chat" tabIndex={tab}>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7a1 1 0 1 0-1.4 1.4l4.9 4.9-4.9 4.9a1 1 0 1 0 1.4 1.4l4.9-4.9 4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4Z" /></svg>
+          </button>
+        </header>
 
-      {/* WhatsApp */}
-      <a
-        href={waUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="social-float__btn social-float__btn--wa"
-        aria-label="Chat on WhatsApp"
-        tabIndex={open ? 0 : -1}
-      >
-        {/* WhatsApp SVG */}
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="26" height="26">
-          <circle cx="16" cy="16" r="16" fill="#25D366"/>
-          <path d="M23.5 8.5A10.44 10.44 0 0 0 16 5.5C10.75 5.5 6.5 9.75 6.5 15a9.44 9.44 0 0 0 1.27 4.76L6.5 26.5l6.93-1.82A9.44 9.44 0 0 0 16 25.5c5.25 0 9.5-4.25 9.5-9.5a9.44 9.44 0 0 0-2-5.5Zm-7.5 14.6a7.84 7.84 0 0 1-4-.11l-.29-.09-2.99.78.8-2.92-.19-.3A7.84 7.84 0 0 1 8.14 15c0-4.33 3.53-7.86 7.86-7.86A7.86 7.86 0 0 1 23.86 15c0 4.33-3.53 7.1-7.86 7.1Zm4.31-5.88c-.24-.12-1.4-.69-1.61-.77-.22-.08-.38-.12-.54.12-.16.24-.62.77-.76.93-.14.16-.28.18-.52.06-.24-.12-1-.37-1.91-1.18-.71-.63-1.18-1.41-1.32-1.65-.14-.24-.01-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.47-.39-.4-.54-.41h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.57.18 1.09.15 1.5.09.46-.07 1.4-.57 1.6-1.12.2-.55.2-1.02.14-1.12-.06-.1-.22-.16-.46-.28Z" fill="#fff"/>
-        </svg>
-      </a>
+        <div className="wa-body" ref={bodyRef} aria-live="polite">
+          <span className="wa-day">Today</span>
 
-      {/* Messenger */}
-      <a
-        href={FB_MESSENGER}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="social-float__btn social-float__btn--msg"
-        aria-label="Chat on Messenger"
-        tabIndex={open ? 0 : -1}
-      >
-        {/* Messenger SVG */}
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="26" height="26">
-          <circle cx="16" cy="16" r="16" fill="url(#msg-grad)"/>
-          <defs>
-            <linearGradient id="msg-grad" x1="16" y1="0" x2="16" y2="32" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#A334FA"/>
-              <stop offset="1" stopColor="#FF6968"/>
-            </linearGradient>
-          </defs>
-          <path d="M16 6C10.48 6 6 10.26 6 15.5c0 2.9 1.37 5.49 3.52 7.24V26l3.13-1.72c.83.23 1.72.36 2.63.36 5.52 0 10-4.26 10-9.5S21.52 6 16 6Zm1.03 12.77-2.55-2.72-4.98 2.72 5.48-5.82 2.61 2.72 4.92-2.72-5.48 5.82Z" fill="#fff"/>
-        </svg>
-      </a>
+          {/* Greeting (shown locally, not stored) */}
+          <div className="wa-bubble">
+            <p><strong>Hi there 👋</strong></p>
+            <p>Thanks for visiting Qualixe! Ask us anything about your project — our team will reply right here.</p>
+            <span className="wa-bubble__time">{timeOf(greetTime)}</span>
+          </div>
 
-      {/* Toggle / Close button */}
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={`wa-bubble${m.sender === 'visitor' ? ' wa-bubble--me' : ''}${m.pending ? ' is-pending' : ''}${m.failed ? ' is-failed' : ''}`}
+            >
+              {m.sender === 'admin' && <span className="wa-bubble__from">Qualixe team</span>}
+              <p>{m.body}</p>
+              <span className="wa-bubble__time">
+                {m.failed ? 'Not sent' : m.pending ? 'Sending…' : timeOf(m.created_at)}
+                {m.sender === 'visitor' && !m.pending && !m.failed && <span className="wa-tick" aria-label="Sent"> ✓</span>}
+              </span>
+            </div>
+          ))}
+
+          {!hasVisitorMsg && (
+            <div className="wa-quick" aria-label="Quick replies">
+              {QUICK_REPLIES.map((q) => (
+                <button key={q} type="button" className="wa-quick__btn" onClick={() => send(q)} tabIndex={tab} disabled={sending}>
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Ask for an email so the team can follow up if the visitor leaves */}
+          {session && hasVisitorMsg && !hasEmail && !contactSaved && (
+            <form className="wa-contact" onSubmit={saveContact}>
+              <p>Leave your email so we can reply even if you leave the site.</p>
+              <input
+                type="text"
+                placeholder="Your name (optional)"
+                value={contact.name}
+                onChange={(e) => setContact((c) => ({ ...c, name: e.target.value }))}
+                autoComplete="name"
+                tabIndex={tab}
+              />
+              <div className="wa-contact__row">
+                <input
+                  type="email"
+                  placeholder="you@company.com"
+                  value={contact.email}
+                  onChange={(e) => setContact((c) => ({ ...c, email: e.target.value }))}
+                  autoComplete="email"
+                  required
+                  tabIndex={tab}
+                />
+                <button type="submit" tabIndex={tab}>Save</button>
+              </div>
+            </form>
+          )}
+          {contactSaved && <p className="wa-note">✓ Thanks! We&apos;ll follow up by email if we miss you here.</p>}
+        </div>
+
+        {error && <p className="wa-error" role="alert">{error}</p>}
+
+        <form className="wa-compose" onSubmit={(e) => { e.preventDefault(); send(); }}>
+          <textarea
+            ref={inputRef}
+            className="wa-compose__input"
+            rows={1}
+            maxLength={2000}
+            placeholder="Type your message…"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={onKeyDown}
+            aria-label="Your message"
+            tabIndex={tab}
+          />
+          <button type="submit" className="wa-compose__send" aria-label="Send message" disabled={sending || !text.trim()} tabIndex={tab}>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6 3.39 10 16 12 3.39 14z" /></svg>
+          </button>
+        </form>
+
+        <div className="wa-foot">
+          <span>Prefer another app?</span>
+          <span className="wa-foot__links">
+            <a href={waHref} target="_blank" rel="noopener noreferrer" tabIndex={tab} className="wa-foot__wa">WhatsApp</a>
+            <span aria-hidden="true">·</span>
+            <a href={FB_MESSENGER} target="_blank" rel="noopener noreferrer" tabIndex={tab}>Messenger</a>
+          </span>
+        </div>
+      </div>
+
       <button
-        className="social-float__toggle"
-        onClick={() => setOpen(o => !o)}
-        aria-label={open ? 'Close chat options' : 'Open chat options'}
+        type="button"
+        className="wa-launcher"
+        onClick={toggleOpen}
+        aria-label={open ? 'Close live chat' : `Open live chat${unread ? ` (${unread} new)` : ''}`}
         aria-expanded={open}
       >
-        {open
-          ? <span className="social-float__close-icon">✕</span>
-          : (
-            <svg width="30" height="30" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M53.0437 27.0094C53.0437 37.0594 42.7312 45.2063 30 45.2063C28.85 45.209 27.7009 45.1401 26.5594 45C24.6094 44.775 19.1344 51.7406 17.3812 51.15C15.9656 50.6719 18.225 42.7125 16.9781 42.0281C10.9219 38.7469 6.95625 33.2437 6.95625 27.0281C6.95625 16.9781 17.2687 8.84062 30 8.84062C42.7312 8.84062 53.0437 16.9594 53.0437 27.0094Z" stroke="black" stroke-width="2.8125" stroke-linecap="round"/>
-            <path d="M21.9187 26.7656H22.3875" stroke="black" stroke-width="2.8125" stroke-linecap="round"/>
-            <path d="M30 26.7656H30.4688" stroke="black" stroke-width="2.8125" stroke-linecap="round"/>
-            <path d="M37.8375 26.7656H38.3063" stroke="black" stroke-width="2.8125" stroke-linecap="round"/>
-            </svg>
-
-
-          )
-        }
+        <span className="wa-launcher__icon wa-launcher__icon--wa" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 3C6.48 3 2 6.92 2 11.75c0 2.47 1.17 4.7 3.06 6.28-.12 1.2-.6 2.66-1.66 3.72 0 0 2.95-.15 5.14-1.86.99.27 2.15.41 3.46.41 5.52 0 10-3.92 10-8.55S17.52 3 12 3Zm-4 9.75a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Zm4 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Zm4 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Z" /></svg>
+        </span>
+        <span className="wa-launcher__icon wa-launcher__icon--close" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7a1 1 0 1 0-1.4 1.4l4.9 4.9-4.9 4.9a1 1 0 1 0 1.4 1.4l4.9-4.9 4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4Z" /></svg>
+        </span>
+        {!open && unread > 0 && <span className="wa-launcher__badge">{unread}</span>}
+        {!open && !unread && <span className="wa-launcher__ping" aria-hidden="true" />}
       </button>
     </div>
   );

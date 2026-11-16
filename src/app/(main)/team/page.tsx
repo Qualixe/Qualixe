@@ -42,7 +42,13 @@ export default function TeamPage() {
 
   return (
     <main className="team-page">
-      <PageBanner heading="Our Team" />
+      <PageBanner
+        eyebrow="The people behind Qualixe"
+        heading="Meet the team"
+        accent="the team"
+        subtitle="Designers, developers and marketers who obsess over building stores that look great and sell."
+        breadcrumb={[{ label: 'Team' }]}
+      />
 
       <section className="team-section">
         <div className="container">

@@ -601,3 +601,11 @@
 .process-timeline__row--right .process-timeline__card p {
     text-align: left;
 }
+/* Sit under the floating header so its gradient runs to the top of the page */
+.service-hero {
+  margin-top: calc(var(--site-hdr, 88px) * -1);
+  padding-top: calc(var(--site-hdr, 88px) + 64px);
+}
+@media (max-width: 767px) {
+  .service-hero { padding-top: calc(var(--site-hdr, 76px) + 40px); }
+}

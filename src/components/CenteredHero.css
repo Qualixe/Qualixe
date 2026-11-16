@@ -1,0 +1,111 @@
+/* Dark centred hero — shared by Blog, Contact (matches the home hero) */
+.ch-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  margin-top: calc(var(--site-hdr, 88px) * -1);
+  padding: calc(var(--site-hdr, 88px) + 56px) 0 88px;
+  background: #050a1f;
+  color: #fff;
+  text-align: center;
+}
+.ch-bg { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.ch-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 20%, transparent 75%);
+}
+.ch-aurora {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  opacity: 0.7;
+  animation: ch-drift 18s ease-in-out infinite alternate;
+}
+.ch-aurora--1 { width: 680px; height: 680px; top: -280px; left: -180px; background: radial-gradient(circle, rgba(12, 60, 195, 0.75), transparent 65%); }
+.ch-aurora--2 { width: 580px; height: 580px; bottom: -300px; right: 10%; background: radial-gradient(circle, rgba(109, 77, 255, 0.55), transparent 65%); animation-delay: -9s; }
+@keyframes ch-drift { to { transform: translate3d(80px, 40px, 0) scale(1.12); } }
+.ch-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.ch-hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.4), rgba(167, 139, 250, 0.4), transparent);
+}
+
+.ch-crumbs { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 28px; font-size: 13.5px; color: rgba(226, 232, 255, 0.5); }
+.ch-crumbs a { color: rgba(226, 232, 255, 0.65); text-decoration: none; }
+.ch-crumbs a:hover { color: #fff; }
+.ch-crumbs i { font-size: 10px; }
+.ch-crumbs [aria-current] { color: #fff; font-weight: 500; }
+
+.ch-pill {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto 24px;
+  padding: 8px 18px 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: ch-rise 700ms cubic-bezier(.16, 1, .3, 1) both;
+}
+.ch-pill__dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 12px #34d399; }
+
+.ch-title {
+  max-width: 880px;
+  margin: 0 auto 20px;
+  font-size: clamp(38px, 5.4vw, 72px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.02;
+  color: #fff;
+  text-wrap: balance;
+  animation: ch-rise 900ms cubic-bezier(.16, 1, .3, 1) 100ms both;
+}
+.ch-gradient {
+  background: linear-gradient(100deg, #7dd3fc 0%, #818cf8 35%, #c084fc 60%, #34d399 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: ch-shift 8s ease-in-out infinite alternate;
+}
+@keyframes ch-shift { to { background-position: 100% 0; } }
+.ch-sub {
+  max-width: 620px;
+  margin: 0 auto 36px;
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1.7;
+  color: rgba(226, 232, 255, 0.72);
+  animation: ch-rise 900ms cubic-bezier(.16, 1, .3, 1) 200ms both;
+}
+.ch-hero .container > :last-child { margin-bottom: 0; }
+@keyframes ch-rise { from { opacity: 0; transform: translateY(18px); } }
+
+@media (max-width: 767px) {
+  .ch-hero { padding: calc(var(--site-hdr, 76px) + 36px) 0 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch-aurora, .ch-pill, .ch-title, .ch-sub, .ch-gradient { animation: none; }
+}

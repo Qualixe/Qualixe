@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
   },
   allowedDevOrigins: ['pair-tourist-burlington-ict.trycloudflare.com','192.168.0.185'],
 
+  // Retired pages → permanent (301) redirects so search rankings and backlinks carry over
+  async redirects() {
+    return [
+      { source: '/services/uiux-design', destination: '/services', permanent: true },
+      { source: '/dashboard/services/uiux', destination: '/dashboard', permanent: false },
+    ];
+  },
+
   images: {
     // Serve WebP/AVIF automatically — massive size reduction
     formats: ['image/avif', 'image/webp'],

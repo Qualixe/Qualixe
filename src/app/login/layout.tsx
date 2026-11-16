@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import './login.css';
+import './auth.css';
 
 export const metadata: Metadata = {
-  title: "Login - Qualixe",
-  description: "Login to Qualixe Dashboard",
+  title: "Admin Login | Qualixe",
+  description: "Sign in to the Qualixe admin dashboard.",
+  // Private admin entry point — keep it out of search results
+  robots: { index: false, follow: false },
 };
 
 export default function LoginLayout({

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import DashboardHeader from '@/components/DashboardHeader';
 import { portfolioAPI } from '../../../lib/api/portfolio';
@@ -8,397 +9,318 @@ import { brandsAPI } from '../../../lib/api/brands';
 import { clientsAPI } from '../../../lib/api/clients';
 import { themesAPI } from '../../../lib/api/themes';
 import { contactsAPI } from '../../../lib/api/contacts';
-import {
-  getAnalyticsOverview,
-  getDailyTraffic,
-  getRealTimeUsers,
-} from '../../../lib/api/analytics';
+import { getAnalyticsOverview, getDailyTraffic, getRealTimeUsers } from '../../../lib/api/analytics';
+
+type Row = Record<string, unknown> & { id?: string; created_at?: string; updated_at?: string };
+type Traffic = { labels: string[]; pageViews: number[]; visitors: number[] };
+type Overview = { pageViews?: number; uniqueVisitors?: number } | null;
+
+const MIX_COLORS = ['#2f5bea', '#6d4dff', '#34d399', '#f59e0b'];
+
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+}
+
+function timeAgo(iso?: string) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.round(diff / 60000);
+  if (m < 60) return `${Math.max(1, m)}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  return d < 30 ? `${d}d ago` : new Date(iso).toLocaleDateString();
+}
+
+const fmt = (n?: number) => (n ?? 0).toLocaleString();
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({
-    portfolio: 0,
-    brands: 0,
-    clients: 0,
-    themes: 0,
-    contacts: 0,
-  });
-  const [analyticsStats, setAnalyticsStats] = useState<any>(null);
-  const [dailyTraffic, setDailyTraffic] = useState<any>({ labels: [], pageViews: [], visitors: [] });
-  const [realTimeUsers, setRealTimeUsers] = useState(0);
-  const [recentProjects, setRecentProjects] = useState<any[]>([]);
+  const [stats, setStats] = useState({ portfolio: 0, brands: 0, clients: 0, themes: 0, contacts: 0 });
+  const [overview, setOverview] = useState<Overview>(null);
+  const [traffic, setTraffic] = useState<Traffic>({ labels: [], pageViews: [], visitors: [] });
+  const [live, setLive] = useState(0);
+  const [messages, setMessages] = useState<Row[]>([]);
+  const [recentWork, setRecentWork] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
-  const lineChartRef = useRef<any>(null);
-  const doughnutChartRef = useRef<any>(null);
+  const lineRef = useRef<{ destroy: () => void } | null>(null);
+  const donutRef = useRef<{ destroy: () => void } | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       try {
-        const [
-          portfolioData,
-          brandsData,
-          clientsData,
-          themesData,
-          contactsData,
-          analytics,
-          traffic,
-          realTime,
-        ] = await Promise.all([
-          portfolioAPI.getAll(),
-          brandsAPI.getAll(),
-          clientsAPI.getAll(),
-          themesAPI.getAll(),
-          contactsAPI.getAll(),
-          getAnalyticsOverview('7days'),
-          getDailyTraffic('7days'),
-          getRealTimeUsers(),
+        const [portfolio, brands, clients, themes, contacts, analytics, daily, realTime] = await Promise.all([
+          portfolioAPI.getAll().catch(() => []),
+          brandsAPI.getAll().catch(() => []),
+          clientsAPI.getAll().catch(() => []),
+          themesAPI.getAll().catch(() => []),
+          contactsAPI.getAll().catch(() => []),
+          getAnalyticsOverview('7days').catch(() => null),
+          getDailyTraffic('7days').catch(() => ({ labels: [], pageViews: [], visitors: [] })),
+          getRealTimeUsers().catch(() => 0),
         ]);
-
         setStats({
-          portfolio: portfolioData?.length || 0,
-          brands: brandsData?.length || 0,
-          clients: clientsData?.length || 0,
-          themes: themesData?.length || 0,
-          contacts: contactsData?.length || 0,
+          portfolio: portfolio?.length || 0,
+          brands: brands?.length || 0,
+          clients: clients?.length || 0,
+          themes: themes?.length || 0,
+          contacts: contacts?.length || 0,
         });
-
-        setAnalyticsStats(analytics);
-        setDailyTraffic(traffic);
-        setRealTimeUsers(realTime);
-
-        // Get recent projects (mix of portfolio, brands, clients, themes)
-        const recent = [
-          ...(portfolioData?.slice(0, 2).map((p: any) => ({ ...p, type: 'Portfolio' })) || []),
-          ...(brandsData?.slice(0, 1).map((b: any) => ({ ...b, type: 'Brand', client: b.name })) || []),
-          ...(clientsData?.slice(0, 1).map((c: any) => ({ ...c, type: 'Client', name: c.name })) || []),
-        ];
-
-        setRecentProjects(recent);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        setOverview(analytics as Overview);
+        setTraffic(daily as Traffic);
+        setLive(Number(realTime) || 0);
+        setMessages(((contacts ?? []) as Row[]).slice(0, 5));
+        setRecentWork(((portfolio ?? []) as Row[]).slice(0, 5));
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchData();
+    })();
   }, []);
 
+  // Charts
   useEffect(() => {
     if (loading) return;
-
     let cancelled = false;
-
-    const initCharts = async () => {
-      if (!dailyTraffic.labels.length) return;
+    (async () => {
       const Chart = (await import('chart.js/auto')).default;
       if (cancelled) return;
+      Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+      Chart.defaults.color = '#6b7280';
 
-      const ctxLine = document.getElementById('installChart') as HTMLCanvasElement;
-      if (ctxLine) {
-        lineChartRef.current?.destroy();
-        lineChartRef.current = new Chart(ctxLine.getContext('2d')!, {
+      const line = document.getElementById('ov-traffic') as HTMLCanvasElement | null;
+      if (line && traffic.labels.length) {
+        lineRef.current?.destroy();
+        const ctx = line.getContext('2d')!;
+        const grad = ctx.createLinearGradient(0, 0, 0, 260);
+        grad.addColorStop(0, 'rgba(47, 91, 234, 0.22)');
+        grad.addColorStop(1, 'rgba(47, 91, 234, 0)');
+        lineRef.current = new Chart(ctx, {
           type: 'line',
           data: {
-            labels: dailyTraffic.labels,
+            labels: traffic.labels,
             datasets: [
-              {
-                label: 'Page Views',
-                data: dailyTraffic.pageViews,
-                borderColor: '#0d4be1',
-                backgroundColor: 'rgba(13, 75, 225, 0.08)',
-                tension: 0.2,
-                pointBackgroundColor: '#0d4be1',
-                pointBorderColor: '#fff',
-                pointRadius: 4,
-                fill: true,
-                borderWidth: 3,
-              },
+              { label: 'Page views', data: traffic.pageViews, borderColor: '#2f5bea', backgroundColor: grad, fill: true, tension: 0.35, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5 },
+              { label: 'Visitors', data: traffic.visitors, borderColor: '#6d4dff', borderDash: [5, 5], fill: false, tension: 0.35, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5 },
             ],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } } },
             scales: {
-              y: { beginAtZero: true, grid: { color: '#dee9f0' } },
-              x: { grid: { display: false } },
+              y: { beginAtZero: true, grid: { color: '#eef1f7' }, border: { display: false }, ticks: { precision: 0 } },
+              x: { grid: { display: false }, border: { display: false } },
             },
           },
         });
       }
 
-      const ctxDoughnut = document.getElementById('stageChart') as HTMLCanvasElement;
-      if (ctxDoughnut) {
-        doughnutChartRef.current?.destroy();
-        doughnutChartRef.current = new Chart(ctxDoughnut.getContext('2d')!, {
+      const donut = document.getElementById('ov-mix') as HTMLCanvasElement | null;
+      if (donut) {
+        donutRef.current?.destroy();
+        donutRef.current = new Chart(donut.getContext('2d')!, {
           type: 'doughnut',
           data: {
-            labels: ['portfolio', 'brands', 'themes'],
-            datasets: [
-              {
-                data: [stats.portfolio, stats.brands, stats.themes],
-                backgroundColor: ['#0d4be1', '#0530a7', '#5a9bcf'],
-                borderWidth: 0,
-                borderRadius: 8,
-                spacing: 4,
-              },
-            ],
+            labels: ['Portfolio', 'Clients', 'Brands', 'Themes'],
+            datasets: [{
+              data: [stats.portfolio, stats.clients, stats.brands, stats.themes],
+              backgroundColor: MIX_COLORS,
+              borderWidth: 0,
+              borderRadius: 6,
+              spacing: 3,
+            }],
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '65%',
-            plugins: { legend: { display: false } },
-          },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } },
         });
       }
-    };
-
-    initCharts();
-
+    })();
     return () => {
       cancelled = true;
-      lineChartRef.current?.destroy();
-      doughnutChartRef.current?.destroy();
-      lineChartRef.current = null;
-      doughnutChartRef.current = null;
+      lineRef.current?.destroy();
+      donutRef.current?.destroy();
+      lineRef.current = null;
+      donutRef.current = null;
     };
-  }, [loading, stats.portfolio, stats.brands, stats.themes, dailyTraffic]);
+  }, [loading, traffic, stats]);
 
-  if (loading) {
-    return (
-      <div className="dashboard-wrapper">
-        <DashboardSidebar />
-        <div className="main-content">
-          <div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>
-        </div>
-      </div>
-    );
-  }
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+  const kpis = [
+    { label: 'Page views (7 days)', value: fmt(overview?.pageViews), icon: 'bi-eye', tone: 'blue', href: '/dashboard/analytics' },
+    { label: 'Unique visitors (7 days)', value: fmt(overview?.uniqueVisitors), icon: 'bi-people', tone: 'violet', href: '/dashboard/analytics' },
+    { label: 'Visitors right now', value: fmt(live), icon: 'bi-activity', tone: 'green', href: '/dashboard/analytics', live: true },
+    { label: 'Contact messages', value: fmt(stats.contacts), icon: 'bi-envelope', tone: 'amber', href: '/dashboard/contacts' },
+    { label: 'Portfolio projects', value: fmt(stats.portfolio), icon: 'bi-briefcase', tone: 'blue', href: '/dashboard/portfolio' },
+    { label: 'Clients', value: fmt(stats.clients), icon: 'bi-people', tone: 'cyan', href: '/dashboard/clients' },
+    { label: 'Brands', value: fmt(stats.brands), icon: 'bi-award', tone: 'rose', href: '/dashboard/brands' },
+    { label: 'Shopify themes', value: fmt(stats.themes), icon: 'bi-palette', tone: 'violet', href: '/dashboard/themes' },
+  ];
+
+  const mix = [
+    { label: 'Portfolio', value: stats.portfolio },
+    { label: 'Clients', value: stats.clients },
+    { label: 'Brands', value: stats.brands },
+    { label: 'Themes', value: stats.themes },
+  ];
+
+  const actions = [
+    { label: 'Write a blog post', icon: 'bi-pencil-square', href: '/dashboard/blog' },
+    { label: 'Add portfolio project', icon: 'bi-briefcase', href: '/dashboard/portfolio' },
+    { label: 'Add Laravel project', icon: 'bi-code-square', href: '/dashboard/laravel-projects' },
+    { label: 'Add HTML template', icon: 'bi-box-seam', href: '/dashboard/products' },
+    { label: 'Edit home page', icon: 'bi-house', href: '/dashboard/home' },
+    { label: 'Upload media', icon: 'bi-images', href: '/dashboard/media' },
+  ];
 
   return (
     <div className="dashboard-wrapper">
       <DashboardSidebar />
 
       <div className="main-content">
-        <DashboardHeader icon="bi-grid-fill" title="Dashboard" subtitle="overview" />
+        <DashboardHeader icon="bi-grid-1x2" title="Dashboard" subtitle="overview" />
 
-        <div className="row g-4 mb-4">
-          <div className="col-sm-6 col-xl-3">
-            <div className="card p-3 p-xl-3 h-100 border-0">
-              <div className="d-flex align-items-center gap-3">
-                <div className="stat-icon-circle">
-                  <i className="bi bi-briefcase"></i>
-                </div>
-                <div>
-                  <span className="text-secondary text-uppercase small fw-semibold">portfolio items</span>
-                  <h2 className="fw-bold mt-1 mb-0">{stats.portfolio}</h2>
-                  <span className="text-success small"><i className="bi bi-arrow-up"></i> Active</span>
-                </div>
-              </div>
-            </div>
+        {/* Welcome */}
+        <section className="ov-hero">
+          <div>
+            <span className="ov-hero__date">{today}</span>
+            <h2 className="ov-hero__title">{greeting()} 👋</h2>
+            <p className="ov-hero__text">Here&apos;s what&apos;s happening across your website this week.</p>
           </div>
-          <div className="col-sm-6 col-xl-3">
-            <div className="card p-3 p-xl-3 h-100">
-              <div className="d-flex align-items-center gap-3">
-                <div className="stat-icon-circle">
-                  <i className="bi bi-award"></i>
-                </div>
-                <div>
-                  <span className="text-secondary text-uppercase small fw-semibold">brands</span>
-                  <h2 className="fw-bold mt-1 mb-0">{stats.brands}</h2>
-                  <span className="text-info small"><i className="bi bi-star-fill"></i> featured</span>
-                </div>
-              </div>
-            </div>
+          <div className="ov-hero__actions">
+            <Link href="/dashboard/blog" className="ov-hero__btn ov-hero__btn--primary"><i className="bi bi-plus-lg" aria-hidden="true" /> New post</Link>
+            <Link href="/dashboard/contacts" className="ov-hero__btn"><i className="bi bi-envelope" aria-hidden="true" /> Messages</Link>
+            <Link href="/" target="_blank" className="ov-hero__btn"><i className="bi bi-box-arrow-up-right" aria-hidden="true" /> View site</Link>
           </div>
-          <div className="col-sm-6 col-xl-3">
-            <div className="card p-3 p-xl-3 h-100">
-              <div className="d-flex align-items-center gap-3">
-                <div className="stat-icon-circle">
-                  <i className="bi bi-people"></i>
-                </div>
-                <div>
-                  <span className="text-secondary text-uppercase small fw-semibold">active clients</span>
-                  <h2 className="fw-bold mt-1 mb-0">{stats.clients}</h2>
-                  <span className="text-success small"><i className="bi bi-arrow-up"></i> Total</span>
-                </div>
+        </section>
+
+        {/* KPIs */}
+        <div className="ov-kpis">
+          {kpis.map((k) => (
+            <Link key={k.label} href={k.href} className="ov-kpi">
+              <div className="ov-kpi__top">
+                <span className={`ov-kpi__icon ov-kpi__icon--${k.tone}`} aria-hidden="true"><i className={`bi ${k.icon}`} /></span>
+                {k.live ? <span className="ov-kpi__tag ov-kpi__tag--live">Live</span> : <i className="bi bi-arrow-up-right ov-kpi__tag" aria-hidden="true" />}
               </div>
-            </div>
-          </div>
-          <div className="col-sm-6 col-xl-3">
-            <div className="card p-3 p-xl-3 h-100">
-              <div className="d-flex align-items-center gap-3">
-                <div className="stat-icon-circle">
-                  <i className="bi bi-palette"></i>
-                </div>
-                <div>
-                  <span className="text-secondary text-uppercase small fw-semibold">themes</span>
-                  <h2 className="fw-bold mt-1 mb-0">{stats.themes}</h2>
-                  <span className="text-primary small"><i className="bi bi-check-circle"></i> Live</span>
-                </div>
+              <div>
+                <div className="ov-kpi__value">{loading ? '—' : k.value}</div>
+                <div className="ov-kpi__label">{k.label}</div>
               </div>
-            </div>
-          </div>
+            </Link>
+          ))}
         </div>
 
-        {/* Analytics Stats Row */}
-        {analyticsStats && (
-          <div className="row g-4 mb-4">
-            <div className="col-sm-6 col-xl-3">
-              <div className="card p-3 p-xl-3 h-100">
-                <div className="d-flex align-items-center gap-3">
-                  <div className="stat-icon-circle">
-                    <i className="bi bi-eye"></i>
-                  </div>
-                  <div>
-                    <span className="text-secondary text-uppercase small fw-semibold">page views</span>
-                    <h2 className="fw-bold mt-1 mb-0">{analyticsStats.pageViews?.toLocaleString() || 0}</h2>
-                    <span className="text-info small"><i className="bi bi-graph-up"></i> Last 7 days</span>
-                  </div>
-                </div>
+        {/* Charts */}
+        <div className="ov-grid">
+          <section className="ov-panel">
+            <div className="ov-panel__head">
+              <div>
+                <h3 className="ov-panel__title">Website traffic</h3>
+                <span className="ov-panel__sub">Last 7 days</span>
               </div>
+              <Link href="/dashboard/analytics" className="ov-panel__link">Full analytics →</Link>
             </div>
-            <div className="col-sm-6 col-xl-3">
-              <div className="card p-3 p-xl-3 h-100">
-                <div className="d-flex align-items-center gap-3">
-                  <div className="stat-icon-circle">
-                    <i className="bi bi-people"></i>
-                  </div>
-                  <div>
-                    <span className="text-secondary text-uppercase small fw-semibold">visitors</span>
-                    <h2 className="fw-bold mt-1 mb-0">{analyticsStats.uniqueVisitors?.toLocaleString() || 0}</h2>
-                    <span className="text-success small"><i className="bi bi-person-check"></i> Unique</span>
-                  </div>
-                </div>
-              </div>
+            <div className="chart-container" style={{ height: 280 }}>
+              {!loading && traffic.labels.length === 0 ? (
+                <p className="ov-empty">No traffic recorded yet.</p>
+              ) : (
+                <canvas id="ov-traffic" aria-label="Page views and visitors over the last 7 days" role="img" />
+              )}
             </div>
-            <div className="col-sm-6 col-xl-3">
-              <div className="card p-3 p-xl-3 h-100">
-                <div className="d-flex align-items-center gap-3">
-                  <div className="stat-icon-circle">
-                    <i className="bi bi-activity"></i>
-                  </div>
-                  <div>
-                    <span className="text-secondary text-uppercase small fw-semibold">active now</span>
-                    <h2 className="fw-bold mt-1 mb-0">{realTimeUsers}</h2>
-                    <span className="text-success small">
-                      <i className="bi bi-circle-fill" style={{ fontSize: '8px' }}></i> Live
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-sm-6 col-xl-3">
-              <div className="card p-3 p-xl-3 h-100">
-                <div className="d-flex align-items-center gap-3">
-                  <div className="stat-icon-circle">
-                    <i className="bi bi-envelope"></i>
-                  </div>
-                  <div>
-                    <span className="text-secondary text-uppercase small fw-semibold">messages</span>
-                    <h2 className="fw-bold mt-1 mb-0">{stats.contacts}</h2>
-                    <span className="text-warning small"><i className="bi bi-envelope-fill"></i> Inbox</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          </section>
 
-        <div className="row g-4 mb-4">
-          <div className="col-lg-7">
-            <div className="card p-3 p-xl-4">
-              <div className="d-flex align-items-center gap-2 mb-2">
-                <i className="bi bi-bar-chart-steps fs-4"></i>
-                <h5 className="fw-semibold mb-0">Website traffic (last 7 days)</h5>
-                {analyticsStats && analyticsStats.pageViews > 0 && (
-                  <span className="badge-soft-green ms-2">
-                    <i className="bi bi-arrow-up"></i> {analyticsStats.pageViews} views
-                  </span>
-                )}
-              </div>
-              <div className="chart-container">
-                <canvas id="installChart" width="400" height="180"></canvas>
+          <section className="ov-panel">
+            <div className="ov-panel__head">
+              <div>
+                <h3 className="ov-panel__title">Content mix</h3>
+                <span className="ov-panel__sub">What&apos;s published on the site</span>
               </div>
             </div>
-          </div>
-          <div className="col-lg-5">
-            <div className="card p-3 p-xl-4">
-              <div className="d-flex align-items-center gap-2 mb-2">
-                <i className="bi bi-pie-chart-fill fs-4"></i>
-                <h5 className="fw-semibold mb-0">Project distribution</h5>
-              </div>
-              <div className="chart-container" style={{height: '180px'}}>
-                <canvas id="stageChart" width="300" height="160"></canvas>
-              </div>
-              <div className="d-flex justify-content-around mt-3 small fw-medium">
-                <span><span style={{color:'#0d4be1'}}>●</span> portfolio ({stats.portfolio})</span>
-                <span><span style={{color:'#0530a7'}}>●</span> brands ({stats.brands})</span>
-                <span><span style={{color:'#5a9bcf'}}>●</span> themes ({stats.themes})</span>
-              </div>
+            <div className="chart-container" style={{ height: 180 }}>
+              <canvas id="ov-mix" aria-label="Content distribution" role="img" />
             </div>
-          </div>
+            <ul className="ov-legend list-unstyled mb-0">
+              {mix.map((m, i) => (
+                <li key={m.label}>
+                  <span className="ov-legend__dot" style={{ background: MIX_COLORS[i] }} aria-hidden="true" />
+                  {m.label}
+                  <span className="ov-legend__val">{m.value}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
 
-        <div className="row g-4">
-          <div className="col-12">
-            <div className="card p-3 p-xl-4">
-              <div className="d-flex align-items-center mb-3">
-                <i className="bi bi-list-check fs-2 me-2"></i>
-                <h5 className="fw-semibold mb-0">Recent projects</h5>
-                <span className="ms-auto text-secondary"><i className="bi bi-arrow-right-circle"></i></span>
+        {/* Lists */}
+        <div className="ov-grid">
+          <section className="ov-panel">
+            <div className="ov-panel__head">
+              <div>
+                <h3 className="ov-panel__title">Latest messages</h3>
+                <span className="ov-panel__sub">From the contact form</span>
               </div>
-              <div className="table-responsive">
-                <table className="table table-hover align-middle">
-                  <thead>
-                    <tr><th>project</th><th>type</th><th>client</th><th>status</th><th>updated</th></tr>
-                  </thead>
-                  <tbody>
-                    {recentProjects.length > 0 ? (
-                      recentProjects.map((project, index) => (
-                        <tr key={index}>
-                          <td><span className="fw-semibold">{project.name}</span></td>
-                          <td>{project.type}</td>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <span className="avatar-placeholder me-2">
-                                {project.client?.substring(0, 2).toUpperCase() || 'NA'}
-                              </span>
-                              {project.client || 'N/A'}
-                            </div>
-                          </td>
-                          <td>
-                            <span className={`badge px-3 py-2 rounded-pill ${
-                              project.status === 'completed' ? 'bg-success bg-opacity-25 text-success' :
-                              project.status === 'in progress' ? 'bg-primary bg-opacity-25 text-primary' :
-                              project.status === 'active' ? 'bg-success bg-opacity-25 text-success' :
-                              'bg-warning bg-opacity-25 text-warning'
-                            }`}>
-                              {project.status || 'active'}
-                            </span>
-                          </td>
-                          <td>{new Date(project.updated_at || project.created_at).toLocaleDateString()}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={5} className="text-center">No recent projects</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-2 footer-note">
-                <i className="bi bi-clock me-1"></i>updated just now · {recentProjects.length} active projects
-              </div>
+              <Link href="/dashboard/contacts" className="ov-panel__link">View all →</Link>
             </div>
-          </div>
+            {messages.length === 0 ? (
+              <p className="ov-empty">{loading ? 'Loading…' : 'No messages yet.'}</p>
+            ) : (
+              <ul className="ov-list">
+                {messages.map((m) => {
+                  const name = String(m.full_name ?? 'Unknown');
+                  const sub = [m.business_name, m.email].filter(Boolean).map(String).join(' · ');
+                  return (
+                    <li key={String(m.id)}>
+                      <span className="avatar-placeholder" aria-hidden="true">{name.slice(0, 2).toUpperCase()}</span>
+                      <div className="ov-list__main">
+                        <span className="ov-list__title">{name}</span>
+                        <span className="ov-list__sub">{sub || String(m.note ?? '')}</span>
+                      </div>
+                      <span className="ov-list__meta">{timeAgo(m.created_at)}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
+          <section className="ov-panel">
+            <div className="ov-panel__head">
+              <h3 className="ov-panel__title">Quick actions</h3>
+            </div>
+            <div className="ov-actions">
+              {actions.map((a) => (
+                <Link key={a.label} href={a.href} className="ov-action">
+                  <i className={`bi ${a.icon}`} aria-hidden="true" /> {a.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="ov-panel__head mt-4">
+              <h3 className="ov-panel__title">Recent portfolio</h3>
+              <Link href="/dashboard/portfolio" className="ov-panel__link">Manage →</Link>
+            </div>
+            {recentWork.length === 0 ? (
+              <p className="ov-empty">{loading ? 'Loading…' : 'No projects yet.'}</p>
+            ) : (
+              <ul className="ov-list">
+                {recentWork.map((p) => (
+                  <li key={String(p.id)}>
+                    <span className="avatar-placeholder" aria-hidden="true"><i className="bi bi-briefcase" /></span>
+                    <div className="ov-list__main">
+                      <span className="ov-list__title">{String(p.title ?? 'Untitled')}</span>
+                      <span className="ov-list__sub">{String(p.category ?? '')}</span>
+                    </div>
+                    <span className="ov-list__meta" style={{ textTransform: 'capitalize' }}>{String(p.status ?? '')}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
 
-        <footer className="d-flex justify-content-between mt-5 pt-2 text-secondary small">
-          <span>⚡ Qualixe · IT Solutions & Services</span>
-          <span className="d-none d-sm-block"><i className="bi bi-bootstrap-fill me-1"></i>Dashboard v1.0</span>
+        <footer className="ov-foot">
+          <span>Qualixe Admin</span>
+          <span>Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to search</span>
         </footer>
       </div>
     </div>

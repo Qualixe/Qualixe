@@ -30,7 +30,9 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Qualixe',
+    // Page titles already end with the brand ("… | Qualixe"); a '%s | Qualixe'
+    // template doubled it ("… | Qualixe | Qualixe") in search results.
+    template: '%s',
     default: 'Qualixe – Shopify Development & E-Commerce Solutions',
   },
   description: 'Qualixe builds high-converting Shopify stores, free HTML templates, and digital marketing solutions for e-commerce brands worldwide.',

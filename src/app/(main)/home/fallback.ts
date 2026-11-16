@@ -43,7 +43,7 @@ export const FALLBACK: HomePage = {
     items: [
       { icon: '🛍️', heading: 'Shopify Development', content: 'Custom Shopify stores built from scratch — tailored to your brand, optimized for conversions, and delivered fast. From theme design to full-stack integrations.', href: '/services/shopify-development', color: '#eef2ff', accent: '#0c3cc3' },
       { icon: '📣', heading: 'Digital Marketing', content: 'Data-driven SEO, paid ads, and social media campaigns that drive real traffic and revenue. We treat your budget like our own.', href: '/services/digital-marketing', color: '#f0fdf4', accent: '#16a34a' },
-      { icon: '🎨', heading: 'UI/UX Design', content: 'Beautiful, intuitive interfaces designed around your users. From wireframes to pixel-perfect handoff — we design experiences people love.', href: '/services/uiux-design', color: '#fff7ed', accent: '#ea580c' },
+      { icon: '🧩', heading: 'Shopify App Development', content: 'Public App Store apps and private custom apps that extend Shopify with the features your business needs.', href: '/services/shopify-app-development', color: '#fff7ed', accent: '#ea580c' },
     ],
   },
 };

@@ -1,143 +1,99 @@
-"use client";
-import { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
-import PageBanner from "@/components/PageBanner";
-import ClientsGrid from "../home/Clients";
-import { portfolioAPI } from '../../../../lib/api/portfolio';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import ClientsGrid from '../home/Clients';
+import { portfolioAPI, type Portfolio } from '../../../../lib/api/portfolio';
+import PortfolioShowcase from './PortfolioShowcase';
 import './portfolio.css';
 
-const PAGE_SIZE = 9;
+export { metadata } from './metadata';
 
-interface PortfolioItem {
-  id: string;
-  title: string;
-  image_url: string;
-  project_url: string;
-  category?: string;
-}
+export const revalidate = 60;
 
-function SkeletonGrid({ count }: { count: number }) {
-  return (
-    <>
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="port-skeleton" />
-      ))}
-    </>
-  );
-}
+export default async function PortfolioPage() {
+  let items: Portfolio[] = [];
+  try {
+    items = ((await portfolioAPI.getAll()) ?? []) as Portfolio[];
+  } catch {
+    items = [];
+  }
 
-export default function PortfolioPage() {
-  const [loading, setLoading]         = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [portfolios, setPortfolios]   = useState<PortfolioItem[]>([]);
-  const [page, setPage]               = useState(0);
-  const [hasMore, setHasMore]         = useState(true);
-  const sentinelRef                   = useRef<HTMLDivElement>(null);
+  const categoryCount = new Set(items.map((p) => p.category).filter(Boolean)).size;
 
-  const fetchPage = useCallback(async (pageNum: number) => {
-    try {
-      const { data, count } = await portfolioAPI.getPaginated(pageNum, PAGE_SIZE);
-      setPortfolios(prev => pageNum === 0 ? data : [...prev, ...data]);
-      setHasMore((pageNum + 1) * PAGE_SIZE < count);
-    } catch (err) {
-      console.error('Failed to load portfolio:', err);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchPage(0); }, [fetchPage]);
-
-  // Infinite scroll sentinel
-  useEffect(() => {
-    if (!hasMore || loading) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !loadingMore) {
-          setLoadingMore(true);
-          setPage(prev => { fetchPage(prev + 1); return prev + 1; });
-        }
-      },
-      { threshold: 0.1 }
-    );
-    const el = sentinelRef.current;
-    if (el) observer.observe(el);
-    return () => { if (el) observer.unobserve(el); };
-  }, [hasMore, loading, loadingMore, fetchPage]);
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Qualixe Portfolio',
+    url: 'https://www.qualixe.com/portfolio',
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: items.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: p.title,
+        url: p.project_url || undefined,
+      })),
+    },
+  };
 
   return (
-    <>
-      <PageBanner heading="Our Portfolio" />
+    <main className="pf-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <section className="port-section">
+      {/* ── Hero ─────────────────────────────────────── */}
+      <section className="pf-hero">
+        <div className="pf-hero__bg" aria-hidden="true" />
         <div className="container">
+          <span className="pf-eyebrow">
+            <span className="pf-eyebrow__dot" aria-hidden="true" /> Our Work
+          </span>
+          <h1 className="pf-hero__title">
+            Stores we&apos;ve designed, built <span className="pf-accent">&amp; launched</span>
+          </h1>
+          <p className="pf-hero__sub">
+            A collection of Shopify stores and e-commerce experiences crafted for brands across
+            Bangladesh and worldwide — each one built to look sharp and sell more.
+          </p>
 
-          {/* Intro */}
-          <div className="port-intro">
-            <p className="port-intro__text">
-              A collection of Shopify stores, e-commerce websites, and digital experiences
-              we've crafted for brands across Bangladesh and worldwide.
-            </p>
-          </div>
+          <nav className="pf-switch" aria-label="Portfolio type">
+            <span className="pf-switch__item is-active" aria-current="page">
+              <i className="bi bi-bag-check" aria-hidden="true" /> Shopify &amp; E-commerce
+            </span>
+            <Link href="/laravel-projects" className="pf-switch__item">
+              <i className="bi bi-code-square" aria-hidden="true" /> Laravel Applications
+            </Link>
+          </nav>
 
-          {/* Grid */}
-          <div className="port-grid">
-            {loading ? (
-              <SkeletonGrid count={PAGE_SIZE} />
-            ) : portfolios.length === 0 ? (
-              <div className="port-empty">
-                <i className="bi bi-briefcase" />
-                <p>No portfolio items yet.</p>
-              </div>
-            ) : (
-              portfolios.map(item => (
-                <div key={item.id} className="port-item">
-                  <a
-                    href={item.project_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="port-item__link"
-                    aria-label={`View ${item.title}`}
-                  >
-                    <Image
-                      src={item.image_url}
-                      alt={item.title}
-                      fill
-                      className="port-item__img"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                    {/* Gradient overlay */}
-                    <div className="port-item__overlay">
-                      <div className="port-item__info">
-                        {item.category && (
-                          <span className="port-item__cat">{item.category}</span>
-                        )}
-                        <h3 className="port-item__title">{item.title}</h3>
-                        <span className="port-item__cta">View Live ↗</span>
-                      </div>
-                    </div>
-                  </a>
-                </div>
-              ))
-            )}
-
-            {/* Load-more skeletons */}
-            {loadingMore && <SkeletonGrid count={3} />}
-          </div>
-
-          {/* Infinite scroll sentinel */}
-          <div ref={sentinelRef} style={{ height: 1 }} />
-
-          {/* End of results */}
-          {!hasMore && !loading && portfolios.length > 0 && (
-            <p className="port-end">You've seen all our work ✓</p>
+          {items.length > 0 && (
+            <dl className="pf-hero__stats">
+              <div><dt>Projects delivered</dt><dd>{items.length}</dd></div>
+              {categoryCount > 1 && <div><dt>Categories</dt><dd>{categoryCount}</dd></div>}
+            </dl>
           )}
+        </div>
+      </section>
 
+      <PortfolioShowcase items={items} />
+
+      {/* ── CTA ──────────────────────────────────────── */}
+      <section className="pf-cta-section">
+        <div className="container">
+          <div className="pf-cta">
+            <div className="pf-cta__glow" aria-hidden="true" />
+            <div className="pf-cta__text">
+              <h2>Want your store to be next?</h2>
+              <p>
+                Tell us about your brand and goals — we&apos;ll come back with a plan, timeline
+                and a clear quote.
+              </p>
+            </div>
+            <Link href="/contact" className="pf-btn pf-btn--light">
+              Get a free quote <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
       </section>
 
       <ClientsGrid />
-    </>
+    </main>
   );
 }

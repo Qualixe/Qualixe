@@ -18,7 +18,13 @@ export const metadata: Metadata = {
 function page() {
   return (
     <div className="about-page">
-      <PageBanner heading="About Us" />
+      <PageBanner
+        eyebrow="About Qualixe"
+        heading="A Shopify studio built around your growth"
+        accent="your growth"
+        subtitle="We're a team of designers and developers in Dhaka crafting high-converting Shopify stores and custom web apps for brands in Bangladesh and worldwide."
+        breadcrumb={[{ label: 'About' }]}
+      />
       <div className="about-page-content">
        <About />
        <ClientsGrid />

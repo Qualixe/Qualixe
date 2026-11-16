@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Qualixe – Shopify Development & E-Commerce Solutions",
   description: "Qualixe builds high-converting Shopify stores, free HTML templates, and digital marketing solutions for e-commerce brands worldwide.",
-  keywords: ["shopify development", "ecommerce development", "free html templates", "digital marketing", "ui ux design", "qualixe"],
+  keywords: ["shopify development", "ecommerce development", "free html templates", "shopify app development", "laravel development", "next.js development", "saas development", "digital marketing", "qualixe"],
   metadataBase: new URL("https://www.qualixe.com"),
   openGraph: {
     type: "website",

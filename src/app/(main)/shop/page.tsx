@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Eye, Download } from 'lucide-react';
 import Link from 'next/link';
 import { slugify } from '@/lib/slugify';
+import PageBanner from '@/components/PageBanner';
 import './shop.css';
 
 interface Product {
@@ -180,15 +181,13 @@ export default function ShopPage() {
       <main className="shop-page">
 
         {/* ── Page heading ──────────────────────────────── */}
-        <section className="shop-heading-section">
-          <div className="container">
-            <h1 className="shop-main-title">HTML Templates</h1>
-            <p className="shop-main-sub">
-              Discover our collection of responsive, production-ready HTML templates.
-              All templates are built with clean code, fully responsive, perfect for modern websites and apps.
-            </p>
-          </div>
-        </section>
+        <PageBanner
+          eyebrow="HTML templates"
+          heading="Production-ready templates, free & premium"
+          accent="free & premium"
+          subtitle="Responsive, clean-coded HTML templates built by our team — perfect for launching modern websites and apps faster."
+          breadcrumb={[{ label: 'Templates' }]}
+        />
 
         {/* ── Filter panel ──────────────────────────────── */}
         <section className="shop-filter-section">
@@ -261,6 +260,10 @@ export default function ShopPage() {
                     <article key={product.id} className="shop-card">
                       {/* Thumbnail */}
                       <Link href={`/shop/${slugify(product.name)}`} className="shop-card__thumb-link">
+                        <div className="shop-card__bar" aria-hidden="true">
+                          <span className="shop-card__dots"><i /><i /><i /></span>
+                          <span className="shop-card__url">{getCategory(product)}</span>
+                        </div>
                         <div className="shop-card__thumb">
                           {product.preview_url ? (
                             <img

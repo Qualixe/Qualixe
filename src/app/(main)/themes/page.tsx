@@ -63,7 +63,13 @@ const ThemesPage = () => {
   if (loading) {
     return (
       <>
-        <PageBanner heading="Our Themes" />
+        <PageBanner
+        eyebrow="Shopify themes"
+        heading="Premium themes, ready to launch"
+        accent="ready to launch"
+        subtitle="Conversion-focused Shopify themes designed and built by our team — fast, flexible and easy to make your own."
+        breadcrumb={[{ label: 'Themes' }]}
+      />
         <section className="themes-section">
           <div className="container">
             <div style={{ textAlign: 'center', padding: '50px' }}>Loading themes...</div>
@@ -75,7 +81,13 @@ const ThemesPage = () => {
 
   return (
     <>
-      <PageBanner heading="Our Themes" />
+      <PageBanner
+        eyebrow="Shopify themes"
+        heading="Premium themes, ready to launch"
+        accent="ready to launch"
+        subtitle="Conversion-focused Shopify themes designed and built by our team — fast, flexible and easy to make your own."
+        breadcrumb={[{ label: 'Themes' }]}
+      />
       
       <section className="themes-section">
         <div className="container">
