@@ -196,7 +196,8 @@ export function useVoiceCall({ onSaved }: Opts) {
     if (elevenToken) {
       try {
         const { VoiceConversation } = await import('@elevenlabs/client');
-        const seen = new Set<number>();
+        // A visitor line and Moon's reply in the same turn share one event_id — dedupe per speaker
+        const seen = new Set<string>();
         const conv = await VoiceConversation.startSession({
           conversationToken: elevenToken,
           connectionType: 'webrtc',
@@ -206,9 +207,10 @@ export function useVoiceCall({ onSaved }: Opts) {
           },
           onModeChange: ({ mode }) => setState(mode === 'speaking' ? 'speaking' : 'listening'),
           onMessage: (m) => {
-            if (seen.has(m.event_id)) return;
-            seen.add(m.event_id);
             const fromAgent = m.role === 'agent' || m.source === 'ai';
+            const key = `${fromAgent ? 'ai' : 'visitor'}:${m.event_id}`;
+            if (seen.has(key)) return;
+            seen.add(key);
             chain.current = chain.current.then(() => save(fromAgent ? 'ai' : 'visitor', m.message));
           },
           onDisconnect: () => {
