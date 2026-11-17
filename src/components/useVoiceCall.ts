@@ -34,6 +34,7 @@ export function useVoiceCall({ onSaved }: Opts) {
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const micRef = useRef<MediaStream | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const dcRef = useRef<RTCDataChannel | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionRef = useRef<{ conversationId: string; token: string } | null>(null);
   const elevenRef = useRef<{ endSession: () => Promise<void> } | null>(null);
@@ -61,6 +62,40 @@ export function useVoiceCall({ onSaved }: Opts) {
       .catch(() => { /* transcript is best-effort */ });
   }, []);
 
+  /**
+   * Tool "find_demos" (used by both providers): search our demos, drop clickable
+   * links into the chat, and give Moon a short summary to talk about (no URLs —
+   * she shouldn't read links aloud).
+   */
+  const findDemos = useCallback(async (args: { query?: string; platform?: string }) => {
+    const query = String(args?.query ?? '').slice(0, 200);
+    const platform = args?.platform === 'laravel' || args?.platform === 'shopify' ? args.platform : 'any';
+    try {
+      const r = await fetch(`/api/voice/demos?q=${encodeURIComponent(query)}&platform=${platform}`);
+      const data = (await r.json()) as {
+        note?: string;
+        matches?: { name: string; label: string; category: string; summary: string; url: string | null; page: string | null }[];
+      };
+      const matches = data.matches ?? [];
+      if (matches.length) {
+        const origin = window.location.origin;
+        const lines = matches.map((m) => {
+          const link = m.url || (m.page ? origin + m.page : '');
+          return `• ${m.name} — ${m.label}${m.category ? ` (${m.category})` : ''}${link ? `\n  ${link}` : ''}`;
+        });
+        const text = `🔗 Demos for “${query}”:\n${lines.join('\n')}`;
+        chain.current = chain.current.then(() => save('ai', text));
+      }
+      return JSON.stringify({
+        note: data.note ?? '',
+        links_shown_in_chat: matches.length > 0,
+        matches: matches.map(({ name, label, category, summary }) => ({ name, type: label, category, summary: summary.slice(0, 160) })),
+      });
+    } catch {
+      return JSON.stringify({ note: 'Demo search is unavailable right now. Offer to have the team send examples by email.', matches: [] });
+    }
+  }, [save]);
+
   const cleanup = useCallback(() => {
     genRef.current += 1;
     liveRef.current = false;
@@ -72,6 +107,7 @@ export function useVoiceCall({ onSaved }: Opts) {
     pcRef.current?.getSenders().forEach((s) => s.track?.stop());
     pcRef.current?.close();
     pcRef.current = null;
+    dcRef.current = null;
     micRef.current?.getTracks().forEach((t) => t.stop());
     micRef.current = null;
     if (audioRef.current) {
@@ -95,8 +131,21 @@ export function useVoiceCall({ onSaved }: Opts) {
     setSeconds(0);
   }, [cleanup]);
 
-  const handleEvent = useCallback((ev: { type: string; transcript?: string }) => {
+  const handleEvent = useCallback((ev: { type: string; transcript?: string; name?: string; call_id?: string; arguments?: string }) => {
     switch (ev.type) {
+      case 'response.function_call_arguments.done': {
+        if (ev.name !== 'find_demos' || !ev.call_id) break;
+        let args = {};
+        try { args = JSON.parse(ev.arguments || '{}'); } catch { /* use defaults */ }
+        const callId = ev.call_id;
+        findDemos(args).then((output) => {
+          const dc = dcRef.current;
+          if (!dc || dc.readyState !== 'open') return;
+          dc.send(JSON.stringify({ type: 'conversation.item.create', item: { type: 'function_call_output', call_id: callId, output } }));
+          dc.send(JSON.stringify({ type: 'response.create' }));
+        });
+        break;
+      }
       case 'input_audio_buffer.speech_started':
         setState('listening');
         break;
@@ -139,7 +188,7 @@ export function useVoiceCall({ onSaved }: Opts) {
         console.warn('[voice] realtime error event', ev);
         break;
     }
-  }, [save]);
+  }, [save, findDemos]);
 
   const startTimer = useCallback((onLimit: () => void) => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -201,6 +250,7 @@ export function useVoiceCall({ onSaved }: Opts) {
         const conv = await VoiceConversation.startSession({
           conversationToken: elevenToken,
           connectionType: 'webrtc',
+          clientTools: { find_demos: findDemos },
           onConnect: () => {
             setState('listening');
             startTimer(() => end());
@@ -248,6 +298,7 @@ export function useVoiceCall({ onSaved }: Opts) {
       pc.addTrack(mic.getTracks()[0], mic);
 
       const dc = pc.createDataChannel('oai-events');
+      dcRef.current = dc;
       dc.onmessage = (e) => {
         try { handleEvent(JSON.parse(e.data)); } catch { /* ignore malformed */ }
       };
@@ -283,7 +334,7 @@ export function useVoiceCall({ onSaved }: Opts) {
     } catch (err) {
       fail(micError(err));
     }
-  }, [end, fail, handleEvent, save, startTimer]);
+  }, [end, fail, handleEvent, save, startTimer, findDemos]);
 
   // Hang up if the widget unmounts
   useEffect(() => cleanup, [cleanup]);

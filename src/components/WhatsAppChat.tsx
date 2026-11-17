@@ -21,6 +21,19 @@ const VOICE_LABEL: Record<string, string> = {
   thinking: 'Thinking…',
   speaking: 'Speaking…',
 };
+/** Turn http(s) links in a message into clickable links (everything else stays plain text) */
+function linkify(text: string) {
+  return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a key={i} href={part} target="_blank" rel="noopener noreferrer nofollow" className="wa-link">
+        {part.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+      </a>
+    ) : (
+      part
+    ),
+  );
+}
+
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
 const WA_NUMBER = '8801318552266';
@@ -291,7 +304,7 @@ export default function WhatsAppChat() {
             >
               {m.sender === 'admin' && <span className="wa-bubble__from">{isAi ? 'Moon · Qualixe AI' : 'Qualixe team'}</span>}
               {isVoice && <span className="wa-bubble__from wa-bubble__from--voice">You · voice</span>}
-              <p>{body}</p>
+              <p>{linkify(body)}</p>
               <span className="wa-bubble__time">
                 {m.failed ? 'Not sent' : m.pending ? 'Sending…' : timeOf(m.created_at)}
                 {m.sender === 'visitor' && !m.pending && !m.failed && <span className="wa-tick" aria-label="Sent"> ✓</span>}

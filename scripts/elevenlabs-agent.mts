@@ -45,6 +45,46 @@ const config = {
   platform_settings: { auth: { enable_auth: true } },
 };
 
+// ── Client tool: find_demos (runs in the visitor's browser, see src/components/useVoiceCall.ts) ──
+const TOOL_NAME = 'find_demos';
+const toolConfig = {
+  type: 'client',
+  name: TOOL_NAME,
+  description:
+    "Search Qualixe's real demo stores (Laravel), Shopify themes and client websites for the visitor's type of business. " +
+    'Call it as soon as the visitor says what kind of shop or website they want. The links are shown in the chat automatically.',
+  parameters: {
+    type: 'object',
+    properties: {
+      query: { type: 'string', description: 'The business / website type in English, e.g. "baby shop", "clothing store", "electronics"' },
+      platform: { type: 'string', enum: ['laravel', 'shopify', 'any'], description: 'Platform the visitor asked for, or "any"' },
+    },
+    required: ['query', 'platform'],
+  },
+  expects_response: true,
+  response_timeout_secs: 15,
+};
+
+async function el(path: string, init: RequestInit = {}) {
+  const r = await fetch(`https://api.elevenlabs.io${path}`, {
+    ...init,
+    headers: { 'xi-api-key': KEY!, 'Content-Type': 'application/json', ...(init.headers ?? {}) },
+  });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    console.error(`ElevenLabs ${r.status} ${path}:`, JSON.stringify(body, null, 2));
+    process.exit(1);
+  }
+  return body;
+}
+
+const existing = (await el('/v1/convai/tools')).tools?.find((t: { tool_config?: { name?: string } }) => t.tool_config?.name === TOOL_NAME);
+const toolId: string = existing
+  ? (await el(`/v1/convai/tools/${existing.id}`, { method: 'PATCH', body: JSON.stringify({ tool_config: toolConfig }) })).id ?? existing.id
+  : (await el('/v1/convai/tools', { method: 'POST', body: JSON.stringify({ tool_config: toolConfig }) })).id;
+console.log(`${existing ? 'Updated' : 'Created'} tool ${TOOL_NAME} (${toolId})`);
+(config.conversation_config.agent.prompt as Record<string, unknown>).tool_ids = [toolId];
+
 const url = AGENT_ID
   ? `https://api.elevenlabs.io/v1/convai/agents/${AGENT_ID}`
   : 'https://api.elevenlabs.io/v1/convai/agents/create';

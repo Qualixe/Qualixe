@@ -471,3 +471,7 @@
 @media (prefers-reduced-motion: reduce) {
   .wa-voice__orb, .wa-voice__orb span { animation: none !important; }
 }
+
+/* Clickable links in messages (e.g. demo suggestions from Moon) */
+.wa-link { color: #2f5bea; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; word-break: break-all; }
+.wa-link:hover { color: #6d4dff; }

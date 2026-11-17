@@ -40,6 +40,24 @@ export async function POST(req: Request, { params }: Ctx) {
     model: VOICE_MODEL,
     instructions: VOICE_INSTRUCTIONS,
     max_output_tokens: 600,
+    tool_choice: 'auto',
+    tools: [
+      {
+        type: 'function',
+        name: 'find_demos',
+        description:
+          "Search Qualixe's real demo stores (Laravel), Shopify themes and client websites for the visitor's type of business. " +
+          'Call it as soon as the visitor says what kind of shop or website they want. The links are shown in the chat automatically.',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'The business / website type in English, e.g. "baby shop", "clothing store"' },
+            platform: { type: 'string', enum: ['laravel', 'shopify', 'any'], description: 'Platform the visitor asked for, or "any"' },
+          },
+          required: ['query', 'platform'],
+        },
+      },
+    ],
     audio: {
       input: {
         transcription: {
