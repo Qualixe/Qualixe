@@ -4,6 +4,9 @@ import { VOICE_INSTRUCTIONS, VOICE_MODEL, VOICE_NAME } from '@/lib/voiceAgent';
 
 export const dynamic = 'force-dynamic';
 
+// In development, show OpenAI's real error in the widget to make setup issues obvious
+const DEV = process.env.NODE_ENV !== 'production';
+
 type Ctx = { params: Promise<{ id: string }> };
 
 /**
@@ -13,7 +16,10 @@ type Ctx = { params: Promise<{ id: string }> };
  */
 export async function POST(req: Request, { params }: Ctx) {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: 'Voice chat is not available right now.' }, { status: 503 });
+  if (!apiKey) {
+    console.error('[voice] OPENAI_API_KEY is not set on this server');
+    return NextResponse.json({ error: DEV ? 'OPENAI_API_KEY is missing — add it to .env and restart the server.' : 'Voice chat is not available right now.' }, { status: 503 });
+  }
 
   const { id } = await params;
   const convo = await getVisitorConversation(id, req.headers.get('x-chat-token'));
@@ -60,11 +66,13 @@ export async function POST(req: Request, { params }: Ctx) {
     const answer = await r.text();
     if (!r.ok) {
       console.error('[voice] OpenAI realtime call failed', r.status, answer.slice(0, 500));
-      return NextResponse.json({ error: 'Voice chat is not available right now.' }, { status: 502 });
+      let detail = answer.slice(0, 300);
+      try { detail = JSON.parse(answer)?.error?.message || detail; } catch { /* not JSON */ }
+      return NextResponse.json({ error: DEV ? `OpenAI ${r.status}: ${detail}` : 'Voice chat is not available right now.' }, { status: 502 });
     }
     return new Response(answer, { headers: { 'Content-Type': 'application/sdp', 'Cache-Control': 'no-store' } });
   } catch (err) {
     console.error('[voice] OpenAI request error', err);
-    return NextResponse.json({ error: 'Voice chat is not available right now.' }, { status: 502 });
+    return NextResponse.json({ error: DEV ? `Could not reach OpenAI: ${err instanceof Error ? err.message : err}` : 'Voice chat is not available right now.' }, { status: 502 });
   }
 }
