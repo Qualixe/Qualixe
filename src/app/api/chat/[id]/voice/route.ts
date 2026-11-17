@@ -42,7 +42,11 @@ export async function POST(req: Request, { params }: Ctx) {
     max_output_tokens: 600,
     audio: {
       input: {
-        transcription: { model: 'gpt-4o-mini-transcribe' },
+        transcription: {
+          model: 'gpt-4o-mini-transcribe',
+          // Hint: most visitors speak Bangla, English, or a mix
+          prompt: 'Conversation in Bangla (Bangladesh) and English about websites, Shopify, Laravel and web apps.',
+        },
         turn_detection: { type: 'server_vad', silence_duration_ms: 600 },
       },
       output: { voice: VOICE_NAME },

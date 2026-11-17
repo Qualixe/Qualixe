@@ -10,6 +10,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const VOICE_MAX_SECONDS = 300; // keep in sync with src/lib/voiceAgent.ts
 
+/** Moon's opening line (Bangla script gives the model the right pronunciation) */
+const GREETING = 'হ্যালো, আসসালামু আলাইকুম! আমি মুন, Qualixe থেকে বলছি। আপনার প্রজেক্ট নিয়ে কীভাবে সাহায্য করতে পারি?';
+
 export type VoiceState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'error';
 
 type SavedMsg = { id: string; sender: 'visitor' | 'admin'; body: string; created_at: string };
@@ -162,10 +165,10 @@ export function useVoiceCall({ onSaved }: Opts) {
       };
       dc.onopen = () => {
         setState('listening');
-        // AI greets first
+        // Moon greets first
         dc.send(JSON.stringify({
           type: 'response.create',
-          response: { instructions: 'Greet the visitor in one short sentence as the Qualixe assistant and ask how you can help with their project.' },
+          response: { instructions: `Greet the visitor warmly in Bangla with your natural Bangladeshi accent. Say exactly: "${GREETING}" Then stop and wait for them.` },
         }));
       };
 

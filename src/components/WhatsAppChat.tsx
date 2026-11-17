@@ -289,7 +289,7 @@ export default function WhatsAppChat() {
               key={m.id}
               className={`wa-bubble${m.sender === 'visitor' ? ' wa-bubble--me' : ''}${isAi ? ' wa-bubble--ai' : ''}${m.pending ? ' is-pending' : ''}${m.failed ? ' is-failed' : ''}`}
             >
-              {m.sender === 'admin' && <span className="wa-bubble__from">{isAi ? 'Qualixe AI · voice' : 'Qualixe team'}</span>}
+              {m.sender === 'admin' && <span className="wa-bubble__from">{isAi ? 'Moon · Qualixe AI' : 'Qualixe team'}</span>}
               {isVoice && <span className="wa-bubble__from wa-bubble__from--voice">You · voice</span>}
               <p>{body}</p>
               <span className="wa-bubble__time">
@@ -346,7 +346,7 @@ export default function WhatsAppChat() {
             <span className="wa-voice__orb" aria-hidden="true"><span /><span /><span /></span>
             <div className="wa-voice__info">
               <strong>{VOICE_LABEL[voice.state] ?? ''}</strong>
-              <span>AI assistant · {mmss(voice.seconds)} / {mmss(VOICE_MAX_SECONDS)}</span>
+              <span>Moon · AI assistant · {mmss(voice.seconds)} / {mmss(VOICE_MAX_SECONDS)}</span>
             </div>
             <button type="button" className="wa-voice__end" onClick={voice.end} tabIndex={tab}>
               <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28a11.27 11.27 0 0 0-2.67-1.85.996.996 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9Z" /></svg>
@@ -355,7 +355,7 @@ export default function WhatsAppChat() {
           </div>
         ) : (
         <form className="wa-compose" onSubmit={(e) => { e.preventDefault(); send(); }}>
-          <button type="button" className="wa-mic" aria-label="Talk to our AI assistant" title="Talk to our AI assistant" onClick={startVoice} tabIndex={tab}>
+          <button type="button" className="wa-mic" aria-label="Talk to Moon, our AI assistant" title="Talk to Moon, our AI assistant" onClick={startVoice} tabIndex={tab}>
             <span className="wa-mic__ring" aria-hidden="true" />
             <span className="wa-mic__ring" aria-hidden="true" />
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z" /></svg>
