@@ -1056,7 +1056,12 @@
 @media (max-width: 991px) {
   .hx-section { padding: 96px 0; }
 
-  .hx-hero { align-items: flex-end; padding: calc(var(--hx-hdr) + 240px) 0 96px; }
+  /* Text starts over the lower half of the globe instead of below it */
+  .hx-hero { min-height: 0; align-items: flex-start; padding: calc(var(--hx-hdr) + 110px) 0 80px; }
+  /* Centered layout on tablet/mobile */
+  .hx-hero__content { margin: 0 auto; text-align: center; }
+  .hx-hero__content > :not(.hx-hero__title) { margin-left: auto; margin-right: auto; }
+  .hx-hero__actions, .hx-hero__proof { justify-content: center; }
   .hx-hero__orb { width: 240px; top: calc(var(--hx-hdr) + 20px); right: 50%; transform: translateX(50%); }
   .hx-hero__chips { display: none; }
 
@@ -1093,7 +1098,11 @@
   .hx-head { margin-bottom: 40px; }
   .hx-lead { font-size: 16px; }
 
-  .hx-hero { padding: calc(var(--hx-hdr) + 200px) 0 88px; }
+  .hx-hero { padding: calc(var(--hx-hdr) + 70px) 0 64px; }
+  .hx-hero .hx-pill { margin-bottom: 20px; }
+  /* Keep the copy readable where it overlaps the globe */
+  .hx-hero__title, .hx-hero__desc { text-shadow: 0 2px 18px rgba(5, 8, 22, 0.85); }
+  .hx-hero__title .hx-gradient-text { text-shadow: none; } /* transparent fill — a shadow would show through */
   .hx-hero__orb { width: 190px; }
   .hx-hero__actions { flex-direction: column; }
   .hx-hero__actions .hx-btn { width: 100%; }

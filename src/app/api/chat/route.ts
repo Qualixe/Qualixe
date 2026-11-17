@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     .select('id')
     .single();
   if (error || !convo) {
-    console.error('[live-chat] create conversation failed', error);
+    console.error('[live-chat] create conversation failed:', error?.code, error?.message, error?.hint ?? '');
     return NextResponse.json({ error: 'Chat is unavailable right now. Please try again.' }, { status: 500 });
   }
 
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     .select(MESSAGE_FIELDS)
     .single();
   if (msgErr) {
-    console.error('[live-chat] first message failed', msgErr);
+    console.error('[live-chat] first message failed:', msgErr?.code, msgErr?.message, msgErr?.hint ?? '');
     return NextResponse.json({ error: 'Message could not be sent. Please try again.' }, { status: 500 });
   }
 

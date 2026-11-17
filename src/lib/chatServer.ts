@@ -75,6 +75,24 @@ export function tooManyNewChats(ip: string) {
   return false;
 }
 
+/**
+ * Generic in-memory sliding-window limiter (per server instance; resets on deploy).
+ * Returns true when `key` already used `max` slots inside `windowMs`.
+ */
+const windows = new Map<string, number[]>();
+export function overLimit(key: string, max: number, windowMs: number) {
+  const now = Date.now();
+  const recent = (windows.get(key) ?? []).filter((t) => now - t < windowMs);
+  if (recent.length >= max) {
+    windows.set(key, recent);
+    return true;
+  }
+  recent.push(now);
+  windows.set(key, recent);
+  if (windows.size > 10000) windows.clear(); // keep memory bounded
+  return false;
+}
+
 export function clientIp(req: Request) {
   return (req.headers.get('x-forwarded-for')?.split(',')[0] || req.headers.get('x-real-ip') || 'unknown').trim();
 }

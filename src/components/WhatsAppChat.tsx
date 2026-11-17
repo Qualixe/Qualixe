@@ -8,7 +8,20 @@
  * page changes and return visits.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useVoiceCall, VOICE_MAX_SECONDS } from './useVoiceCall';
 import './WhatsAppChat.css';
+
+// Voice-call transcript lines are stored with these prefixes (see src/lib/voiceAgent.ts)
+const AI_PREFIX = '🤖 ';
+const VOICE_PREFIX = '🎙️ ';
+
+const VOICE_LABEL: Record<string, string> = {
+  connecting: 'Connecting…',
+  listening: 'Listening — go ahead and talk',
+  thinking: 'Thinking…',
+  speaking: 'Speaking…',
+};
+const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
 const WA_NUMBER = '8801318552266';
 const FB_MESSENGER = 'https://m.me/qualixe';
@@ -104,12 +117,22 @@ export default function WhatsAppChat() {
     return () => clearInterval(id);
   }, [session, open, poll]);
 
+  // ── AI voice call ─────────────────────────────────────
+  const onVoiceSaved = useCallback((m: Msg) => {
+    lastAt.current = m.created_at;
+    setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+    if (m.sender === 'admin') setSeenAdmin((n) => n + 1); // heard it live — not "unread"
+  }, []);
+  const voice = useVoiceCall({ onSaved: onVoiceSaved });
+  const hangUp = voice.end; // stable; closing the widget always hangs up
+
   // Unread badge = team replies that arrived while the window was closed
   const adminCount = messages.filter((m) => m.sender === 'admin').length;
   const unread = open ? 0 : Math.max(0, adminCount - seenAdmin);
 
   const toggleOpen = () => {
     setSeenAdmin(adminCount); // opening or closing marks everything so far as seen
+    if (open) hangUp();
     setOpen((o) => !o);
   };
 
@@ -122,10 +145,39 @@ export default function WhatsAppChat() {
   useEffect(() => {
     if (!open) return;
     const f = setTimeout(() => inputRef.current?.focus(), 250);
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { hangUp(); setOpen(false); } };
     document.addEventListener('keydown', onKey);
     return () => { clearTimeout(f); document.removeEventListener('keydown', onKey); };
-  }, [open]);
+  }, [open, hangUp]);
+
+  const startVoice = async () => {
+    if (voice.active) return;
+    setError('');
+    voice.clearError();
+    let s = session;
+    if (!s) {
+      // Voice needs a conversation to attach the transcript to
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: `${VOICE_PREFIX}Started a voice call with the AI assistant`, pageUrl: window.location.href }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not start the call');
+        s = { conversationId: data.conversationId, token: data.token };
+        saveSession(s);
+        lastAt.current = data.messages[data.messages.length - 1]?.created_at ?? null;
+        setMessages(data.messages);
+        setHasEmail(false);
+        setSession(s);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Could not start the call');
+        return;
+      }
+    }
+    voice.start(s);
+  };
 
   const send = async (raw?: string) => {
     const body = (raw ?? text).trim();
@@ -213,7 +265,7 @@ export default function WhatsAppChat() {
             <strong>Qualixe</strong>
             <span>Live chat · we&apos;ll reply right here</span>
           </div>
-          <button type="button" className="wa-head__close" onClick={() => { setSeenAdmin(adminCount); setOpen(false); }} aria-label="Close chat" tabIndex={tab}>
+          <button type="button" className="wa-head__close" onClick={() => { setSeenAdmin(adminCount); hangUp(); setOpen(false); }} aria-label="Close chat" tabIndex={tab}>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7a1 1 0 1 0-1.4 1.4l4.9 4.9-4.9 4.9a1 1 0 1 0 1.4 1.4l4.9-4.9 4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4Z" /></svg>
           </button>
         </header>
@@ -228,19 +280,25 @@ export default function WhatsAppChat() {
             <span className="wa-bubble__time">{timeOf(greetTime)}</span>
           </div>
 
-          {messages.map((m) => (
+          {messages.map((m) => {
+            const isAi = m.sender === 'admin' && m.body.startsWith(AI_PREFIX);
+            const isVoice = m.sender === 'visitor' && m.body.startsWith(VOICE_PREFIX);
+            const body = isAi ? m.body.slice(AI_PREFIX.length) : isVoice ? m.body.slice(VOICE_PREFIX.length) : m.body;
+            return (
             <div
               key={m.id}
-              className={`wa-bubble${m.sender === 'visitor' ? ' wa-bubble--me' : ''}${m.pending ? ' is-pending' : ''}${m.failed ? ' is-failed' : ''}`}
+              className={`wa-bubble${m.sender === 'visitor' ? ' wa-bubble--me' : ''}${isAi ? ' wa-bubble--ai' : ''}${m.pending ? ' is-pending' : ''}${m.failed ? ' is-failed' : ''}`}
             >
-              {m.sender === 'admin' && <span className="wa-bubble__from">Qualixe team</span>}
-              <p>{m.body}</p>
+              {m.sender === 'admin' && <span className="wa-bubble__from">{isAi ? 'Qualixe AI · voice' : 'Qualixe team'}</span>}
+              {isVoice && <span className="wa-bubble__from wa-bubble__from--voice">You · voice</span>}
+              <p>{body}</p>
               <span className="wa-bubble__time">
                 {m.failed ? 'Not sent' : m.pending ? 'Sending…' : timeOf(m.created_at)}
                 {m.sender === 'visitor' && !m.pending && !m.failed && <span className="wa-tick" aria-label="Sent"> ✓</span>}
               </span>
             </div>
-          ))}
+            );
+          })}
 
           {!hasVisitorMsg && (
             <div className="wa-quick" aria-label="Quick replies">
@@ -281,9 +339,27 @@ export default function WhatsAppChat() {
           {contactSaved && <p className="wa-note">✓ Thanks! We&apos;ll follow up by email if we miss you here.</p>}
         </div>
 
-        {error && <p className="wa-error" role="alert">{error}</p>}
+        {(error || voice.error) && <p className="wa-error" role="alert">{error || voice.error}</p>}
 
+        {voice.active ? (
+          <div className={`wa-voice is-${voice.state}`} role="status" aria-live="polite">
+            <span className="wa-voice__orb" aria-hidden="true"><span /><span /><span /></span>
+            <div className="wa-voice__info">
+              <strong>{VOICE_LABEL[voice.state] ?? ''}</strong>
+              <span>AI assistant · {mmss(voice.seconds)} / {mmss(VOICE_MAX_SECONDS)}</span>
+            </div>
+            <button type="button" className="wa-voice__end" onClick={voice.end} tabIndex={tab}>
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28a11.27 11.27 0 0 0-2.67-1.85.996.996 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9Z" /></svg>
+              End
+            </button>
+          </div>
+        ) : (
         <form className="wa-compose" onSubmit={(e) => { e.preventDefault(); send(); }}>
+          <button type="button" className="wa-mic" aria-label="Talk to our AI assistant" title="Talk to our AI assistant" onClick={startVoice} tabIndex={tab}>
+            <span className="wa-mic__ring" aria-hidden="true" />
+            <span className="wa-mic__ring" aria-hidden="true" />
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z" /></svg>
+          </button>
           <textarea
             ref={inputRef}
             className="wa-compose__input"
@@ -300,6 +376,7 @@ export default function WhatsAppChat() {
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6 3.39 10 16 12 3.39 14z" /></svg>
           </button>
         </form>
+        )}
 
         <div className="wa-foot">
           <span>Prefer another app?</span>
