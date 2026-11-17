@@ -18,7 +18,7 @@ export type VoiceState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'spe
 type SavedMsg = { id: string; sender: 'visitor' | 'admin'; body: string; created_at: string };
 
 type Opts = {
-  /** Called with each transcript line once it's saved, so the widget can show it */
+  
   onSaved: (m: SavedMsg) => void;
 };
 
