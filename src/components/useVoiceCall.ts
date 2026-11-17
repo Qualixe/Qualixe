@@ -1,17 +1,21 @@
 'use client';
 
 /**
- * AI voice call for the live chat widget (OpenAI Realtime over WebRTC).
- * Audio flows browser ⇄ OpenAI directly; our server only brokers the connection
- * (/api/chat/:id/voice) so the API key stays private. Each finished sentence is
- * saved to the chat via /api/chat/:id/transcript so the team can read it.
+ * AI voice call ("Moon") for the live chat widget.
+ *
+ * Primary: ElevenLabs agent (GPT brain + realistic Bangla voice) — our server hands
+ * out a one-time token (/api/chat/:id/voice/token).
+ * Fallback: OpenAI Realtime over WebRTC (/api/chat/:id/voice) when ElevenLabs isn't
+ * configured or VOICE_PROVIDER=openai.
+ *
+ * API keys never reach the browser. Each finished sentence is saved to the chat via
+ * /api/chat/:id/transcript so the team can read it in the dashboard / admin app.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { VOICE_GREETING as GREETING } from '@/lib/voiceGreeting';
 
 export const VOICE_MAX_SECONDS = 300; // keep in sync with src/lib/voiceAgent.ts
 
-/** Moon's opening line (Bangla script gives the model the right pronunciation) */
-const GREETING = 'হ্যালো, আসসালামু আলাইকুম! আমি মুন, Qualixe থেকে বলছি। আপনার প্রজেক্ট নিয়ে কীভাবে সাহায্য করতে পারি?';
 
 export type VoiceState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'error';
 
@@ -32,6 +36,9 @@ export function useVoiceCall({ onSaved }: Opts) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionRef = useRef<{ conversationId: string; token: string } | null>(null);
+  const elevenRef = useRef<{ endSession: () => Promise<void> } | null>(null);
+  const liveRef = useRef(false); // a call is starting or running
+  const genRef = useRef(0); // bumps on every hang-up, so late async results are ignored
   const onSavedRef = useRef(onSaved);
   useEffect(() => { onSavedRef.current = onSaved; }, [onSaved]);
 
@@ -55,6 +62,11 @@ export function useVoiceCall({ onSaved }: Opts) {
   }, []);
 
   const cleanup = useCallback(() => {
+    genRef.current += 1;
+    liveRef.current = false;
+    const eleven = elevenRef.current;
+    elevenRef.current = null;
+    eleven?.endSession().catch(() => {});
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = null;
     pcRef.current?.getSenders().forEach((s) => s.track?.stop());
@@ -129,8 +141,27 @@ export function useVoiceCall({ onSaved }: Opts) {
     }
   }, [save]);
 
+  const startTimer = useCallback((onLimit: () => void) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const startedAt = Date.now();
+    timerRef.current = setInterval(() => {
+      const s = Math.floor((Date.now() - startedAt) / 1000);
+      setSeconds(s);
+      if (s >= VOICE_MAX_SECONDS) onLimit();
+    }, 1000);
+  }, []);
+
+  const micError = (err: unknown) => {
+    const name = err instanceof DOMException ? err.name : '';
+    if (name === 'NotAllowedError' || name === 'SecurityError') return 'Microphone access was blocked. Allow it in your browser to talk.';
+    if (name === 'NotFoundError') return 'No microphone found.';
+    return err instanceof Error ? err.message : 'Voice chat is not available right now.';
+  };
+
   const start = useCallback(async (session: { conversationId: string; token: string }) => {
-    if (pcRef.current) return;
+    if (liveRef.current) return;
+    liveRef.current = true;
+    const gen = genRef.current;
     setError('');
     setSeconds(0);
     setState('connecting');
@@ -146,6 +177,61 @@ export function useVoiceCall({ onSaved }: Opts) {
       return;
     }
 
+    // ── 1. Try ElevenLabs (realistic Bangla voice) ──
+    let elevenToken: string | null = null;
+    try {
+      const r = await fetch(`/api/chat/${session.conversationId}/voice/token`, {
+        method: 'POST',
+        headers: { 'x-chat-token': session.token },
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'Voice chat is not available right now.');
+      elevenToken = data.token ?? null; // null → server said { fallback: 'openai' }
+    } catch (err) {
+      fail(micError(err));
+      return;
+    }
+    if (genRef.current !== gen) return; // hung up meanwhile
+
+    if (elevenToken) {
+      try {
+        const { VoiceConversation } = await import('@elevenlabs/client');
+        const seen = new Set<number>();
+        const conv = await VoiceConversation.startSession({
+          conversationToken: elevenToken,
+          connectionType: 'webrtc',
+          onConnect: () => {
+            setState('listening');
+            startTimer(() => end());
+          },
+          onModeChange: ({ mode }) => setState(mode === 'speaking' ? 'speaking' : 'listening'),
+          onMessage: (m) => {
+            if (seen.has(m.event_id)) return;
+            seen.add(m.event_id);
+            const fromAgent = m.role === 'agent' || m.source === 'ai';
+            chain.current = chain.current.then(() => save(fromAgent ? 'ai' : 'visitor', m.message));
+          },
+          onDisconnect: () => {
+            // Ended by the agent / time limit / network (our own hang-up clears elevenRef first)
+            if (elevenRef.current) {
+              elevenRef.current = null;
+              end();
+            }
+          },
+          onError: (message) => console.warn('[voice] ElevenLabs:', message),
+        });
+        if (genRef.current !== gen) {
+          conv.endSession().catch(() => {});
+          return;
+        }
+        elevenRef.current = conv;
+      } catch (err) {
+        fail(micError(err));
+      }
+      return;
+    }
+
+    // ── 2. Fallback: OpenAI Realtime ──
     try {
       const mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
       micRef.current = mic;
@@ -191,19 +277,11 @@ export function useVoiceCall({ onSaved }: Opts) {
       if (!pcRef.current) return; // hung up while connecting
       await pc.setRemoteDescription({ type: 'answer', sdp: await res.text() });
 
-      const startedAt = Date.now();
-      timerRef.current = setInterval(() => {
-        const s = Math.floor((Date.now() - startedAt) / 1000);
-        setSeconds(s);
-        if (s >= VOICE_MAX_SECONDS) end();
-      }, 1000);
+      startTimer(() => end());
     } catch (err) {
-      const name = err instanceof DOMException ? err.name : '';
-      if (name === 'NotAllowedError' || name === 'SecurityError') fail('Microphone access was blocked. Allow it in your browser to talk.');
-      else if (name === 'NotFoundError') fail('No microphone found.');
-      else fail(err instanceof Error ? err.message : 'Voice chat is not available right now.');
+      fail(micError(err));
     }
-  }, [end, fail, handleEvent]);
+  }, [end, fail, handleEvent, save, startTimer]);
 
   // Hang up if the widget unmounts
   useEffect(() => cleanup, [cleanup]);

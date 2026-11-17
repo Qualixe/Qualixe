@@ -7,9 +7,11 @@
     "dev:https": "next dev --experimental-https -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "voice:agent": "node scripts/elevenlabs-agent.mts"
   },
   "dependencies": {
+    "@elevenlabs/client": "^1.36.1",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.84.0",
     "@tiptap/extension-color": "^2.27.2",
